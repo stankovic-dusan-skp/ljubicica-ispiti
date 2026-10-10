@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Interaktivni testovi i skripta za pripremu ispita iz organizacije zdravstva: sedam lekcija, simulacija ispita na vreme, automatsko bodovanje.">
+<title>Testovi iz organizacije zdravstva</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one narrow exam-sheet column; home = exam block + lessons as collapsible sheets, runner = one question per screen, result = score sheet + full review. */
+:root{
+  --bg:#eaf0f2; --surface:#ffffff; --sunk:#f3f7f8; --ink:#13242d; --muted:#586b76; --line:#cfdbe0;
+  --accent:#0b6b78; --accent-ink:#ffffff; --accent-soft:#d9eef1;
+  --good:#1b7646; --good-bg:#def3e6; --bad:#b2362b; --bad-bg:#fbe3e0; --warn:#8a5a00; --warn-bg:#fbefd2; --veil:rgba(8,16,20,.55);
+  --display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e171b; --surface:#17232a; --sunk:#121c21; --ink:#e5eef1; --muted:#93a6b0; --line:#2b3c45;
+  --accent:#55c4d0; --accent-ink:#06262b; --accent-soft:#143840;
+  --good:#63d193; --good-bg:#143524; --bad:#f28b80; --bad-bg:#3e1d1a; --warn:#f0c268; --warn-bg:#3a2e12; --veil:rgba(0,0,0,.65);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e171b; --surface:#17232a; --sunk:#121c21; --ink:#e5eef1; --muted:#93a6b0; --line:#2b3c45;
+  --accent:#55c4d0; --accent-ink:#06262b; --accent-soft:#143840;
+  --good:#63d193; --good-bg:#143524; --bad:#f28b80; --bad-bg:#3e1d1a; --warn:#f0c268; --warn-bg:#3a2e12; --veil:rgba(0,0,0,.65);
+  color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:28px 56px}
+#app{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3,p,ul{margin:0}
+h1{font-family:var(--display);font-size:clamp(1.8rem,5vw,2.5rem);line-height:1.08;text-wrap:balance;letter-spacing:-.01em}
+h2{font-family:var(--display);font-size:1.2rem;line-height:1.2;text-wrap:balance}
+.eyebrow{font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lead{color:var(--muted);max-width:62ch}
+.muted{color:var(--muted)} .small{font-size:.9rem}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grow{flex:1 1 0;min-width:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 16px;font-weight:600}
+a.btn{display:inline-block;text-decoration:none;color:var(--ink)}
+a.btn.primary{color:var(--accent-ink)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.link{color:var(--accent);font-weight:600;text-decoration:none}
+.link:hover{text-decoration:underline}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.quiet{background:transparent}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.btn.on{background:var(--warn-bg);border-color:var(--warn);color:var(--warn)}
+.btn:disabled{opacity:.45;cursor:default}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:8px 14px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.stat{background:var(--sunk);border-radius:8px;padding:10px 12px}
+.sheet .stat{background:var(--sunk)} #app>.stats .stat{background:var(--surface);border:1px solid var(--line)}
+.stat b{display:block;font-family:var(--mono);font-size:1.15rem;font-weight:500}
+.stat small{color:var(--muted)}
+.tests{display:flex;flex-direction:column}
+.test{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+.test:first-of-type{border-top:0;padding-top:4px}
+.test h3{font-size:1.02rem;font-weight:600}
+.test .meta{color:var(--muted);font-size:.88rem}
+.chip{font-size:.8rem;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.chip.good{background:var(--good-bg);color:var(--good)} .chip.bad{background:var(--bad-bg);color:var(--bad)} .chip.warn{background:var(--warn-bg);color:var(--warn)}
+details.sheet{padding:0}
+details.sheet>summary{list-style:none;cursor:pointer;padding:18px 20px;display:flex;gap:14px;align-items:center;border-radius:12px}
+details.sheet>summary::-webkit-details-marker{display:none}
+details.sheet>summary .num{font-family:var(--mono);color:var(--accent);font-size:1.05rem;flex:none}
+details.sheet>summary .caret{flex:none;color:var(--muted);transition:transform .2s}
+details.sheet[open]>summary .caret{transform:rotate(90deg)}
+details.sheet>.inner{padding:0 20px 16px}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.help li{margin-bottom:6px;max-width:66ch}
+.help ul{padding-left:20px}
+/* runner */
+.q{font-size:1.18rem;font-weight:500;line-height:1.45;text-wrap:pretty}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:12px 14px;width:100%}
+.opt b{font-family:var(--mono);font-weight:500;color:var(--muted);flex:none}
+.opt:hover{border-color:var(--accent)}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.tf{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tf .opt{justify-content:center;font-weight:600}
+.blank{font:inherit;color:inherit;background:var(--sunk);border:0;border-bottom:2px solid var(--accent);border-radius:4px 4px 0 0;padding:2px 8px;width:11.5em;max-width:100%;margin:3px 2px}
+.fb{border-radius:8px;padding:12px 14px;font-size:.95rem}
+.fb.warn{background:var(--warn-bg);color:var(--warn)} .fb.bad{background:var(--bad-bg);color:var(--bad)}
+.fb span{color:var(--ink)}
+.dots{display:grid;grid-template-columns:repeat(auto-fill,minmax(36px,1fr));gap:6px}
+.dot{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 0;font-family:var(--mono);font-size:.82rem;text-align:center}
+.dot.done{background:var(--accent-soft);border-color:var(--accent-soft)}
+.dot.flag{border-color:var(--warn);box-shadow:inset 0 -3px 0 var(--warn)}
+.dot.cur{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.dot.ok{background:var(--good-bg);border-color:var(--good-bg);color:var(--good)} .dot.no{background:var(--bad-bg);border-color:var(--bad-bg);color:var(--bad)} .dot.half{background:var(--warn-bg);border-color:var(--warn-bg);color:var(--warn)}
+.clock.low{color:var(--bad)}
+/* result */
+.score{display:flex;flex-wrap:wrap;gap:20px 28px;align-items:center}
+.ring{width:132px;height:132px;flex:none}
+.big{font-family:var(--display);font-size:2.6rem;line-height:1}
+.rev{border-top:1px solid var(--line);padding:14px 0;display:flex;flex-direction:column;gap:6px}
+.rev:first-of-type{border-top:0}
+.rev .ans{font-size:.94rem;color:var(--muted)}
+.rev .ans strong{color:var(--ink);font-weight:600}
+.copybox{font-family:var(--mono);font-size:.85rem;background:var(--sunk);border-radius:8px;padding:10px 12px;user-select:all;overflow-wrap:anywhere}
+.veil{position:fixed;inset:0;background:var(--veil);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:22px;max-width:420px;width:100%;display:flex;flex-direction:column;gap:14px}
+@media (prefers-reduced-motion:reduce){.bar i,details.sheet>summary .caret{transition:none}}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+/* ============================================================
+   BAZA TESTOVA — novi test se dodaje kao novi objekat u ovaj niz.
+   Tipovi pitanja:
+   mc   → {t:'mc', q:'tekst', o:['a','b','c','d'], a:indeks tačnog (0=prvi), e:'objašnjenje'}
+   fill → {t:'fill', q:'tekst sa ___ za svaku prazninu', a:[['prihvaćen odgovor','varijanta'], ...], unordered:true ako redosled nije bitan}
+   tf   → {t:'tf', q:'tvrdnja', a:true/false, e:'objašnjenje'}
+   Redosled lekcija na početnoj strani određuje niz ORDER.
+   ============================================================ */
+const TESTS=[
+{id:'ozd-uvod-1',lesson:'Organizacija zdravstvene delatnosti: uvod',author:'dr med. Miloš Potkrajac',title:'Test 1',qs:[
+ {t:'mc',q:'Zdravstvena zaštita je definisana kao:',o:['delatnost zdravstvenih ustanova usmerena na lečenje bolesnih','organizovana i sveobuhvatna delatnost društva','skup propisa o radu zdravstvenih radnika','delatnost Ministarstva zdravlja'],a:1},
+ {t:'mc',q:'Koja od navedenih NIJE osnovna komponenta sistema zdravstvene zaštite?',o:['resursi','finansiranje','menadžment','zakonodavstvo'],a:3,e:'Pet komponenti: resursi, organizacija i administriranje, menadžment, finansiranje, obezbeđivanje i pružanje zdravstvene zaštite.'},
+ {t:'mc',q:'Odnos između Ministarstva zdravlja i doma zdravlja je:',o:['horizontalan','vertikalan','dijagonalan','ne postoji'],a:1},
+ {t:'mc',q:'Nacionalna zdravstvena služba (NHS) je:',o:['Bizmarkov model','model privatnog osiguranja','Beveridžov model','model „divlji zapad”'],a:2},
+ {t:'mc',q:'Opšta medicina pokriva populaciju veličine:',o:['1–10','2.000–50.000','100.000–500.000','500.000–5.000.000'],a:1},
+ {t:'fill',q:'Svaki posmatrani sistem je deo većeg, složenog sistema i u njemu ima status njegovog ___.',a:[['podsistema','podsistem']]},
+ {t:'fill',q:'Tri nivoa zdravstvene zaštite su: ___, ___ i ___.',a:[['primarni'],['sekundarni'],['tercijarni']],unordered:true},
+ {t:'fill',q:'Obavezno zdravstveno osiguranje finansira se iz ___, a dobrovoljno iz ___ osiguranja.',a:[['doprinosa','doprinos','doprinosi'],['premija','premije']]},
+ {t:'fill',q:'Pri Republičkom fondu za zdravstveno osiguranje postoje: pokrajinski fond, ___ fonda i ___ filijala.',a:[['filijale','filijala'],['ispostave','ispostava']]},
+ {t:'fill',q:'U sredstva kao resurs sistema spadaju ___ i ___ materijal.',a:[['lekovi','lek','lekove'],['sanitetski']],unordered:true},
+ {t:'tf',q:'Sistem zdravstvene zaštite pruža zaštitu pojedincima, porodicama i zajednici.',a:true},
+ {t:'tf',q:'Zavod za javno zdravlje Kruševac i Zavod za javno zdravlje Sombor su u vertikalnom odnosu.',a:false,e:'Ustanove istog nivoa su u horizontalnom odnosu.'},
+ {t:'tf',q:'Participacija je lično učešće u troškovima i spada u plaćanje iz džepa.',a:true},
+ {t:'tf',q:'Zdravstvena ustanova može se osnovati u 9 oblika.',a:true},
+ {t:'tf',q:'Sistem zdravstvene zaštite pruža samo usluge moderne medicine.',a:false,e:'Pruža usluge i moderne i tradicionalne medicine.'}
+]},
+{id:'ozd-uvod-2',lesson:'Organizacija zdravstvene delatnosti: uvod',author:'dr med. Miloš Potkrajac',title:'Test 2',qs:[
+ {t:'mc',q:'Osnovni cilj zdravstvene zaštite je:',o:['smanjenje troškova lečenja','najviši mogući nivo očuvanja zdravlja građana i porodice','povećanje broja zdravstvenih ustanova','lečenje svih bolesti'],a:1},
+ {t:'mc',q:'Koja komora NE postoji u zdravstvenom sistemu Srbije?',o:['Lekarska komora','Farmaceutska komora','Komora biohemičara','Komora fizioterapeuta'],a:3},
+ {t:'mc',q:'Specijalistička zaštita odgovara administrativnom nivou:',o:['pojedinac/porodica','opština','okrug','region'],a:2},
+ {t:'mc',q:'Bizmarkov model je model:',o:['nacionalne zdravstvene službe','obaveznog zdravstvenog (socijalnog) osiguranja','privatnog osiguranja','finansiranja iz donacija'],a:1},
+ {t:'mc',q:'Uslove za obavljanje zdravstvene delatnosti u ustanovama bliže uređuje:',o:['Zakon o zdravstvenom osiguranju','Zakon o lekovima i medicinskim sredstvima','Pravilnik o bližim uslovima za obavljanje zdravstvene delatnosti','Pravilnik o nomenklaturi zdravstvenih usluga'],a:2},
+ {t:'fill',q:'Pod sistemom podrazumevamo skup međusobno ___ elemenata koji zajedno dovode do dostizanja ___.',a:[['povezanih','povezani'],['ciljeva','cilja','cilj','ciljeve']]},
+ {t:'fill',q:'Pet osnovnih komponenti sistema zdravstvene zaštite su: resursi, ___, menadžment, ___ i obezbeđivanje i pružanje zdravstvene zaštite.',a:[['organizacija i administriranje','organizacija','organizacija i administracija'],['finansiranje']],unordered:true},
+ {t:'fill',q:'Na vrhu zdravstvenog sistema Srbije nalazi se ___.',a:[['Ministarstvo zdravlja']]},
+ {t:'fill',q:'Najniži nivo zdravstvene zaštite u piramidi je ___, a odgovara mu administrativni nivo ___.',a:[['samozaštita'],['pojedinac/porodica','pojedinac','porodica','pojedinac i porodica']]},
+ {t:'fill',q:'Model privatnog osiguranja naziva se i model ___ korisnika ili „___” model.',a:[['nezavisnog','nezavisnih'],['divlji zapad']]},
+ {t:'tf',q:'Rehabilitacija nije deo zdravstvene zaštite.',a:false,e:'Zdravstvena zaštita obuhvata i blagovremeno lečenje i rehabilitaciju.'},
+ {t:'tf',q:'Državni budžet se kao izvor finansiranja puni iz opštih i specifičnih poreza.',a:true},
+ {t:'tf',q:'Sistemi zdravstvene zaštite su pod jakim uticajem normi i vrednosti društva.',a:true},
+ {t:'tf',q:'Veterinarski sektor je deo Instituta za javno zdravlje Srbije.',a:false,e:'Veterinarski sektor je deo Agencije za lekove i medicinska sredstva.'},
+ {t:'tf',q:'Subspecijalistička zaštita pokriva populaciju od 500.000 do 5.000.000 stanovnika.',a:true}
+]},
+{id:'ozd-uvod-3',lesson:'Organizacija zdravstvene delatnosti: uvod',author:'dr med. Miloš Potkrajac',title:'Test 3',qs:[
+ {t:'mc',q:'Sistem zdravstvene zaštite je podsistem:',o:['privrednog sistema','političkog sistema','velikog društvenog sistema','sistema socijalne zaštite'],a:2},
+ {t:'mc',q:'U ljudske resurse (kadrove) NE spadaju:',o:['lekari, stomatolozi i farmaceuti','medicinske sestre i tehničari','saradnici','zgrade i oprema'],a:3,e:'Zgrade i oprema su resursi tipa „ustanove”, ne kadrovi.'},
+ {t:'mc',q:'Puna cena usluge u privatnoj praksi spada u:',o:['fond osiguranja','plaćanje iz džepa','državni budžet','donacije'],a:1},
+ {t:'mc',q:'Pokazatelj obezbeđenosti stanovništva zdravstvenim radnicima je:',o:['broj postelja na 1.000 stanovnika','broj stanovnika na 1 lekara','broj pregleda po lekaru','broj ustanova po okrugu'],a:1},
+ {t:'mc',q:'U središtu sheme komponenti zdravstvenog sistema nalazi se:',o:['menadžment','ulaganje u službu','participacija zajednice','rezultati rada službe'],a:2},
+ {t:'fill',q:'Zdravstvena zaštita obuhvata mere za očuvanje i ___ zdravlja, sprečavanje, suzbijanje i rano ___ bolesti, kao i blagovremeno i efikasno lečenje i ___.',a:[['unapređenje'],['otkrivanje'],['rehabilitaciju','rehabilitacija']]},
+ {t:'fill',q:'Usluge sistema zdravstvene zaštite moraju biti pružene na efikasan način i ljudima ___ i ___.',a:[['dostupne','dostupni','dostupno'],['prihvatljive','prihvatljivi','prihvatljivo']],unordered:true},
+ {t:'fill',q:'Organizacija i administriranje obuhvataju: formulisanje zdravstvene ___, planiranje i uspostavljanje ___ i postizanje „vrednosti za ___”.',a:[['politike','politika'],['prioriteta','prioritet','prioriteti'],['novac']]},
+ {t:'fill',q:'Zdravstvene ustanove u Srbiji deluju na primarnom, sekundarnom i tercijarnom nivou, kao i na ___.',a:[['više nivoa']]},
+ {t:'fill',q:'Četiri izvora finansiranja su: državni budžet, ___, plaćanje iz džepa i ___.',a:[['fond osiguranja','fondovi osiguranja','osiguranje','fond'],['donacije','donacija','dobrovoljni prilozi','donacije dobrovoljni prilozi']],unordered:true},
+ {t:'tf',q:'„Vrednost za novac” podrazumeva efektivnost i efikasnost.',a:true},
+ {t:'tf',q:'Opšta bolnica i specijalna bolnica su vrste bolnica kao zdravstvene ustanove.',a:true},
+ {t:'tf',q:'Institut za javno zdravlje Srbije ispod sebe ima institute i zavode za javno zdravlje.',a:true},
+ {t:'tf',q:'Postoje sistemi zdravstvene zaštite koji su savršeni i jeftini.',a:false,e:'Svi sistemi su nesavršeni i skupi.'},
+ {t:'tf',q:'Agencija za lekove i medicinska sredstva je u sastavu Republičkog fonda za zdravstveno osiguranje.',a:false,e:'Agencija je zasebna celina pod Ministarstvom zdravlja.'}
+]},
+{id:'ozd-uvod-4',lesson:'Organizacija zdravstvene delatnosti: uvod',author:'dr med. Miloš Potkrajac',title:'Test 4',qs:[
+ {t:'mc',q:'Prema definiciji SZO, sistem zdravstvene zaštite obuhvata:',o:['zdravstvenu infrastrukturu koja obezbeđuje spektar programa i usluga','samo bolnice i domove zdravlja','isključivo zdravstvene radnike','propise o zdravstvenom osiguranju'],a:0},
+ {t:'mc',q:'Koliko komora postoji u zdravstvenom sistemu Srbije?',o:['tri','četiri','pet','šest'],a:2,e:'Lekarska, Stomatološka, Farmaceutska, Komora biohemičara i Komora medicinskih sestara i zdravstvenih tehničara.'},
+ {t:'mc',q:'Nacionalna kontrolna laboratorija je deo:',o:['Instituta za javno zdravlje Srbije','Agencije za lekove i medicinska sredstva','Republičkog fonda za zdravstveno osiguranje','Lekarske komore Srbije'],a:1},
+ {t:'mc',q:'Specijalistička zaštita pokriva populaciju veličine:',o:['1–10','2.000–50.000','100.000–500.000','500.000–5.000.000'],a:2},
+ {t:'mc',q:'Koji od navedenih NIJE prikazan kao podsistem velikog društvenog sistema?',o:['politički sistem','privredni sistem','sistem obrazovanja','pravosudni sistem'],a:3,e:'Prikazani su: politički, privredni, sistem socijalne zaštite, sistem zdravstvene zaštite i sistem obrazovanja.'},
+ {t:'fill',q:'Sistemi zdravstvene zaštite često reflektuju ___ i ___ očekivanja građana.',a:[['socijalna','socijalne'],['kulturalna','kulturna','kulturalne']],unordered:true},
+ {t:'fill',q:'Resursi u sistemu zdravstvene zaštite su: ljudski resursi (kadrovi), ___ i ___.',a:[['ustanove','ustanova'],['sredstva','sredstvo']],unordered:true},
+ {t:'fill',q:'Samozaštita pokriva populaciju veličine od 1 do ___.',a:[['10','deset']]},
+ {t:'fill',q:'Peta komora je Komora medicinskih ___ i zdravstvenih ___.',a:[['sestara','sestre'],['tehničara','tehničari']]},
+ {t:'fill',q:'Pravilnik o nomenklaturi zdravstvenih usluga odnosi se na ___ nivo zdravstvene zaštite.',a:[['primarni','primarnom']]},
+ {t:'tf',q:'Zavod i zavod za javno zdravlje su dva odvojena oblika zdravstvene ustanove.',a:true},
+ {t:'tf',q:'Centar za humane lekove je deo Republičkog fonda za zdravstveno osiguranje.',a:false,e:'Centar za humane lekove je deo Agencije za lekove i medicinska sredstva.'},
+ {t:'tf',q:'Opštoj medicini odgovara administrativni nivo lokalna zajednica – opština.',a:true},
+ {t:'tf',q:'Privredni sistem na shemi obuhvata industriju, poljoprivredu i trgovinu.',a:true},
+ {t:'tf',q:'Sistemi zdravstvene zaštite nisu pod uticajem nacionalne istorije, tradicije i političkog sistema.',a:false,e:'Pod uticajem su jedinstvene nacionalne istorije, tradicije i političkog sistema.'}
+]},
+{id:'ozd-uvod-5',lesson:'Organizacija zdravstvene delatnosti: uvod',author:'dr med. Miloš Potkrajac',title:'Test 5',qs:[
+ {t:'mc',q:'Svrha sistema zdravstvene zaštite je:',o:['ostvarivanje prihoda zdravstvenih ustanova','očuvanje i unapređenje zdravlja ljudi obezbeđivanjem zdravstvenih usluga stanovništvu','zapošljavanje zdravstvenih radnika','kontrola potrošnje lekova'],a:1},
+ {t:'mc',q:'Koji od navedenih NIJE oblik u kojem se zdravstvena ustanova može osnovati?',o:['dom zdravlja','apoteka','institut','ordinacija'],a:3,e:'Devet oblika: dom zdravlja, apoteka, bolnica, zavod, zavod za javno zdravlje, klinika, institut, kliničko-bolnički centar, klinički centar.'},
+ {t:'mc',q:'Šta se NE nalazi neposredno ispod Ministarstva zdravlja na shemi zdravstvenog sistema Srbije?',o:['Agencija za lekove i medicinska sredstva','Komore','Institut za javno zdravlje Srbije','Pokrajinski fond'],a:3,e:'Pokrajinski fond je deo Republičkog fonda za zdravstveno osiguranje.'},
+ {t:'mc',q:'Koji uticaj NIJE naveden u spoljnom krugu sheme komponenti zdravstvenih sistema?',o:['socijalni','ekonomski','ekosistemski','tehnološki'],a:3,e:'Navedeni su: socijalni, kulturalni, sredinski, politički, ekonomski i ekosistemski.'},
+ {t:'mc',q:'Na shemi komponenti, između ulaganja u službu i rezultata rada službe nalazi se:',o:['participacija zajednice','distribucija ulaganja','ishodi po zdravlje ljudi','zdravstveni problemi'],a:1},
+ {t:'fill',q:'Postizanje „vrednosti za novac” povezano je sa zdravstvenom zaštitom zasnovanom na ___.',a:[['dokazima','dokazi','dokaz']]},
+ {t:'fill',q:'Sistem je skup međusobno povezanih elemenata koji dovode do dostizanja ciljeva u ___ u kojoj sistem egzistira.',a:[['sredini','sredina']]},
+ {t:'fill',q:'Subspecijalističkoj zaštiti odgovara administrativni nivo ___, a specijalističkoj ___.',a:[['region','regiona'],['okrug','okruga']]},
+ {t:'fill',q:'Na shemi komponenti, zdravstveni problemi vode ka ulaganjima u ___, a rezultati rada službe ka ishodima po ___ ljudi.',a:[['službu','služba'],['zdravlje']]},
+ {t:'fill',q:'Nacionalni centar za ___ o lekovima i medicinskim sredstvima deo je Agencije.',a:[['informacije','informacija']]},
+ {t:'tf',q:'Stomatološka komora Srbije je jedna od pet komora u zdravstvenom sistemu.',a:true},
+ {t:'tf',q:'Sektor za medicinska sredstva i Centar za podršku deo su Agencije za lekove i medicinska sredstva.',a:true},
+ {t:'tf',q:'Sistem socijalne zaštite je podsistem sistema zdravstvene zaštite.',a:false,e:'Oba su zasebni podsistemi velikog društvenog sistema.'},
+ {t:'tf',q:'Samozaštiti odgovara administrativni nivo okrug.',a:false,e:'Samozaštiti odgovara nivo pojedinac/porodica; okrug odgovara specijalističkoj zaštiti.'},
+ {t:'tf',q:'Važni aspekti kadrova su odgovarajuće obrazovanje i obuka i obezbeđenost stanovništva zdravstvenim radnicima.',a:true}
+]},
+{id:'kom-8',lesson:'Komunikacija u delatnosti zdravstvenih radnika',author:'Zlatko Ćirić',title:'Test 8',qs:[
+ {t:'mc',q:'Koliki deo poruke čini ono što kažemo (same reči)?',o:['7%','38%','55%','93%'],a:0},
+ {t:'mc',q:'Najveći deo poruke prenosi se:',o:['govorom tela','izborom reči','načinom na koji govorimo','pisanim putem'],a:0,e:'Govor tela 55%, kako kažemo 38%, šta kažemo 7%.'},
+ {t:'mc',q:'Podela timskih uloga navedena je prema:',o:['Crosbyju','Belbinu (1993)','JCAHO (2004)','Svetskoj zdravstvenoj organizaciji'],a:1},
+ {t:'mc',q:'Komunikologija je:',o:['naučna disciplina koja proučava komuniciranje','vrsta neverbalne komunikacije','tehnika aktivnog slušanja','faza razvoja tima'],a:0},
+ {t:'mc',q:'Šta od navedenog NIJE na listi oblika komuniciranja sa postera?',o:['intrapersonalna komunikacija','telekomunikacija','računarski posredovana komunikacija','hijerarhijska komunikacija'],a:3,e:'Lista: interpersonalna, intrapersonalna, govorna, neverbalna, aktivno slušanje, telekomunikacija, računarski posredovana komunikacija.'},
+ {t:'fill',q:'Način na koji nešto kažemo čini ___% poruke.',a:[['38']]},
+ {t:'fill',q:'Komunikacija je proces razmene informacija preko dogovorenog sistema ___.',a:[['znakova','znaka','znakovi']]},
+ {t:'fill',q:'U radu sa kritično obolelim bolesnicima, u procesu ___, komunikacija tima je delikatna i specifična.',a:[['reanimacije','reanimacija']]},
+ {t:'fill',q:'Cilj komunikacije u timu je izbeći dvosmislena i nejasna ___ i jasno podeliti ___.',a:[['pravila','pravilo'],['zadatke','zadatak','zadaci']]},
+ {t:'fill',q:'Stalni timovi su menadžment i ___ timovi, a privremeni su ___ timovi.',a:[['radni'],['projektni']]},
+ {t:'tf',q:'Govor tela čini 55% poruke koju prenosimo.',a:true},
+ {t:'tf',q:'Komunikacija tima u procesu reanimacije je jednostavna i ne razlikuje se od uobičajene.',a:false,e:'U radu sa kritično obolelim bolesnicima komunikacija tima je delikatna i specifična.'},
+ {t:'tf',q:'Intrapersonalna komunikacija navedena je kao jedan od oblika komuniciranja.',a:true},
+ {t:'tf',q:'Verbalna komunikacija je oblik na koji prvi pomislimo kada je reč o komunikaciji.',a:true},
+ {t:'tf',q:'Reči čine najveći deo poruke koju prenosimo.',a:false,e:'Samo je 7% ono što kažemo; govor tela čini 55%, a način govora 38%.'}
+]},
+{id:'men-1',lesson:'Menadžment i organizacija zdravstvene službe',author:'Zlatko Ćirić',title:'Test 1',qs:[
+ {t:'mc',q:'Zdravstveni sistemi su sistemi koji obuhvataju:',o:['sve organizacije, institucije i resurse posvećene preduzimanju zdravstvenih akcija','samo bolnice i domove zdravlja','isključivo državne zdravstvene ustanove','zdravstveno osiguranje i apoteke'],a:0},
+ {t:'mc',q:'Koliko glavnih komponenti ima jedan zdravstveni sistem?',o:['tri','četiri','pet','sedam'],a:2,e:'Razvoj resursa, organizovano uređenje resursa, pružanje zdravstvene zaštite, ekonomska pomoć i menadžment.'},
+ {t:'mc',q:'Koja od navedenih NIJE funkcija menadžmenta?',o:['planiranje','organizovanje','kontrola','finansiranje'],a:3,e:'Funkcije su: planiranje, organizovanje, vođenje i kontrola.'},
+ {t:'mc',q:'Definicija zdravlja SZO verifikovana je na Svetskoj zdravstvenoj skupštini:',o:['1946. godine','1948. godine','1958. godine','1978. godine'],a:1},
+ {t:'mc',q:'Direktora zdravstvene ustanove čiji je osnivač Republika imenuje i razrešava:',o:['upravni odbor','Ministarstvo zdravlja','Vlada RS','nadzorni odbor'],a:2},
+ {t:'fill',q:'Zdravlje je stanje potpunog fizičkog, ___ i ___ blagostanja, a ne samo odsutnost bolesti ili invalidnosti.',a:[['mentalnog','mentalno','psihičkog'],['socijalnog','socijalno']],unordered:true},
+ {t:'fill',q:'Organi zdravstvene ustanove u državnoj svojini su: direktor, ___ odbor i ___ odbor.',a:[['upravni'],['nadzorni']],unordered:true},
+ {t:'fill',q:'Uloge menadžera grupišu se u: izgradnju međuljudskih odnosa, ___ i donošenje ___.',a:[['informisanje'],['odluka','odluke']]},
+ {t:'fill',q:'Bolničko odeljenje za standardno lečenje i negu u opštoj bolnici ima od ___ do ___ postelja.',a:[['24'],['40']]},
+ {t:'fill',q:'Odeljenje se može organizovati sa najmanje ___, odsek sa ___, a kabinet sa ___ zaposlena.',a:[['10','deset'],['6','šest'],['3','tri']]},
+ {t:'tf',q:'Prema SZO, zdravlje je samo odsustvo bolesti.',a:false,e:'Zdravlje je stanje potpunog fizičkog, mentalnog i socijalnog blagostanja, a ne samo odsutnost bolesti.'},
+ {t:'tf',q:'Statut zdravstvene ustanove donosi upravni odbor uz saglasnost osnivača.',a:true},
+ {t:'tf',q:'Nadzor nad zakonitošću rada zdravstvenih ustanova vrši ministarstvo nadležno za poslove zdravlja.',a:true},
+ {t:'tf',q:'Apoteka može u svom sastavu imati galensku laboratoriju.',a:true},
+ {t:'tf',q:'U zavodu za javno zdravlje organizacione jedinice su službe.',a:false,e:'U zavodu za javno zdravlje obrazuju se centri, a u okviru njih odeljenja i odseci.'}
+]},
+{id:'men-2',lesson:'Menadžment i organizacija zdravstvene službe',author:'Zlatko Ćirić',title:'Test 2',qs:[
+ {t:'mc',q:'Zdravstvena akcija je:',o:['svaki pregled kod lekara','bilo koji napor čija je primarna namera da poboljša zdravlje','samo program vakcinacije','propis iz oblasti zdravstva'],a:1},
+ {t:'mc',q:'Menadžment kao komponenta zdravstvenog sistema odnosi se na:',o:['kadar, opremu i znanje','izvore finansiranja','vođstvo, odlučivanje i regulaciju','nivoe zdravstvene zaštite'],a:2},
+ {t:'mc',q:'Koji od navedenih NIJE cilj zdravstvenog sistema?',o:['unapređenje i očuvanje zdravlja ljudi','odgovor na očekivanja i zahteve ljudi','poštena (pravedna) kontribucija','ostvarivanje profita'],a:3},
+ {t:'mc',q:'Nadzor nad radom i poslovanjem zdravstvene ustanove vrši:',o:['direktor','upravni odbor','nadzorni odbor','osnivač'],a:2},
+ {t:'mc',q:'Bolničko odeljenje za poluintenzivno lečenje i negu ima:',o:['6 do 12 postelja','12 do 16 postelja','20 do 30 postelja','24 do 40 postelja'],a:1},
+ {t:'fill',q:'Pružanje zdravstvene zaštite kao komponenta odnosi se na nivoe zaštite: primarni, ___ i ___.',a:[['sekundarni'],['tercijarni']],unordered:true},
+ {t:'fill',q:'Razvoj zdravstvenih resursa odnosi se na kadar, zdravstvene ___, opremu i snabdevanje i ___.',a:[['kapacitete','kapaciteti'],['znanje']]},
+ {t:'fill',q:'Opšta bolnica kojoj gravitira manje od ___ stanovnika može obrazovati službe koje objedinjavaju stacionarnu i specijalističko-konsultativnu delatnost.',a:[['50000','50 000','pedeset hiljada']]},
+ {t:'fill',q:'Direktor zdravstvene ustanove odgovoran je za ___ rada i poslovanje ustanove.',a:[['zakonitost']]},
+ {t:'fill',q:'U zavodu za javno zdravlje obrazuje se ___ centara.',a:[['6','šest']]},
+ {t:'tf',q:'Direktora ustanove čiji su osnivači druga pravna i fizička lica imenuje Vlada RS.',a:false,e:'Tog direktora imenuje i razrešava osnivač.'},
+ {t:'tf',q:'Zdravstvena ustanova može obezbediti sredstva izdavanjem pod zakup slobodnog kapaciteta.',a:true},
+ {t:'tf',q:'Odeljenje za intenzivno lečenje i negu u opštoj bolnici ima najmanje šest postelja.',a:true},
+ {t:'tf',q:'Poliklinika spada u druge oblike zdravstvene delatnosti.',a:true},
+ {t:'tf',q:'U kliničkom centru obrazuju se klinike, centri i službe.',a:true}
+]},
+{id:'men-3',lesson:'Menadžment i organizacija zdravstvene službe',author:'Zlatko Ćirić',title:'Test 3',qs:[
+ {t:'mc',q:'Organizovano uređenje resursa odnosi se na:',o:['kadar, kapacitete, opremu i znanje','nacionalne zdravstvene vlasti, zdravstveno osiguranje, državne i nevladine agencije i privatni sektor','primarni, sekundarni i tercijarni nivo','vođstvo i odlučivanje'],a:1},
+ {t:'mc',q:'Opšta bolnica za teritoriju jedne opštine objedinjuje delatnost iz:',o:['interne medicine, opšte hirurgije, pedijatrije, ginekologije i akušerstva','interne medicine, neurologije, psihijatrije i ortopedije','hirurgije, urologije, oftalmologije i pedijatrije','interne medicine, infektologije, pedijatrije i dermatologije'],a:0},
+ {t:'mc',q:'Kliničko odeljenje za standardno lečenje i negu u klinici ima:',o:['12 do 16 postelja','20 do 30 postelja','24 do 40 postelja','6 do 12 postelja'],a:1},
+ {t:'mc',q:'Koja organizaciona jedinica postoji u kliničkom centru, a nije navedena za kliniku?',o:['dnevna bolnica','bolnička apoteka','služba za kliničku farmakologiju','služba za anesteziju sa reanimatologijom'],a:2},
+ {t:'mc',q:'Nadzor nad primenom zakona, drugih propisa i sprovođenjem propisanih mera vrši:',o:['nadzorni odbor','zdravstvena inspekcija','upravni odbor','direktor'],a:1},
+ {t:'fill',q:'Ekonomska pomoć kao komponenta odnosi se na izvore ___.',a:[['finansiranja','finansiranje']]},
+ {t:'fill',q:'Nadzor nad radom zdravstvenih ustanova vrši se kao nadzor nad ___ rada i nadzor nad ___ radom.',a:[['zakonitošću','zakonitost'],['stručnim','stručni']]},
+ {t:'fill',q:'Za nemedicinske poslove na primarnom nivou obrazuju se služba za pravne i ekonomsko-___ poslove i služba za ___ i druge slične poslove.',a:[['finansijske','finansijski'],['tehničke','tehnički']]},
+ {t:'fill',q:'Kliničko odeljenje za intenzivno lečenje i negu ima od ___ do ___ postelja.',a:[['6','šest'],['12','dvanaest']]},
+ {t:'fill',q:'U teritorijalno izdvojenim naseljima apoteka može organizovati ___ apoteke ili jedinicu za izdavanje gotovih lekova.',a:[['ogranak']]},
+ {t:'tf',q:'U institutu se obrazuju klinike, odnosno službe, a u okviru njih odeljenja, odseci i kabineti.',a:true},
+ {t:'tf',q:'Kliničko-bolnički centar nema bolnice kao organizacione jedinice.',a:false,e:'U KBC-u se obrazuju klinike, bolnice, odnosno službe.'},
+ {t:'tf',q:'Zavod za medicinu rada obrazuje stacionarno odeljenje za profesionalne bolesti i bolesti u vezi sa radom.',a:true},
+ {t:'tf',q:'Zavod za sudsku medicinu ima službu za toksikološku dijagnostiku.',a:true},
+ {t:'tf',q:'Centralna jedinica za intenzivno lečenje može se obrazovati u opštoj bolnici sa najmanje 200 postelja.',a:false,e:'Može u opštoj bolnici u sedištu upravnog okruga ili sa najmanje 500 postelja.'}
+]},
+{id:'men-4',lesson:'Menadžment i organizacija zdravstvene službe',author:'Zlatko Ćirić',title:'Test 4',qs:[
+ {t:'mc',q:'Koji od navedenih NIJE izvor sredstava za rad zdravstvenih ustanova?',o:['organizacija zdravstvenog osiguranja','budžet','legati, pokloni i zaveštanja','novčane kazne pacijenata'],a:3},
+ {t:'mc',q:'Šta od navedenog NIJE u nadležnosti direktora?',o:['zastupa ustanovu','zaključuje ugovor o radu sa radnikom','odlučuje o odmorima i odsustvu radnika','donosi statut ustanove'],a:3,e:'Statut donosi upravni odbor uz saglasnost osnivača.'},
+ {t:'mc',q:'Centar u kliničkom centru:',o:['objedinjava delatnost više kliničkih disciplina','obavlja samo nemedicinske poslove','isto je što i kabinet','postoji samo na primarnom nivou'],a:0},
+ {t:'mc',q:'Služba za dezinfekciju, dezinsekciju i deratizaciju pripada:',o:['Zavodu za javno zdravlje','Zavodu za antirabičnu zaštitu','Zavodu za biocide i medicinsku ekologiju','Zavodu za medicinu rada'],a:2},
+ {t:'mc',q:'Koliko službi ima Zavod za transfuziju krvi?',o:['tri','četiri','pet','šest'],a:1},
+ {t:'fill',q:'Treći cilj zdravstvenog sistema je poštena (pravedna, fer) ___ ljudi.',a:[['kontribucija','doprinos','kontribucija doprinos']]},
+ {t:'fill',q:'Dom zdravlja obavlja delatnost i u oblasti polivalentne ___.',a:[['patronaže','patronaža']]},
+ {t:'fill',q:'Bolnička apoteka je služba za ___ zdravstvenu delatnost.',a:[['farmaceutsku','farmaceutska']]},
+ {t:'fill',q:'U okviru službe u klinici formiraju se odeljenja, ___ i ___.',a:[['odseci','odsek'],['kabineti','kabinet']],unordered:true},
+ {t:'fill',q:'Zavod za medicinu rada ima centar za ___ zaštitu i centar za higijenu rada i ___.',a:[['radiološku','radiološka'],['epidemiologiju','epidemiologija']]},
+ {t:'tf',q:'Specijalna bolnica obrazuje organizacione jedinice pod uslovima i na način utvrđen za opštu bolnicu.',a:true},
+ {t:'tf',q:'U dnevnoj bolnici obavljaju se, između ostalog, dijaliza, hemoterapija i hirurške intervencije.',a:true},
+ {t:'tf',q:'U pedijatriji, akušerstvu i za infektivne bolesti odeljenje za standardnu negu može imati manje postelja.',a:true},
+ {t:'tf',q:'Zavod za zdravstvenu zaštitu studenata ne može imati stacionar.',a:false,e:'Jedna od njegovih organizacionih jedinica je stacionar, u skladu sa zakonom.'},
+ {t:'tf',q:'Laboratorija i ambulanta spadaju u druge oblike zdravstvene delatnosti.',a:true}
+]},
+{id:'men-5',lesson:'Menadžment i organizacija zdravstvene službe',author:'Zlatko Ćirić',title:'Test 5',qs:[
+ {t:'mc',q:'Koji od navedenih NIJE centar zavoda za javno zdravlje?',o:['centar za promociju zdravlja','centar za mikrobiologiju','centar za higijenu i humanu ekologiju','centar za radiološku zaštitu'],a:3,e:'Centar za radiološku zaštitu pripada zavodu za medicinu rada.'},
+ {t:'mc',q:'Služba za identifikaciju očinstva, bioloških i drugih tragova postoji u:',o:['Zavodu za sudsku medicinu','Zavodu za transfuziju krvi','Zavodu za javno zdravlje','Zavodu za virusologiju, vakcine i serume'],a:0},
+ {t:'mc',q:'Zavod za antirabičnu zaštitu bavi se pre svega:',o:['proizvodnjom vakcina','prevencijom i sprečavanjem širenja besnila','profesionalnim bolestima','govornom patologijom'],a:1},
+ {t:'mc',q:'U kliničkom centru jedinica za prijem i zbrinjavanje hitnih stanja naziva se:',o:['dnevna bolnica','urgentni centar','centralna jedinica','služba hitne pomoći'],a:1},
+ {t:'mc',q:'Šta od navedenog je vrsta zdravstvene ustanove, a ne drugi oblik zdravstvene delatnosti?',o:['dispanzer','lekarska ordinacija','klinika','patronažna služba'],a:2},
+ {t:'fill',q:'Direktor donosi opšti akt kojim se utvrđuje vrsta i stepen ___ spreme za određeno radno mesto.',a:[['stručne','stručna']]},
+ {t:'fill',q:'Zavod za transfuziju krvi ima službu za kliničku ___, terapijske usluge i distribuciju krvi.',a:[['transfuziologiju','transfuziologija']]},
+ {t:'fill',q:'Pun naziv je Zavod za virusologiju, ___ i serume.',a:[['vakcine','vakcina']]},
+ {t:'fill',q:'U centralnoj jedinici zbrinjavaju se pacijenti sa oštećenjem ___ ili više organskih sistema.',a:[['dva','2']]},
+ {t:'fill',q:'Pun naziv je Zavod za psihofiziološke poremećaje i ___ patologiju.',a:[['govornu','govorna']]},
+ {t:'tf',q:'Zavod za javno zdravlje ima centar za informatiku i biostatistiku u zdravstvu.',a:true},
+ {t:'tf',q:'Zavodi za transfuziju krvi, sudsku medicinu i antirabičnu zaštitu organizovani su u službe.',a:true},
+ {t:'tf',q:'Zavod za biocide i medicinsku ekologiju obrazuje stacionarno odeljenje.',a:false,e:'Stacionar imaju zavod za medicinu rada, zavod za psihofiziološke poremećaje i govornu patologiju i zavod za zdravstvenu zaštitu studenata.'},
+ {t:'tf',q:'Savetovalište za prevenciju HIV/SIDA i polno prenosivih infekcija postoji u zavodu za zdravstvenu zaštitu studenata.',a:true},
+ {t:'tf',q:'Upravni i nadzorni odbor ustanove čiji je osnivač Republika imenuje i razrešava direktor.',a:false,e:'Imenuje ih i razrešava Vlada RS.'}
+]},
+{id:'men-6',lesson:'Menadžment i organizacija zdravstvene službe',author:'Zlatko Ćirić',title:'Test 6',qs:[
+ {t:'mc',q:'Na šta se NE odnosi ekonomska pomoć kao komponenta zdravstvenog sistema?',o:['državne izvore finansiranja','lokalne zajednice','privatna domaćinstva','nivoe zdravstvene zaštite'],a:3},
+ {t:'mc',q:'Ko vrši izbor između kandidata prijavljenih za zapošljavanje u zdravstvenoj ustanovi?',o:['upravni odbor','direktor','nadzorni odbor','zdravstvena inspekcija'],a:1},
+ {t:'mc',q:'Šta od navedenog NIJE oblast rada doma zdravlja?',o:['opšta medicina','zdravstvena zaštita žena','hitna medicinska pomoć','kardiohirurgija'],a:3},
+ {t:'mc',q:'Služba za proizvodnju dijagnostičkih preparata (bakteriološke podloge, antibiogrami) postoji u:',o:['Zavodu za transfuziju krvi','Zavodu za javno zdravlje','Zavodu za virusologiju, vakcine i serume','Zavodu za sudsku medicinu'],a:2},
+ {t:'mc',q:'Klinika, odnosno služba u institutu objedinjava:',o:['stacionarnu i specijalističko-konsultativnu delatnost za određenu granu medicine','samo ambulantne preglede','nemedicinske poslove','isključivo naučni rad'],a:0},
+ {t:'fill',q:'Četiri funkcije menadžmenta su: planiranje, ___, vođenje i ___.',a:[['organizovanje','organizacija'],['kontrola','kontrolisanje']],unordered:true},
+ {t:'fill',q:'Definicija zdravlja sadržana je u ___ Svetske zdravstvene organizacije.',a:[['Ustavu','Ustav']]},
+ {t:'fill',q:'Zavod za medicinu rada ima ___ centra.',a:[['4','četiri']]},
+ {t:'fill',q:'Zavod za javno zdravlje ima centar za kontrolu i ___ bolesti.',a:[['prevenciju','prevencija']]},
+ {t:'fill',q:'Pacijentima u centralnoj jedinici potrebna je mehanička potpora ___ i invazivno hemodinamsko praćenje.',a:[['disanju','disanja','disanje']]},
+ {t:'tf',q:'Direktor odlučuje o udaljavanju radnika sa radnog mesta i iz ustanove.',a:true},
+ {t:'tf',q:'Zdravstveni centar i apotekarska ustanova navedeni su kao vrste zdravstvenih ustanova.',a:true},
+ {t:'tf',q:'Odeljenje za poluintenzivno lečenje i negu u klinici ima 20 do 30 postelja.',a:false,e:'Poluintenzivno ima 12 do 16 postelja; 20 do 30 ima standardno odeljenje u klinici.'},
+ {t:'tf',q:'Klinika ima službu za naučnoistraživačku i obrazovnu delatnost.',a:true},
+ {t:'tf',q:'Direktor izvršava pravosnažnu odluku suda donesenu u postupku za zaštitu prava radnika.',a:true}
+]},
+{id:'men-7',lesson:'Menadžment i organizacija zdravstvene službe',author:'Zlatko Ćirić',title:'Test 7',qs:[
+ {t:'mc',q:'Šta od navedenog je drugi oblik zdravstvene delatnosti, a ne vrsta zdravstvene ustanove?',o:['dispanzer','institut','zavod','kliničko-bolnički centar'],a:0},
+ {t:'mc',q:'Koliko organizacionih jedinica za zajedničke medicinske poslove se obrazuje u klinici?',o:['8','10','11','12'],a:2},
+ {t:'mc',q:'Koliko takvih organizacionih jedinica se obrazuje na nivou kliničkog centra?',o:['8','10','11','12'],a:3},
+ {t:'mc',q:'U zavodu za zdravstvenu zaštitu studenata služba opšte medicine, ginekologije i stomatologije obavlja se preko:',o:['izabranog lekara','dežurnog lekara','patronažne sestre','lekara specijaliste'],a:0},
+ {t:'mc',q:'Koji od navedenih centara pripada zavodu za javno zdravlje?',o:['centar za analizu, planiranje i organizaciju zdravstvene zaštite','centar za unapređenje medicine rada','urgentni centar','centar za radiološku zaštitu'],a:0},
+ {t:'fill',q:'Zdravstvena ustanova može obezbediti sredstva od prodaje ___ i proizvoda.',a:[['usluga','usluge']]},
+ {t:'fill',q:'Dom zdravlja obavlja delatnost u oblasti zdravstvene zaštite žena, predškolske dece i ___ dijagnostike.',a:[['rendgen','rendgenske','rentgen']]},
+ {t:'fill',q:'Zavod za zdravstvenu zaštitu studenata može organizovati zdravstvene ambulante u studentskim ___.',a:[['domovima','domovi','dom']]},
+ {t:'fill',q:'Zavod za antirabičnu zaštitu ima službu za istraživanje i praćenje kretanja besnila i drugih ___.',a:[['zoonoza','zoonoze']]},
+ {t:'fill',q:'U klinici službe objedinjavaju ___ specijalističko-konsultativnu i stacionarnu zdravstvenu delatnost.',a:[['visokospecijalizovanu','visoko specijalizovanu']]},
+ {t:'tf',q:'U opštoj bolnici navedeno je osam organizacionih jedinica za zajedničke medicinske poslove.',a:true},
+ {t:'tf',q:'Sredstva se mogu obezbediti obavljanjem naučnoistraživačke i obrazovne delatnosti.',a:true},
+ {t:'tf',q:'Zavod za psihofiziološke poremećaje i govornu patologiju nema stacionarno odeljenje.',a:false,e:'Zavod obrazuje stacionarno odeljenje za rehabilitaciju psihofizioloških poremećaja i govornu patologiju.'},
+ {t:'tf',q:'Direktor daje saglasnost za dopunski rad radnika u drugoj ustanovi.',a:true},
+ {t:'tf',q:'Zdravstveno savetovalište i zdravstvena stanica su vrste zdravstvenih ustanova.',a:false,e:'To su drugi oblici zdravstvene delatnosti.'}
+]},
+{id:'men-8',lesson:'Menadžment i organizacija zdravstvene službe',author:'Zlatko Ćirić',title:'Test 8',qs:[
+ {t:'mc',q:'U zavodu za javno zdravlje u okviru centara obrazuju se:',o:['odeljenja i odseci','klinike i službe','kabineti i ambulante','bolnice i dispanzeri'],a:0},
+ {t:'mc',q:'U zavodu za medicinu rada u okviru centara obrazuju se:',o:['samo kabineti','službe, odeljenja i odseci','klinike','ogranci'],a:1},
+ {t:'mc',q:'Za koju oblast specijalističko-konsultativna služba zavoda za zdravstvenu zaštitu studenata NEMA odeljenje?',o:['interna medicina','oftalmologija','otorinolaringologija','hirurgija'],a:3,e:'Odeljenja: interna medicina, oftalmologija, otorinolaringologija, psihijatrija, fizikalna medicina i rehabilitacija.'},
+ {t:'mc',q:'Koja služba NE pripada Zavodu za transfuziju krvi?',o:['služba za prikupljanje krvi, testiranje i proizvodnju produkata od krvi','služba za kliničku transfuziologiju','služba za obezbeđenje i kontrolu kvaliteta','služba za toksikološku dijagnostiku'],a:3,e:'Služba za toksikološku dijagnostiku pripada Zavodu za sudsku medicinu.'},
+ {t:'mc',q:'Centar u kliničkom centru može biti obrazovan i za:',o:['jednu usko specijalizovanu dijagnostičku ili terapijsku delatnost klinike','nemedicinske poslove','primarnu zdravstvenu zaštitu','izdavanje gotovih lekova'],a:0},
+ {t:'fill',q:'Zavod za biocide ima službu za biocide i programe medicinske ___.',a:[['ekologije','ekologija']]},
+ {t:'fill',q:'Zavod za psihofiziološke poremećaje ima službu za dijagnostiku, ___ i rehabilitaciju.',a:[['habilitaciju','habilitacija']]},
+ {t:'fill',q:'Zavod za sudsku medicinu ima službu za obdukcijsku, citološku i drugu dijagnostiku i ___.',a:[['veštačenje','veštačenja']]},
+ {t:'fill',q:'Dom zdravlja obavlja delatnost u oblasti zdravstvenog vaspitanja, opšte medicine i zdravstvene zaštite ___ dece.',a:[['školske','školska']]},
+ {t:'fill',q:'Savetovalište u zavodu za studente bavi se prevencijom HIV/SIDA i ___ prenosivih infekcija.',a:[['polno']]},
+ {t:'tf',q:'Direktor utvrđuje način osposobljavanja pripravnika.',a:true},
+ {t:'tf',q:'Zavod za virusologiju, vakcine i serume ima službu za obezbeđenje i kontrolu kvaliteta.',a:true},
+ {t:'tf',q:'Zdravstvena ustanova ne može obezbeđivati sredstva od prometa robe.',a:false,e:'Promet robe je jedan od navedenih izvora sredstava.'},
+ {t:'tf',q:'Zavod za antirabičnu zaštitu ima službu za mikrobiološku i drugu dijagnostiku.',a:true},
+ {t:'tf',q:'Direktor donosi odluku o rasporedu, početku i završetku radnog vremena.',a:true}
+]},
+{id:'kom-1',lesson:'Komunikacija u delatnosti zdravstvenih radnika',author:'Zlatko Ćirić',title:'Test 1',qs:[
+ {t:'mc',q:'Prema Svetskoj zdravstvenoj organizaciji, kvalitetna komunikacija je jedna od koliko veština neophodnih za zdrav i srećan život?',o:['tri','pet','sedam','deset'],a:1},
+ {t:'mc',q:'Komuniciranje u zdravstvu predstavlja:',o:['neformalni tip komunikacije','formalni tip komunikacije','masovni tip komunikacije','javni tip komunikacije'],a:1},
+ {t:'mc',q:'Povratna sprega (feedback) je:',o:['misao, ideja ili emocija koju jedna osoba šalje drugoj','način na koji se poruka šalje','odgovor koji pošiljalac dobija od primaoca','osoba koja prima i tumači poruku'],a:2},
+ {t:'mc',q:'Najvažniji cilj interpersonalne komunikacije je:',o:['prenošenje naredbi','uspostavljanje stabilnih međuljudskih odnosa','rešavanje zajedničkih problema grupe','informisanje javnosti'],a:1},
+ {t:'mc',q:'Strategija u komunikaciji sa agresivnom osobom je:',o:['pokazati interesovanje, strpljenje, vedrinu i ohrabrenje','odati priznanje i uvažavati „posebnost”','pažljivo slušanje, smirenost, argumentovanost i čvrst stav','izbeći uvlačenje u „sistem” i biti neutralan'],a:2},
+ {t:'fill',q:'Formalne komunikacije prenose se unapred utvrđenim ___ (pravilima, standardima, propisima), a neformalne teku van ___ kanala.',a:[['kanalima','kanali'],['zvaničnih','formalnih','zvaničnih formalnih']]},
+ {t:'fill',q:'Metod slanja poruke može biti: ___, ___ i kombinovana.',a:[['verbalna','verbalni'],['neverbalna','neverbalni']],unordered:true},
+ {t:'fill',q:'Razgovor s pacijentom mora da bude ___ dijalog, a ne ___ monolog.',a:[['dvosmerni','dvosmeran'],['jednosmerni','jednosmeran']]},
+ {t:'fill',q:'Prema vremenskom trajanju timovi su ___ (menadžment i radni timovi) i ___ (projektni timovi).',a:[['stalni'],['privremeni']]},
+ {t:'fill',q:'Više od ___% neželjenih događaja posledica je loše komunikacije (JCAHO, 2004).',a:[['60','šezdeset']]},
+ {t:'tf',q:'Uspešna komunikacija mora dovesti do saglasnosti mišljenja.',a:false,e:'Ne mora dovesti do saglasnosti, ali treba da predstavlja stvarnu razmenu mišljenja.'},
+ {t:'tf',q:'Neverbalna komunikacija je pretežno spontana, ali može biti i namerna.',a:true},
+ {t:'tf',q:'Komunikacija sa zdravstvenim radnicima predstavlja najveći izvor žalbi korisnika.',a:true},
+ {t:'tf',q:'Depresivna osoba je nepoverljiva, sumnjičava i sklona optužbama.',a:false,e:'To je opis paranoidne osobe. Depresivna je bezvoljna, potištena, odsutna duhom i usporena.'},
+ {t:'tf',q:'„Biti deo tima nije svojstveno ljudskoj prirodi – to se uči” (Crosby).',a:true}
+]},
+{id:'kom-2',lesson:'Komunikacija u delatnosti zdravstvenih radnika',author:'Zlatko Ćirić',title:'Test 2',qs:[
+ {t:'mc',q:'Koliko elemenata ima proces komunikacije?',o:['tri','četiri','pet','šest'],a:2,e:'Pošiljalac, poruka, metod slanja, primalac i povratna sprega.'},
+ {t:'mc',q:'Koja od navedenih NIJE faza razvoja tima?',o:['formiranje','iskazivanje','normiranje','nagrađivanje'],a:3,e:'Faze su: formiranje, iskazivanje, normiranje i funkcionisanje.'},
+ {t:'mc',q:'Strategija u komunikaciji sa paranoidnom osobom je:',o:['izbeći uvlačenje u „sistem”, pozivati se na činjenice, biti neutralan','ne kritikovati i odati priznanje','pokazati vedrinu i ohrabrenje','dobronamernost i smirivanje'],a:0},
+ {t:'mc',q:'Interna komunikacija između lekara i medicinskih sestara unapred je određena:',o:['ličnim odnosima zaposlenih','organizacionom šemom i hijerarhijskom strukturom','željama pacijenata','neformalnim kanalima'],a:1},
+ {t:'mc',q:'U barijere vezane za organizaciju poruke spada:',o:['dvosmislenost reči','sklop ličnosti učesnika','suviše razgranata, opširna i neprecizna poruka','emocije učesnika komunikacije'],a:2,e:'Dvosmislenost spada u „reči poruke”, a ličnost i emocije u „ljudi – smetnje u kanalu”.'},
+ {t:'fill',q:'Odnos zdravstveni radnik–___ predstavlja suštinu procesa ___.',a:[['pacijent','pacijenta'],['pomoći','pomoć']]},
+ {t:'fill',q:'Najefikasnija komunikacija je ___ i ___.',a:[['jasna','jasno'],['direktna','direktno']],unordered:true},
+ {t:'fill',q:'Uloge u grupi dele se na: profesionalne, ___, polne i ___ i statusne uloge.',a:[['starosne','starosna'],['klasne','klasna']]},
+ {t:'fill',q:'Tim je određeni broj pojedinaca koji imaju zajedničke ___ i ___.',a:[['ciljeve','ciljevi','cilj'],['interese','interesi','interes','interesovanja']],unordered:true},
+ {t:'fill',q:'Osoba koja je bezvoljna, potištena, odsutna duhom i usporena je ___ osoba.',a:[['depresivna']]},
+ {t:'tf',q:'Porodica predstavlja osnovnu ljudsku grupu.',a:true},
+ {t:'tf',q:'Struktura tima je kruta i ne prilagođava se zahtevima situacije.',a:false,e:'Struktura tima je fleksibilna i prilagođava se zahtevima situacije.'},
+ {t:'tf',q:'Govor tela čine nesvesni pokreti koji mogu da poboljšaju ili naruše komunikaciju.',a:true},
+ {t:'tf',q:'Zdravstveni radnik treba lično da shvata probleme koji se javljaju u komunikaciji.',a:false,e:'Ne treba da ih shvata lično; odnos usmerava na argumente, činjenice i podatke.'},
+ {t:'tf',q:'Većina elemenata verbalne komunikacije je urođena.',a:false,e:'Neki elementi su urođeni, ali se većina uči.'}
+]},
+{id:'kom-3',lesson:'Komunikacija u delatnosti zdravstvenih radnika',author:'Zlatko Ćirić',title:'Test 3',qs:[
+ {t:'mc',q:'Koji od navedenih NIJE oblik komunikacije iz osnovne podele?',o:['verbalna','grupna','masovna','digitalna'],a:3,e:'Oblici su: verbalna, neverbalna, interpersonalna, grupna, javna i masovna.'},
+ {t:'mc',q:'Humor kao osobina dobre komunikacije je sposobnost da se:',o:['našali na račun drugih','napravi šala na svoj račun','izbegne ozbiljna tema','zabavi grupa'],a:1},
+ {t:'mc',q:'Osoba koja je arogantna, teatralna, ima potrebu za uvažavanjem i „filtrira” informacije je:',o:['agresivna','anksiozna','egocentrična','paranoidna'],a:2},
+ {t:'mc',q:'Koja od navedenih NIJE prednost timskog rada?',o:['više specifičnih znanja na raspolaganju','međusobna stimulacija i motivisanje članova','zadovoljenje društvenih potreba članova','smanjenje odgovornosti pojedinca'],a:3},
+ {t:'mc',q:'Faza razvoja tima u kojoj je razvijen osećaj lojalnosti grupi i vlada otvorenost i uzajamno poverenje je:',o:['formiranje','iskazivanje','normiranje','funkcionisanje'],a:3},
+ {t:'fill',q:'Osnovna uloga neverbalne komunikacije je traženje, uspostavljanje, održavanje, usmeravanje ili ___ socijalne ___.',a:[['prekidanje'],['interakcije','interakcija']]},
+ {t:'fill',q:'Interpersonalna komunikacija odvija se između najmanje ___ osobe, licem u ___.',a:[['dve','dvije','2','dva'],['lice']]},
+ {t:'fill',q:'Prema funkciji, grupe se dele na: ___ grupe, neformalne ___ grupe i formalne organizovane grupe.',a:[['porodične','porodična'],['prijateljske','prijateljska']]},
+ {t:'fill',q:'Anksiozna osoba je uznemirena, nesigurna, neodlučna i ne toleriše ___ situacije.',a:[['nejasnost','nejasnoću','nejasnoće']]},
+ {t:'fill',q:'Moć ___ ljudima, a ne ___ ljudima!',a:[['sa','s'],['nad']]},
+ {t:'tf',q:'U malim grupama dolazi do interakcije licem u lice i svaki pojedinac može doći do izražaja.',a:true},
+ {t:'tf',q:'Tim se formira sa jednim glavnim ciljem: da se poslovi uspešnije obave.',a:true},
+ {t:'tf',q:'Korišćenje stručne terminologije u komunikaciji je jedan od razloga žalbi pacijenata.',a:true},
+ {t:'tf',q:'Neverbalna komunikacija nije bitna u urgentnim stanjima.',a:false,e:'Tehnike neverbalne komunikacije su veoma bitne upravo u urgentnim stanjima.'},
+ {t:'tf',q:'Komunikacija između zdravstvenog radnika i pacijenta je bitan i sastavni deo terapijskog postupka.',a:true}
+]},
+{id:'kom-4',lesson:'Komunikacija u delatnosti zdravstvenih radnika',author:'Zlatko Ćirić',title:'Test 4',qs:[
+ {t:'mc',q:'Prema definiciji, komunikacija je:',o:['statičan proces razmene pisanih poruka','dinamičan i stalno promenljiv proces','jednosmerno prenošenje informacija','isključivo verbalna razmena'],a:1},
+ {t:'mc',q:'Istinitost kao osobina komunikacije je:',o:['sposobnost da se podele osećanja','želja da se pomogne drugima','sposobnost da budemo iskreni prema nečijim osećanjima','sposobnost da se prihvate postupci drugih'],a:2},
+ {t:'mc',q:'Koji od navedenih NIJE element neverbalne komunikacije?',o:['gestovi','izraz lica','odevanje','izbor reči'],a:3,e:'Izbor reči je deo verbalne komunikacije.'},
+ {t:'mc',q:'Profesionalne uloge su:',o:['ponašanje koje zavisi od starosne dobi','vrsta ponašanja nametnuta određenom profesijom','ponašanje koje zavisi od društvenog statusa','ponašanje prema osobama istog ili suprotnog pola'],a:1},
+ {t:'mc',q:'Koja od navedenih NIJE jedna od timskih uloga po Belbinu?',o:['koordinator','kreativac','implementator','kontrolor budžeta'],a:3,e:'Uloge: koordinator, onaj koji oblikuje, kreativac, istraživač resursa, implementator, timski radnik, izvršilac, osoba koja nadgleda i procenjuje, stručnjak.'},
+ {t:'fill',q:'Primalac poruke je osoba koja poruku prima i ___.',a:[['tumači','tumaci','protumači']]},
+ {t:'fill',q:'Komuniciranje u zdravstvu zahteva znanje, ___ i tehničke ___.',a:[['kompetenciju','kompetencija','kompetencije'],['veštine','veština']]},
+ {t:'fill',q:'Glas prenosi ___, a ton daje ___.',a:[['emocije','emocija'],['sigurnost']]},
+ {t:'fill',q:'Poruka upućena pacijentu treba da bude jasna, ___ i ___.',a:[['glasna'],['precizna']],unordered:true},
+ {t:'fill',q:'Zdravstveni radnik treba da bude ___, a ne rivalizujući.',a:[['komplementaran','komplementarni']]},
+ {t:'tf',q:'Komunikacija u zdravstvenoj delatnosti je najsloženija i najosetljivija, a njen uspeh je neizvestan.',a:true},
+ {t:'tf',q:'Selektivno korišćenje tima je jedna od karakteristika uspešnih timova.',a:true},
+ {t:'tf',q:'Rivalitet i slabo vođstvo su prednosti timskog rada.',a:false,e:'To su prepreke efikasnosti tima.'},
+ {t:'tf',q:'Agresivna osoba je bezvoljna, potištena i usporena.',a:false,e:'To je depresivna osoba. Agresivna kritikuje, omalovažava, povređuje druge, napeta je i nestrpljiva.'},
+ {t:'tf',q:'Osobe sa teškoćama u komunikaciji imaju potrebu da skreću tok komunikacije i udaljavaju se od sadržaja.',a:true}
+]},
+{id:'kom-5',lesson:'Komunikacija u delatnosti zdravstvenih radnika',author:'Zlatko Ćirić',title:'Test 5',qs:[
+ {t:'mc',q:'Briga kao osobina komunikacije je:',o:['sposobnost da se napravi šala na svoj račun','želja da se pomogne drugima na individualnom i društvenom nivou','sposobnost da se podele osećanja','iskrenost prema nečijim osećanjima'],a:1},
+ {t:'mc',q:'U fazi iskazivanja članovi tima:',o:['saznaju šta bi trebalo da rade','spremni su da iskažu stavove u kojima postoje nesigurnost i nesuglasice','žele da započnu organizaciju','imaju razvijen osećaj lojalnosti grupi'],a:1},
+ {t:'mc',q:'Strategija u komunikaciji sa depresivnom osobom je:',o:['čvrst stav i argumentovanost','pokazati interesovanje, strpljenje, toleranciju, vedrinu i ohrabrenje','biti neutralan i pozivati se na činjenice','odati priznanje i uvažavati „posebnost”'],a:1},
+ {t:'mc',q:'Šta od navedenog NIJE navedeno kao situacija u kojoj komuniciramo?',o:['usmeno i neposredno','telefonom','na terenu i u domu pacijenta','preko društvenih mreža'],a:3,e:'Četvrta navedena situacija je pisana komunikacija.'},
+ {t:'mc',q:'Šta od navedenog NIJE osobina medicinske sestre/tehničara potrebna za uspešnu komunikaciju i dobre odnose u timu?',o:['empatija','asertivnost','aktivno slušanje','dominantnost'],a:3,e:'Osobine: otvorenost, srdačnost, samopouzdanje, empatija, aktivno slušanje, izbegavanje stereotipa i predrasuda, asertivnost.'},
+ {t:'fill',q:'Verbalna komunikacija je ključ ___ u zdravstvenoj nezi.',a:[['razumevanja','razumevanje']]},
+ {t:'fill',q:'Grupa je zajednica više ljudi koji čine celinu na osnovu zajedničkih ___ i ___.',a:[['ciljeva','ciljevi','cilj'],['interesovanja','interesa','interesi','interesovanje']],unordered:true},
+ {t:'fill',q:'Nagrađivanje tima uključuje ___ i ___ vidove.',a:[['spoljašnje','spoljasnji','spoljne'],['unutrašnje','unutrasnji']],unordered:true},
+ {t:'fill',q:'Komunikacija u timu mora da bude ___, uz poštovanje svih članova tima.',a:[['dvosmerna','dvosmerno']]},
+ {t:'fill',q:'Paranoidna osoba je nepoverljiva, ___, oprezna, stalno proverava i sklona je ___.',a:[['sumnjičava'],['optužbama','optužbe','optuživanju']]},
+ {t:'tf',q:'Polne uloge su vrsta ponašanja u komunikaciji sa ljudima istog ili suprotnog pola.',a:true},
+ {t:'tf',q:'Vođa određuje odgovornosti i aktivnosti tima.',a:true},
+ {t:'tf',q:'Gubitak statusa nije naveden kao mogući uzrok neefikasnosti tima.',a:false,e:'Gubitak statusa je jedan od mogućih uzroka, uz lične probleme, monotoniju posla, izostanak priznanja i druge.'},
+ {t:'tf',q:'Saopštavanje dijagnoze bez empatije je jedan od razloga žalbi korisnika.',a:true},
+ {t:'tf',q:'Osobi sa problemima u komunikaciji nikada ne treba izaći u susret.',a:false,e:'Ponekad treba izaći u susret takvoj osobi da bi se očuvala beskonfliktna komunikacija.'}
+]},
+{id:'kom-6',lesson:'Komunikacija u delatnosti zdravstvenih radnika',author:'Zlatko Ćirić',title:'Test 6',qs:[
+ {t:'mc',q:'Razumevanje kao osobina komunikacije je:',o:['sposobnost da se prihvate postupci drugih, uz osećaj za njihove težnje i potrebe','sposobnost da se podele osećanja','sposobnost da se napravi šala na svoj račun','želja da se pomogne drugima'],a:0},
+ {t:'mc',q:'Klasne i statusne uloge predstavljaju ponašanje koje zavisi od:',o:['profesije','starosne dobi','društvenog statusa osobe','pola'],a:2},
+ {t:'mc',q:'Strategija u komunikaciji sa anksioznom osobom je:',o:['dobronamernost, smirivanje i zainteresovanost','čvrst stav i racionalnost','ne kritikovati i odati priznanje','izbeći uvlačenje u „sistem”'],a:0},
+ {t:'mc',q:'U formalne organizovane grupe NE spada:',o:['školska grupa','sportska organizacija','politička partija','porodica'],a:3,e:'Porodica je posebna, osnovna ljudska grupa.'},
+ {t:'mc',q:'Šta od navedenog NIJE deo ključa za formiranje uspešnih timova?',o:['kreirati jasne ciljeve','treninzi','promena članova tima','izbegavanje odgovornosti'],a:3,e:'Izbegavanje odgovornosti je prepreka efikasnosti tima.'},
+ {t:'fill',q:'Normiranje je faza u kojoj postoji želja da se započne ___ među članovima.',a:[['organizacija','organizovanje']]},
+ {t:'fill',q:'Međuzavisnost članova znači ___ i uspešnost tima.',a:[['opstanak']]},
+ {t:'fill',q:'Strategija sa egocentričnom osobom: ne ___, odati ___ i uvažavati „posebnost”.',a:[['kritikovati'],['priznanje','priznanja']]},
+ {t:'fill',q:'Komunikacija se, kao i svaka druga veština, usavršava ___ i traži stalnu ___.',a:[['vežbanjem','vežbanje','vežbom'],['negu','nega']]},
+ {t:'fill',q:'Boljom komunikacijom dobijamo veću ___ i efektivnost, kao i bolje upravljanje ___.',a:[['produktivnost'],['vremenom','vreme']]},
+ {t:'tf',q:'Komunikacija se poboljšava posmatranjem, obraćanjem pažnje, odgovaranjem na zahteve i proveravanjem informacija.',a:true},
+ {t:'tf',q:'Narušena komunikacija retko je uzrok neuspešnog timskog rada.',a:false,e:'Većina neuspešnog timskog rada povezuje se sa narušenom komunikacijom među članovima tima.'},
+ {t:'tf',q:'Od sklopa ličnosti zavisi kako će poruka biti shvaćena.',a:true},
+ {t:'tf',q:'Kvalitetnom komunikacijom zdravstveni radnik pridobija pacijenta za aktivnog saradnika u rešavanju zajedničkog problema – bolesti.',a:true},
+ {t:'tf',q:'Kod osobe sa problemima u komunikaciji dozvoljeno je aktivirati njene negativne potencijale.',a:false,e:'Nikada ne aktivirati negativne potencijale osobe sa problemima u komunikaciji.'}
+]},
+{id:'kom-7',lesson:'Komunikacija u delatnosti zdravstvenih radnika',author:'Zlatko Ćirić',title:'Test 7',qs:[
+ {t:'mc',q:'Otvaranje kao osobina komunikacije je:',o:['sposobnost da se podele osećanja','iskrenost prema nečijim osećanjima','prihvatanje postupaka drugih','želja da se pomogne drugima'],a:0},
+ {t:'mc',q:'U fazi formiranja tima određuje se:',o:['ko će biti nagrađen','šta bi članovi tima trebalo da rade','kako rešiti nesuglasice','kada se tim raspušta'],a:1},
+ {t:'mc',q:'Šta od navedenog NIJE osnovna karakteristika timova u organizaciji?',o:['vremensko trajanje','međusobna promenljivost','obim zadataka i funkcija','visina zarade'],a:3},
+ {t:'mc',q:'Šta od navedenog NIJE prepreka efikasnosti tima?',o:['nedostatak poverenja','pogrešno usmerena energija','nedostatak spoljašnje podrške','uzajamna podrška'],a:3,e:'Uzajamna podrška je karakteristika uspešnih timova.'},
+ {t:'mc',q:'Dobar razgovor je ključan za sve navedeno OSIM za:',o:['sprovođenje dobre nege pacijenta','pravilno funkcionisanje zdravstvenog tima','izrastanje u vođu','smanjenje broja zaposlenih'],a:3,e:'Četvrti razlog je utvrđivanje snažnih odnosa baziranih na poverenju.'},
+ {t:'fill',q:'Ljudi koji prihvate svoja ___ mogu prihvatiti i druge ljude baš onakvima kakvi jesu.',a:[['osećanja','osećanje']]},
+ {t:'fill',q:'U interpersonalnoj komunikaciji šalju se ___ koji imaju određeno značenje, a mogu biti verbalni i neverbalni.',a:[['simboli','simbol']]},
+ {t:'fill',q:'U neformalnim prijateljskim grupama vlada ___ komunikacija sa svim članovima grupe.',a:[['lična','slobodna','licna']]},
+ {t:'fill',q:'Svaki tim ima svoj ___, a tim kao celina ima jedan primarni ___.',a:[['identitet'],['cilj']]},
+ {t:'fill',q:'Zdravstveni radnik mora da zna da prepozna ___ ličnosti bolesnika.',a:[['tip']]},
+ {t:'tf',q:'Za uspešnu komunikaciju potrebno je da primalac shvati šta mu pošiljalac poručuje.',a:true},
+ {t:'tf',q:'Komunikacijske veštine dovoljno je naučiti jednom i ne zahtevaju stalno učenje i vežbanje.',a:false,e:'Potrebno je permanentno učenje i vežbanje komunikacijskih veština svih članova medicinskog tima.'},
+ {t:'tf',q:'Dobro vođstvo i upravljanje ljudskim različitostima su karakteristike uspešnih timova.',a:true},
+ {t:'tf',q:'Javna i masovna komunikacija ne spadaju u oblike komunikacije.',a:false,e:'Oblici su: verbalna, neverbalna, interpersonalna, grupna, javna i masovna.'},
+ {t:'tf',q:'Izostanak privatnosti i nečuvanje profesionalne tajne su razlozi žalbi korisnika.',a:true}
+]},
+{id:'rad-1',lesson:'Organizacija zdravstvene delatnosti',author:'Zlatko Ćirić',title:'Test 1',qs:[
+ {t:'mc',q:'Pripravnik je lice koje:',o:['prvi put zasniva radni odnos u svojoj struci i osposobljava se za samostalan rad','radi bez ugovora o radu','ima više od godinu dana radnog staža u struci','radi isključivo kao volonter'],a:0},
+ {t:'mc',q:'Pripravnički staž na radnim mestima sa srednjim obrazovanjem traje:',o:['tri meseca','šest meseci','devet meseci','jednu godinu'],a:1},
+ {t:'mc',q:'Puno radno vreme iznosi:',o:['36 časova nedeljno','38 časova nedeljno','40 časova nedeljno','42 časa nedeljno'],a:2},
+ {t:'mc',q:'Radom noću smatra se rad koji se obavlja u vremenu:',o:['od 20 do 04 časa','od 22 do 06 časova','od 23 do 07 časova','od 24 do 08 časova'],a:1},
+ {t:'mc',q:'Zaposleni u svakoj kalendarskoj godini ima pravo na godišnji odmor od najmanje:',o:['18 radnih dana','20 radnih dana','22 radna dana','25 radnih dana'],a:1},
+ {t:'fill',q:'Pripravnik zasniva radni odnos na ___ vreme, posle sprovedenog javnog ___.',a:[['određeno'],['konkursa','konkurs']]},
+ {t:'fill',q:'Prekovremeni rad ne može da traje duže od ___ časova nedeljno, a zaposleni ne može da radi duže od ___ časova dnevno.',a:[['8','osam'],['12','dvanaest']]},
+ {t:'fill',q:'Zaposleni koji radi najmanje šest časova dnevno ima pravo na odmor u toku dnevnog rada od najmanje ___ minuta.',a:[['30','trideset']]},
+ {t:'fill',q:'Disciplinski postupak pokreće se pismenim ___, na koji žalba nije dopuštena.',a:[['zaključkom','zaključak']]},
+ {t:'fill',q:'Zaposleni pristupa sindikatu potpisivanjem ___.',a:[['pristupnice','pristupnica']]},
+ {t:'tf',q:'Vreme provedeno u radnom odnosu kod drugog poslodavca uračunava se u pripravnički staž.',a:false,e:'To vreme se ne uračunava u pripravnički staž.'},
+ {t:'tf',q:'Nedeljni odmor traje najmanje 24 časa neprekidno i po pravilu se koristi nedeljom.',a:true},
+ {t:'tf',q:'Zaposleni može da se odrekne prava na godišnji odmor.',a:false,e:'Ne može da se odrekne tog prava, niti mu se ono može uskratiti.'},
+ {t:'tf',q:'Zabranjena je i neposredna i posredna diskriminacija lica koja traže zaposlenje i zaposlenih.',a:true},
+ {t:'tf',q:'Radna nedelja po pravilu traje pet radnih dana, a radni dan osam časova.',a:true}
+]},
+{id:'rad-2',lesson:'Organizacija zdravstvene delatnosti',author:'Zlatko Ćirić',title:'Test 2',qs:[
+ {t:'mc',q:'Pripravnički staž na radnim mestima sa visokim obrazovanjem drugog stepena (najmanje četiri godine studija) traje:',o:['šest meseci','devet meseci','jednu godinu','dve godine'],a:2},
+ {t:'mc',q:'Disciplinsku komisiju koju može da osnuje rukovodilac čini:',o:['dva člana','tri člana','pet članova','sedam članova'],a:1},
+ {t:'mc',q:'Državni službenik može da podnese pismeni otkaz najmanje:',o:['8 dana pre dana prestanka radnog odnosa','15 dana pre dana prestanka radnog odnosa','30 dana pre dana prestanka radnog odnosa','60 dana pre dana prestanka radnog odnosa'],a:1},
+ {t:'mc',q:'Zaposleni koji radi duže od četiri, a kraće od šest časova dnevno ima pravo na odmor od najmanje:',o:['10 minuta','15 minuta','30 minuta','45 minuta'],a:1},
+ {t:'mc',q:'Plaćeno odsustvo zbog smrti člana uže porodice traje:',o:['dva radna dana','tri radna dana','pet radnih dana','sedam radnih dana'],a:2},
+ {t:'fill',q:'Stručno osposobljavanje u državnim organima obavlja se pod neposrednim nadzorom ___.',a:[['mentora','mentor']]},
+ {t:'fill',q:'Kadrovski plan donosi se u roku od ___ dana od dana donošenja zakona o ___.',a:[['30','trideset'],['budžetu','budžet']]},
+ {t:'fill',q:'Puno radno vreme za zaposlene mlađe od 18 godina ne može biti duže od ___ časova nedeljno.',a:[['35']]},
+ {t:'fill',q:'Zaposleni ima pravo na dnevni odmor od najmanje ___ časova neprekidno u okviru 24 časa.',a:[['12','dvanaest']]},
+ {t:'fill',q:'Zaposlenima se garantuje jednaka ___ za isti rad ili rad iste vrednosti.',a:[['zarada','zaradu','plata']]},
+ {t:'tf',q:'Državnom službeniku na položaju radni odnos može da prestane pismenim sporazumom.',a:false,e:'Državnom službeniku na položaju radni odnos ne može da prestane pismenim sporazumom.'},
+ {t:'tf',q:'Poslodavac može od kandidata da zahteva podatke o bračnom statusu i planiranju porodice.',a:false,e:'Ne može da zahteva podatke o porodičnom, odnosno bračnom statusu i planiranju porodice.'},
+ {t:'tf',q:'Vreme odmora u toku dnevnog rada uračunava se u radno vreme.',a:true},
+ {t:'tf',q:'Sloboda sindikalnog organizovanja i delovanja jamči se bez odobrenja, uz upis u registar.',a:true},
+ {t:'tf',q:'Radno vreme se skraćuje na poslovima sa povećanim rizikom.',a:true}
+]},
+{id:'rad-3',lesson:'Organizacija zdravstvene delatnosti',author:'Zlatko Ćirić',title:'Test 3',qs:[
+ {t:'mc',q:'Pripravnički staž na radnim mestima sa visokim obrazovanjem prvog stepena (studije do tri godine) traje:',o:['šest meseci','devet meseci','jednu godinu','osamnaest meseci'],a:1},
+ {t:'mc',q:'Kadrovski plan za organe državne uprave i službe Vlade donosi:',o:['Narodna skupština','Vlada','Ministarstvo finansija','rukovodilac organa'],a:1},
+ {t:'mc',q:'Opštim aktom može se utvrditi radno vreme kraće od 40 časova nedeljno, ali ne kraće od:',o:['30 časova','35 časova','36 časova','38 časova'],a:2},
+ {t:'mc',q:'Skraćeno radno vreme skraćuje se srazmerno štetnom dejstvu, a najviše:',o:['5 časova nedeljno','8 časova nedeljno','10 časova nedeljno','12 časova nedeljno'],a:2},
+ {t:'mc',q:'Za svaki slučaj dobrovoljnog davanja krvi zaposleni ima pravo na plaćeno odsustvo od:',o:['jednog dana','dva uzastopna dana','tri uzastopna dana','pet radnih dana'],a:1},
+ {t:'fill',q:'Disciplinski postupak pokreće ___, na sopstvenu inicijativu ili na predlog pretpostavljenog.',a:[['rukovodilac']]},
+ {t:'fill',q:'Zaposleni stiče pravo na korišćenje godišnjeg odmora posle ___ dana neprekidnog rada kod poslodavca.',a:[['mesec','30','mesec dana','trideset']]},
+ {t:'fill',q:'O promeni rasporeda radnog vremena poslodavac obaveštava zaposlenog najmanje ___ dana ranije, a izuzetno ne kraće od ___ časova unapred.',a:[['5','pet'],['48']]},
+ {t:'fill',q:'Za vreme udaljenja sa rada zaposlenom pripada naknada zarade u visini jedne ___, a ako izdržava porodicu jedne ___ osnovne zarade.',a:[['četvrtine','četvrtina','1/4'],['trećine','trećina','1/3']]},
+ {t:'fill',q:'Zaposleni ostvaruje prava i obaveze iz radnog odnosa danom ___ na rad.',a:[['stupanja','stupanje']]},
+ {t:'tf',q:'Disciplinska rasprava može da se održi bez prisustva državnog službenika ako postoje važni razlozi, a on je uredno pozvan.',a:true},
+ {t:'tf',q:'Pravo na udruživanje je jedno od osnovnih kolektivnih prava zaposlenih.',a:true},
+ {t:'tf',q:'Zaposleni koji radi najmanje deset časova dnevno ima pravo na odmor od najmanje 30 minuta.',a:false,e:'Ima pravo na odmor od najmanje 45 minuta.'},
+ {t:'tf',q:'Poslodavac može bez ograničenja da uslovljava zasnivanje radnog odnosa testom trudnoće.',a:false,e:'Ne može, osim kod poslova sa znatnim rizikom za zdravlje žene i deteta koji je utvrdio nadležni zdravstveni organ.'},
+ {t:'tf',q:'Pri utvrđivanju dužine godišnjeg odmora radna nedelja se računa kao pet radnih dana.',a:true}
+]},
+{id:'rad-4',lesson:'Organizacija zdravstvene delatnosti',author:'Zlatko Ćirić',title:'Test 4',qs:[
+ {t:'mc',q:'Koji od navedenih NIJE način prestanka radnog odnosa državnog službenika?',o:['sporazumom','otkazom','po sili zakona','odlukom sindikata'],a:3,e:'Načini: protekom vremena, sporazumom, otkazom, po sili zakona i na drugi način određen zakonom.'},
+ {t:'mc',q:'Koja kategorija zaposlenih NEMA pravo na posebnu zaštitu prema navedenom?',o:['zaposlena žena za vreme trudnoće i porođaja','zaposleni mlađi od 18 godina','zaposleni invalid','zaposleni stariji od 50 godina'],a:3},
+ {t:'mc',q:'Šta od navedenog je individualno pravo zaposlenog?',o:['pravo na odgovarajuću zaradu','pravo na udruživanje','pravo na učešće u pregovorima za kolektivni ugovor','pravo na mirno rešavanje kolektivnih sporova'],a:0},
+ {t:'mc',q:'Zaposleni može da radi noću duže od jedne radne nedelje:',o:['nikada','samo uz njegovu pismenu saglasnost','po odluci poslodavca','uz saglasnost sindikata'],a:1},
+ {t:'mc',q:'Zaposleni ima pravo na dvanaestinu godišnjeg odmora za svaki mesec rada:',o:['u godini u kojoj je zasnovao ili u kojoj mu prestaje radni odnos','samo ako radi u smenama','samo na pripravničkom stažu','samo u prve tri godine rada'],a:0},
+ {t:'fill',q:'Pripravniku koji iz opravdanih razloga odsustvuje s rada duže od ___ meseca produžava se pripravnički staž.',a:[['jednog','1','jedan','mesec']]},
+ {t:'fill',q:'Prava i obaveze korisnika stručnog osposobljavanja i državnog organa uređuju se ___ o stručnom osposobljavanju.',a:[['ugovorom','ugovor']]},
+ {t:'fill',q:'Nepuno radno vreme je radno vreme ___ od punog radnog vremena.',a:[['kraće','krace']]},
+ {t:'fill',q:'Plaćeno odsustvo zbog sklapanja braka, porođaja supruge ili teže bolesti člana uže porodice traje ukupno do ___ radnih dana godišnje.',a:[['5','pet']]},
+ {t:'fill',q:'Tehničko-prostorni uslovi za rad sindikata utvrđuju se ___ ugovorom ili sporazumom poslodavca i sindikata.',a:[['kolektivnim','kolektivni']]},
+ {t:'tf',q:'Po okončanju stručnog osposobljavanja mentor dostavlja rukovodiocu izveštaj o rezultatima i uspehu.',a:true},
+ {t:'tf',q:'Zaposleni je dužan da obavesti poslodavca o svakoj vrsti potencijalne opasnosti za život i zdravlje.',a:true},
+ {t:'tf',q:'Godišnji odmor može se u svakom trenutku zameniti novčanom naknadom.',a:false,e:'Može samo u slučaju prestanka radnog odnosa.'},
+ {t:'tf',q:'Odmor u toku dnevnog rada može da se koristi na početku ili na kraju radnog vremena.',a:false,e:'Ne može da se koristi na početku i na kraju radnog vremena.'},
+ {t:'tf',q:'Pre uvođenja noćnog rada poslodavac je dužan da zatraži mišljenje sindikata.',a:true}
+]},
+{id:'rad-5',lesson:'Organizacija zdravstvene delatnosti',author:'Zlatko Ćirić',title:'Test 5',qs:[
+ {t:'mc',q:'Šta NIJE uslov da pripravnik nastavi rad na neodređeno vreme?',o:['položen državni ispit','postojanje odgovarajućeg radnog mesta','uklapanje u kadrovski plan','saglasnost sindikata'],a:3},
+ {t:'mc',q:'Poslodavac može da uslovi zasnivanje radnog odnosa testom trudnoće:',o:['uvek','nikada','samo kod poslova sa znatnim rizikom za zdravlje žene i deteta','samo uz saglasnost sindikata'],a:2},
+ {t:'mc',q:'Rad jednake vrednosti je rad za koji se zahteva:',o:['isti stepen stručne spreme, uz jednak radni doprinos i jednaku odgovornost','isto radno vreme','isti radni staž','ista starosna dob'],a:0},
+ {t:'mc',q:'Zaposleni može da bude privremeno udaljen sa rada ako je:',o:['zatražio godišnji odmor','protiv njega započeto krivično gonjenje zbog dela učinjenog na radu ili u vezi s radom','pristupio sindikatu','radio prekovremeno'],a:1},
+ {t:'mc',q:'Ko od navedenih NIJE član uže porodice?',o:['bračni drug','braća i sestre','usvojilac','ujak'],a:3,e:'Članovi uže porodice: bračni drug, deca, braća, sestre, roditelji, usvojilac, usvojenik, staratelj.'},
+ {t:'fill',q:'Zaštitu uživa zaposleni koji radi noću najmanje ___ časa svakog radnog dana ili trećinu punog radnog vremena u toku nedelje.',a:[['tri','3']]},
+ {t:'fill',q:'Zakonski minimum godišnjeg odmora uvećava se po osnovu doprinosa na radu, uslova rada, radnog ___ i stručne ___.',a:[['iskustva','iskustvo'],['spreme','sprema']]},
+ {t:'fill',q:'Poslodavac je dužan da zaposlenom za obavljeni rad isplati ___.',a:[['zaradu','zarada','platu']]},
+ {t:'fill',q:'Prekovremeni rad je rad duži od ___ radnog vremena.',a:[['punog','puno']]},
+ {t:'fill',q:'Ako zaposleni ne stupi na rad danom utvrđenim ugovorom o radu, smatra se da nije ___ radni odnos.',a:[['zasnovao']]},
+ {t:'tf',q:'Pravo na zaštitu ličnog integriteta odnosi se i na telesni i na moralni integritet.',a:true},
+ {t:'tf',q:'Naknadu zarade za vreme udaljenja sa rada obezbeđuje i isplaćuje poslodavac.',a:true},
+ {t:'tf',q:'Zaposleni sa skraćenim radnim vremenom ima manja prava iz radnog odnosa.',a:false,e:'Ima sva prava kao da radi sa punim radnim vremenom.'},
+ {t:'tf',q:'Praznici koji su neradni dani uračunavaju se u dane godišnjeg odmora.',a:false,e:'Ne uračunavaju se, kao ni odsustvo uz naknadu zarade i privremena sprečenost za rad.'},
+ {t:'tf',q:'Poslodavac je dužan da sindikatu omogući pristup podacima neophodnim za sindikalne aktivnosti.',a:true}
+]},
+{id:'rad-6',lesson:'Organizacija zdravstvene delatnosti',author:'Zlatko Ćirić',title:'Test 6',qs:[
+ {t:'mc',q:'Disciplinski postupak vodi i o disciplinskoj odgovornosti odlučuje:',o:['rukovodilac, ili disciplinska komisija koju on osnuje','sindikat','mentor','Agencija za borbu protiv korupcije'],a:0},
+ {t:'mc',q:'Posle preporuke za razrešenje koju izrekne Agencija za borbu protiv korupcije, službeniku na položaju radni odnos prestaje:',o:['danom objavljivanja preporuke','danom konačnosti rešenja nadležnog organa','istekom 15 dana','istekom kalendarske godine'],a:1},
+ {t:'mc',q:'Šta kadrovski plan NE sadrži?',o:['broj državnih službenika prema radnim mestima','broj pripravnika čiji se prijem planira','broj službenika na određeno vreme zbog povećanja obima posla','visinu zarada državnih službenika'],a:3},
+ {t:'mc',q:'Raspored radnog vremena u okviru radne nedelje utvrđuje:',o:['zaposleni','poslodavac','sindikat','inspekcija rada'],a:1},
+ {t:'mc',q:'Odluka poslodavca koja odstupa od principa jednake zarade za isti rad je:',o:['dozvoljena uz saglasnost zaposlenog','ništava','važeća godinu dana','važeća uz saglasnost sindikata'],a:1,e:'Takva odluka je ništava, a zaposleni ima i pravo na naknadu štete.'},
+ {t:'fill',q:'Kod rada u smenama zaposleni ne sme da radi neprekidno više od jedne radne ___ noću.',a:[['nedelje','nedelja']]},
+ {t:'fill',q:'Zaposleni koji radi u smislu člana 57. Zakona o radu ima pravo na dnevni odmor od najmanje ___ časova.',a:[['11','jedanaest']]},
+ {t:'fill',q:'Ako zaposleni radi na dan nedeljnog odmora, poslodavac mu obezbeđuje odmor od najmanje 24 časa u toku ___ nedelje.',a:[['naredne','sledeće','naredna']]},
+ {t:'fill',q:'Zaposleni je dužan da savesno i ___ obavlja poslove na kojima radi.',a:[['odgovorno']]},
+ {t:'fill',q:'Sindikat se osniva u skladu sa opštim aktom sindikata i upisuje se u ___.',a:[['registar']]},
+ {t:'tf',q:'Na disciplinskoj raspravi državni službenik može da se brani sam ili preko zastupnika, a može da dostavi i pismenu odbranu.',a:true},
+ {t:'tf',q:'Pravo na materijalno obezbeđenje za vreme privremene nezaposlenosti je individualno pravo zaposlenog.',a:true},
+ {t:'tf',q:'Prekovremeni rad uvodi se u slučaju više sile ili iznenadnog povećanja obima posla.',a:true},
+ {t:'tf',q:'Poslodavac može da traži da kandidat unapred potpiše izjavu o otkazu ugovora o radu.',a:false,e:'Ne može uslovljavati zasnivanje radnog odnosa prethodnim davanjem izjave o otkazu.'},
+ {t:'tf',q:'Kod poslodavca bez sindikata mišljenje se traži od predstavnika koga odrede zaposleni.',a:true}
+]},
+{id:'rad-7',lesson:'Organizacija zdravstvene delatnosti',author:'Zlatko Ćirić',title:'Test 7',qs:[
+ {t:'mc',q:'Šta od navedenog je kolektivno pravo zaposlenih?',o:['pravo na konsultovanje, informisanje i izražavanje stavova o bitnim pitanjima u oblasti rada','pravo na odgovarajuću zaradu','pravo na zdravstvenu zaštitu','pravo na bezbednost i zdravlje na radu'],a:0},
+ {t:'mc',q:'U odnosu na šta diskriminacija NIJE izričito navedena kao zabranjena?',o:['uslove za zapošljavanje i izbor kandidata','napredovanje na poslu','otkaz ugovora o radu','izbor sindikalnog predstavnika'],a:3,e:'Navedeno je: zapošljavanje, uslovi rada i prava iz radnog odnosa, obrazovanje i usavršavanje, napredovanje, otkaz ugovora o radu.'},
+ {t:'mc',q:'Skraćeno radno vreme utvrđuje se na osnovu:',o:['zahteva zaposlenog','stručne analize','odluke sindikata','dužine radnog staža'],a:1},
+ {t:'mc',q:'Kada je rad organizovan u smenama, radno vreme se utvrđuje kao:',o:['prosečno nedeljno radno vreme na mesečnom nivou','isto svake nedelje','dnevno radno vreme po izboru zaposlenog','godišnji fond časova'],a:0},
+ {t:'mc',q:'Ako je zaposleni tokom godišnjeg odmora privremeno sprečen za rad:',o:['gubi preostale dane odmora','po isteku sprečenosti nastavlja korišćenje godišnjeg odmora','odmor mu se zamenjuje novčanom naknadom','mora da se vrati na posao'],a:1},
+ {t:'fill',q:'Kandidat je dužan da poslodavcu dostavi ___ i druge dokaze o ispunjenosti uslova za rad.',a:[['isprave','isprava']]},
+ {t:'fill',q:'Poslodavac je dužan da obezbedi uslove rada radi bezbednosti i zaštite života i ___ na radu.',a:[['zdravlja','zdravlje']]},
+ {t:'fill',q:'Sindikat ima pravo da bude obavešten o ekonomskim i radno-___ pitanjima od značaja za položaj zaposlenih.',a:[['socijalnim','socijalna']]},
+ {t:'fill',q:'Nepuno radno vreme za maloletna lica traje kraće od ___ časova nedeljno.',a:[['35']]},
+ {t:'fill',q:'Plaćeno odsustvo je odsustvo sa rada uz ___ zarade.',a:[['naknadu','naknada']]},
+ {t:'tf',q:'Izuzetno, pripravnik može biti i lice koje je kod drugog poslodavca radilo kraće od vremena utvrđenog za pripravnički staž.',a:true},
+ {t:'tf',q:'Pre zaključivanja ugovora o radu poslodavac je dužan da kandidata obavesti o poslu, uslovima rada, pravima i obavezama.',a:true},
+ {t:'tf',q:'Zajednička obaveza poslodavca i zaposlenog je da se pridržavaju prava i obaveza utvrđenih zakonom.',a:true},
+ {t:'tf',q:'Vreme privremene sprečenosti za rad ne smatra se neprekidnim radom za sticanje prava na godišnji odmor.',a:false,e:'Pod neprekidnim radom smatra se i vreme privremene sprečenosti za rad i odsustva uz naknadu zarade.'},
+ {t:'tf',q:'Diskriminacija na osnovu članstva u sindikatu je dozvoljena.',a:false,e:'Članstvo u sindikatima je jedan od navedenih osnova po kojima je diskriminacija zabranjena.'}
+]},
+{id:'upr-1',lesson:'Upravljanje',author:'Zlatko Ćirić',title:'Test 1',qs:[
+ {t:'mc',q:'Obaveznim zdravstvenim osiguranjem obezbeđuju se:',o:['pravo na zdravstvenu zaštitu i pravo na novčane naknade','samo pravo na lekove','samo pravo na bolničko lečenje','pravo na dobrovoljno osiguranje'],a:0},
+ {t:'mc',q:'Rok za prigovor zbog neispunjenja obaveze iz upravnog ugovora je:',o:['15 dana','30 dana','tri meseca','šest meseci'],a:3},
+ {t:'mc',q:'Žalba je uvek isključena protiv rešenja:',o:['prvostepenog organa','Vlade','ministarstva','zdravstvene inspekcije'],a:1},
+ {t:'mc',q:'Predmet je:',o:['skup svih podnesaka, akata i priloga koji se odnose na isto pitanje ili zadatak','svaki zahtev kojim se stranka obraća organu','skup više dosijea u istom omotu','fizički predmet priložen uz akt'],a:0},
+ {t:'mc',q:'Prečnik državnog pečata je:',o:['30 mm','40 mm','60 mm','80 mm'],a:2},
+ {t:'fill',q:'Obavezno zdravstveno osiguranje obezbeđuje se i sprovodi u Republičkom ___ za zdravstveno osiguranje.',a:[['zavodu','zavod','fondu']]},
+ {t:'fill',q:'Sredstva za obavezno zdravstveno osiguranje obezbeđuju se uplatom ___.',a:[['doprinosa','doprinos','doprinosi']]},
+ {t:'fill',q:'Dosije je skup više ___ koji se odnose na istu materiju ili isto lice.',a:[['predmeta','predmet','predmeti']]},
+ {t:'fill',q:'Načelo ___ znači da se postupak vodi bez odugovlačenja i sa što manje troškova.',a:[['ekonomičnosti','ekonomičnost']]},
+ {t:'fill',q:'U sredini državnog pečata je veliki ___ Republike Srbije.',a:[['grb']]},
+ {t:'tf',q:'Prigovor se izjavljuje rukovodiocu organa na čije se postupanje odnosi.',a:true},
+ {t:'tf',q:'Stranka ima pravo na žalbu i kada rešenje nije izdato u zakonom određenom roku (ćutanje administracije).',a:true},
+ {t:'tf',q:'Akt je fizički predmet koji se prilaže radi dokazivanja.',a:false,e:'To je prilog. Akt je pisani sastav kojim se pokreće, dopunjuje, menja, prekida ili završava službena radnja.'},
+ {t:'tf',q:'Državni pečat je četvrtastog oblika.',a:false,e:'Državni pečat je okruglog oblika.'},
+ {t:'tf',q:'Po načelu jednoobraznosti poslovi se obavljaju po utvrđenim i propisanim pravilima poznatim svim učesnicima.',a:true}
+]},
+{id:'upr-2',lesson:'Upravljanje',author:'Zlatko Ćirić',title:'Test 2',qs:[
+ {t:'mc',q:'Obavezno zdravstveno osiguranje obuhvata osiguranje za slučaj:',o:['bolesti i povrede van rada i povrede na radu ili profesionalne bolesti','samo bolesti','samo povrede na radu','nezaposlenosti'],a:0},
+ {t:'mc',q:'Rok za prigovor zbog preduzimanja upravne radnje je:',o:['8 dana','15 dana','30 dana','šest meseci'],a:1},
+ {t:'mc',q:'Podnesak je:',o:['svaki zahtev, predlog, prijava, molba, žalba ili prigovor kojim se stranke obraćaju organima','pisani sastav kojim organ završava službenu radnju','skup više predmeta','dokumentarni materijal od značaja za istoriju'],a:0},
+ {t:'mc',q:'Načelo tačnosti znači da organi:',o:['rade sa što manje troškova','deluju na osnovu pravilno i potpuno utvrđenih činjenica i okolnosti','rade brzo','koriste standardne obrasce'],a:1},
+ {t:'mc',q:'Fascikla je:',o:['skup više predmeta ili dosijea koji se posle završenog postupka čuvaju u istom omotu','svaki pisani sastav organa','skup priloga uz jedan akt','organizaciona jedinica za prijem podnesaka'],a:0},
+ {t:'fill',q:'Pravo na prigovor nastaje zbog neispunjenja obaveza iz upravnog ___, zbog upravne ___ i zbog načina pružanja javnih usluga.',a:[['ugovora','ugovor'],['radnje','radnja']]},
+ {t:'fill',q:'Stranka ima pravo na žalbu protiv rešenja ___ organa.',a:[['prvostepenog','prvostepeni']]},
+ {t:'fill',q:'Akt je pisani sastav kojim se pokreće, dopunjuje, menja, prekida ili ___ službena radnja.',a:[['završava','zavrsava','okončava']]},
+ {t:'fill',q:'Načelo ___ podrazumeva rad sa što većom uštedom u vremenu i materijalu.',a:[['racionalnosti','racionalnost']]},
+ {t:'fill',q:'Na državnom pečatu reč „REPUBLIKA” ispisuje se ___ grba, a reč „SRBIJA” ___ grba.',a:[['iznad'],['ispod']]},
+ {t:'tf',q:'Prigovor može da se izjavi i kada postoji drugo pravno sredstvo u upravnom postupku.',a:false,e:'Prigovor se izjavljuje ako ne može da se izjavi drugo pravno sredstvo.'},
+ {t:'tf',q:'Nadležnost za odlučivanje o žalbi uređuje Zakon o opštem upravnom postupku.',a:false,e:'To se uređuje zakonima u određenim upravnim oblastima.'},
+ {t:'tf',q:'Arhivska građa je dokumentarni materijal od posebnog značaja za istoriju, kulturu i druge potrebe.',a:true},
+ {t:'tf',q:'Prijemna kancelarija informiše stranke i pruža im stručnu pomoć pri sastavljanju podnesaka.',a:true},
+ {t:'tf',q:'Načelo ekspeditivnosti znači blagovremeno ostvarivanje svih elemenata kancelarijskog poslovanja.',a:true}
+]},
+{id:'upr-3',lesson:'Upravljanje',author:'Zlatko Ćirić',title:'Test 3',qs:[
+ {t:'mc',q:'O prigovoru odlučuje:',o:['rukovodilac organa na čije se postupanje prigovor odnosi','Vlada','upravni sud','zdravstvena inspekcija'],a:0},
+ {t:'mc',q:'Stranka NEMA pravo na žalbu zbog neizdavanja rešenja u roku ako je:',o:['zahtev podnela pismeno','posebnim zakonom predviđeno da se neizdavanje rešenja smatra usvajanjem zahteva','prošlo više od 15 dana','rešenje doneo prvostepeni organ'],a:1},
+ {t:'mc',q:'Šta od navedenog NIJE načelo kancelarijskog poslovanja?',o:['tačnost','ekspeditivnost','racionalnost','tajnost'],a:3,e:'Načela: tačnost, ekspeditivnost, jednostavnost i preglednost, jednoobraznost, ekonomičnost, racionalnost.'},
+ {t:'mc',q:'Prilog je:',o:['pisani sastav ili fizički predmet koji se prilaže uz akt radi dopunjavanja, objašnjenja ili dokazivanja','svaki zahtev stranke','skup više predmeta','rešenje organa'],a:0},
+ {t:'mc',q:'Registraturski materijal čine:',o:['samo dokumenti stariji od 30 godina','predmeti, akti, snimci, zapisi, knjige i kartoteke primljeni i nastali u radu organa','samo podnesci stranaka','samo državni pečati'],a:1},
+ {t:'fill',q:'Prigovor se može izjaviti u roku od 15 dana kada se javna ___ ne pruža uredno i kvalitetno.',a:[['usluga','usluge']]},
+ {t:'fill',q:'Zadatak kancelarijskog poslovanja je da obezbedi proces planiranja, ___, praćenja i ___ stručnih radnji.',a:[['koordinacije','koordinacija'],['kontrole','kontrola']]},
+ {t:'fill',q:'Poslovi administracije moraju se obavljati ___ i pregledno.',a:[['jednostavno']]},
+ {t:'fill',q:'Kancelarijsko poslovanje obuhvata raznovrsne ___ poslove.',a:[['administrativne','administrativni']]},
+ {t:'fill',q:'Vođenje evidencije putem automatske obrade podataka obuhvata i ___ obradu podataka.',a:[['statističku','statistička']]},
+ {t:'tf',q:'Rukovodilac koji odlučuje o prigovoru utvrđuje činjenično stanje i ispituje zakonitost i pravilnost postupanja organa.',a:true},
+ {t:'tf',q:'Vođenje evidencije o aktima i prijem i otpremanje pošte primeri su primene načela tačnosti.',a:true},
+ {t:'tf',q:'Dosije i predmet su isti pojam.',a:false,e:'Dosije je skup više predmeta koji se odnose na istu materiju ili isto lice.'},
+ {t:'tf',q:'Arhivskom građom smatra se samo materijal nastao u poslednjih deset godina.',a:false,e:'Arhivska građa je takav materijal bez obzira kada je nastao.'},
+ {t:'tf',q:'Neblagovremeno postupanje organa može dovesti do ćutanja administracije.',a:true}
+]},
+{id:'upr-4',lesson:'Upravljanje',author:'Zlatko Ćirić',title:'Test 4',qs:[
+ {t:'mc',q:'Obaveznim zdravstvenim osiguranjem obuhvaćeni su:',o:['zaposleni i drugi građani obuhvaćeni obaveznim zdravstvenim osiguranjem','samo zaposleni u državnim organima','samo penzioneri','samo korisnici privatnog osiguranja'],a:0},
+ {t:'mc',q:'Koji posao obavlja prijemna kancelarija?',o:['neposredni prijem podnesaka od stranaka','odlučivanje o žalbama','izrada državnog pečata','donošenje kadrovskog plana'],a:0},
+ {t:'mc',q:'Načelo racionalnosti ostvaruje se primenom:',o:['savremenih sredstava komunikacije i standardnih obrazaca','usmenih dogovora','dodatnih kontrola svakog akta','ručnog vođenja svih evidencija'],a:0},
+ {t:'mc',q:'U krugu oko grba na državnom pečatu ispisuje se:',o:['naziv organa','naziv Republike Srbije','datum izrade pečata','ime rukovodioca'],a:1},
+ {t:'mc',q:'Šta od navedenog NIJE posao vođenja evidencije putem automatske obrade podataka?',o:['formiranje i održavanje datoteka','izrada dnevnih izveštaja','dinamika primljenih i arhiviranih predmeta','odlučivanje o prigovoru'],a:3,e:'Lista: datoteke, rad sa strankama, dnevni i periodični izveštaji, dinamika primljenih i arhiviranih predmeta, statistička obrada podataka.'},
+ {t:'fill',q:'Obavezno zdravstveno osiguranje obuhvata i osiguranje za slučaj povrede na radu ili ___ bolesti.',a:[['profesionalne','profesionalna']]},
+ {t:'fill',q:'Ćutanje ___ je situacija kada rešenje nije izdato u zakonom određenom roku.',a:[['administracije','administracija']]},
+ {t:'fill',q:'Jedno od načela kancelarijskog poslovanja je načelo jednostavnosti i ___.',a:[['preglednosti','preglednost']]},
+ {t:'fill',q:'Arhivska građa je izvorni i reprodukovani ___ materijal od posebnog značaja.',a:[['dokumentarni']]},
+ {t:'fill',q:'Prijemna kancelarija obaveštava stranke o stanju ___ njihovih zahteva i drugih podnesaka.',a:[['rešavanja','rešavanje']]},
+ {t:'tf',q:'Ekspeditivnost obezbeđuje uspešno i kvalitetno ostvarivanje i zaštitu prava i pravnih interesa stranaka.',a:true},
+ {t:'tf',q:'Prilog može biti tabela, grafikon ili crtež.',a:true},
+ {t:'tf',q:'Sredstva za obavezno zdravstveno osiguranje obezbeđuju se isključivo iz budžeta.',a:false,e:'Obezbeđuju se uplatom doprinosa, kao i iz drugih izvora u skladu sa zakonom.'},
+ {t:'tf',q:'Pravilima kancelarijskog poslovanja utvrđuju se prava, ovlašćenja, dužnosti i odgovornosti učesnika.',a:true},
+ {t:'tf',q:'Protiv rešenja prvostepenog organa žalba nikada nije dozvoljena.',a:false,e:'Stranka ima pravo na žalbu protiv rešenja prvostepenog organa, ako žalba nije zakonom isključena.'}
+]},
+{id:'osn-1',lesson:'Osnovni principi organizacije zdravstvene službe',author:'dr med. Miloš Potkrajac',title:'Test 1',qs:[
+ {t:'mc',q:'Samozaštita je:',o:['neprofesionalni, laički nivo zaštite koji se ostvaruje u porodici','prvi profesionalni nivo zaštite','zaštita koju pruža izabrani lekar','specijalistička zaštita u opštoj bolnici'],a:0},
+ {t:'mc',q:'Koliko slučajeva koji koriste hitan prijem je zaista hitno?',o:['5%','25%','45%','50%'],a:0,e:'5% je zaista hitno, 45% je urgentno, a 50% ni jedno ni drugo.'},
+ {t:'mc',q:'Glavnu kadrovsku komponentu primarne zdravstvene zaštite čini:',o:['doktor porodične medicine','opšti hirurg','patronažna sestra','farmaceut'],a:0},
+ {t:'mc',q:'Najstarija srpska bolnica osnovana je uz manastir Hilandar:',o:['1191. godine','1219. godine','1389. godine','1804. godine'],a:0},
+ {t:'mc',q:'Ko NE spada u „opšte specijaliste” sekundarnog nivoa?',o:['opšti hirurzi','internisti','ginekolozi','neurohirurzi'],a:3,e:'Neurohirurzi su subspecijalistički kadar tercijarnog nivoa.'},
+ {t:'fill',q:'Primarna zdravstvena zaštita je prvi ___ nivo zaštite i predstavlja prvi ___ pacijenta sa zdravstvenim radnikom.',a:[['profesionalni','profesionalan'],['kontakt']]},
+ {t:'fill',q:'Samozaštita obuhvata najčešće 1 do 2, a maksimalno ___ osoba.',a:[['10','deset']]},
+ {t:'fill',q:'Konferencija o primarnoj zdravstvenoj zaštiti održana je u Alma Ati ___ godine.',a:[['1978']]},
+ {t:'fill',q:'Prema vlasništvu, bolnice mogu biti društvene, državne, ___ i privatne.',a:[['karitativne','karitativna']]},
+ {t:'fill',q:'Kod nas bolnica mora imati najmanje ___ postelja.',a:[['10','deset']]},
+ {t:'tf',q:'Ne postoji nijedan najbolji mogući način za organizovanje zdravstvene zaštite i zdravstvene službe.',a:true},
+ {t:'tf',q:'Tercijarni nivo zaštite pokriva region sa populacijom od 500.000 do 5 miliona.',a:true},
+ {t:'tf',q:'Institucije primarne zdravstvene zaštite su bolničke ustanove.',a:false,e:'Institucije PZZ su vanbolničke zdravstvene ustanove.'},
+ {t:'tf',q:'Bolnice moraju da obezbeđuju i ambulantne usluge svojim pacijentima.',a:false,e:'Bolnice mogu, ali ne moraju obezbeđivati ambulantne usluge.'},
+ {t:'tf',q:'Većina evropskih naziva za bolnice potiče od latinske reči hospitium.',a:true}
+]},
+{id:'osn-2',lesson:'Osnovni principi organizacije zdravstvene službe',author:'dr med. Miloš Potkrajac',title:'Test 2',qs:[
+ {t:'mc',q:'Zdravstvena zaštita predstavlja kombinaciju:',o:['lične i kolektivne odgovornosti za zdravlje i javne (državne) odgovornosti','isključivo državne odgovornosti','isključivo lične odgovornosti pojedinca','odgovornosti privatnog sektora'],a:0},
+ {t:'mc',q:'Na osnovu čega se nivoi zdravstvene zaštite NE dele?',o:['veličine populacije koju nivo obezbeđuje','karakteristika oboljenja i stanja','organizacionih karakteristika','visine budžeta ustanove'],a:3},
+ {t:'mc',q:'Ko NIJE naveden kao član tima primarne zdravstvene zaštite?',o:['medicinska sestra','babica','socijalni radnik','anesteziolog'],a:3,e:'Tim: lekar, medicinska sestra, babica, patronažna sestra, socijalni radnik i fizioterapeut.'},
+ {t:'mc',q:'Karitativne bolnice osniva:',o:['država','lokalna zajednica','crkva ili filantropske organizacije','pojedinci ili grupe ljudi'],a:2},
+ {t:'mc',q:'Prema veličini, bolnice se dele na:',o:['lokalne (opštinske), intermedijarne i regionalne (nacionalne)','male, srednje i velike','gradske i seoske','opšte i specijalne'],a:0},
+ {t:'fill',q:'Hitna ili urgentna služba pruža usluge ___ obolelim ili povređenim pacijentima.',a:[['akutno']]},
+ {t:'fill',q:'Od slučajeva koji koriste hitan prijem, 45% je urgentno, a ___% nije ni hitno ni urgentno.',a:[['50']]},
+ {t:'fill',q:'U našem jeziku naziv bolnica potiče od slovenskog korena ___.',a:[['bol']]},
+ {t:'fill',q:'Organizacioni oblici institucija PZZ su ___ i individualna praksa.',a:[['grupna','grupni']]},
+ {t:'fill',q:'Neprofitne opšte bolnice čine „___” svakog sistema zdravstvene zaštite.',a:[['kičmu','kičma']]},
+ {t:'tf',q:'Zdravstvena služba pruža i preventivne i kurativne usluge.',a:true},
+ {t:'tf',q:'Vanbolničke ustanove razvile su se da bi se rasteretile bolnice i lečenje obavljalo u jeftinijim uslovima.',a:true},
+ {t:'tf',q:'Naziv bolnica se prvi put pominje u Hilandarskom tipiku Svetog Save.',a:true},
+ {t:'tf',q:'Hitna služba može da se koristi samo uz uput.',a:false,e:'Koristi se i kao jednostavan ulaz u bolnicu (bez uputa), čak i za stanja koja nisu hitna.'},
+ {t:'tf',q:'Sa veličinom bolnice raste međusobno otuđenje i nezadovoljstvo zaposlenih.',a:true}
+]},
+{id:'osn-3',lesson:'Osnovni principi organizacije zdravstvene službe',author:'dr med. Miloš Potkrajac',title:'Test 3',qs:[
+ {t:'mc',q:'Definicija bolnice Komiteta eksperata SZO potiče iz:',o:['1940-ih','1960-ih','1978. godine','1990-ih'],a:1},
+ {t:'mc',q:'Društvene bolnice su one čiji je vlasnik:',o:['lokalna zajednica','država','crkva','pojedinac'],a:0,e:'Društvene bolnice su u većini sistema najbrojnije.'},
+ {t:'mc',q:'Poliklinička (ambulantna) služba:',o:['prati bolesnika posle hospitalizacije i može biti referalni nivo sa primarne zaštite','pruža samo hitnu pomoć na mestu nesreće','obavlja isključivo laboratorijske analize','postoji samo u privatnoj praksi'],a:0},
+ {t:'mc',q:'Do pre izvesnog vremena preporučivalo se da opšte bolnice imaju:',o:['100 do 200 postelja','400 do 600 postelja','800 do 1.000 postelja','više od 1.000 postelja'],a:1},
+ {t:'mc',q:'Šta NIJE navedeno kao mesto pružanja primarne zdravstvene zaštite?',o:['ordinacija','kuća obolelog','škola','klinički centar'],a:3,e:'Mesta su: ordinacija, kuća obolelog, škola, radno mesto.'},
+ {t:'fill',q:'Tercijarna zdravstvena zaštita je visoko specijalizovan ili ___ nivo.',a:[['subspecijalistički','subspecijalisticki']]},
+ {t:'fill',q:'Preteče bolnica u Evropi formiraju se prvo u hramovima antičke ___, a kasnije Rima.',a:[['Grčke','Grčka']]},
+ {t:'fill',q:'Zdravstvena služba je permanentan i širom zemlje raspoređen sistem uspostavljenih ___.',a:[['institucija','institucije']]},
+ {t:'fill',q:'Neprofitne opšte bolnice rešavaju oko dve ___ zahteva za bolničkim lečenjem.',a:[['trećine','trećina']]},
+ {t:'fill',q:'Prve vanbolničke institucije bila su ambulantno-___ odeljenja bolnica.',a:[['poliklinička','polikliničko']]},
+ {t:'tf',q:'Dom zdravlja obavlja patronažnu službu.',a:true},
+ {t:'tf',q:'Specijalizovane institucije tercijarnog nivoa istovremeno su i škole za zdravstvene kadrove.',a:true},
+ {t:'tf',q:'Resursi, finansiranje, organizacija, administracija, upravljanje i pružanje usluga su osnovne komponente sistema zdravstvene zaštite.',a:true},
+ {t:'tf',q:'Prema Američkom udruženju bolnica, minimalan broj postelja u bolnici je deset.',a:false,e:'Prema Američkom udruženju bolnica minimum je šest postelja, a kod nas deset.'},
+ {t:'tf',q:'Dom zdravlja ne obavlja dezinfekciju i dezinsekciju.',a:false,e:'Obavljanje dezinfekcije i dezinsekcije je jedan od zadataka doma zdravlja.'}
+]},
+{id:'jov-1',lesson:'Organizacija zdravstvene delatnosti: ustanove i sestrinski menadžment',author:'Ivana Jovčić',title:'Test 1',qs:[
+ {t:'mc',q:'Zdravstvenu ustanovu može osnovati:',o:['Republika, autonomna pokrajina, lokalna samouprava, pravno ili fizičko lice','samo Republika','samo Republika i autonomna pokrajina','samo lokalna samouprava'],a:0},
+ {t:'mc',q:'Zdravstvene ustanove u državnoj svojini osnivaju se u skladu sa:',o:['Planom mreže zdravstvenih ustanova','kadrovskim planom','statutom ustanove','odlukom nadzornog odbora'],a:0},
+ {t:'mc',q:'Na osnovu čega se Plan mreže NE utvrđuje?',o:['plana razvoja','zdravstvenog stanja stanovništva','ekonomskih mogućnosti Republike','broja privatnih ordinacija'],a:3},
+ {t:'mc',q:'Služba na primarnom nivou organizuje se sa najmanje:',o:['3 zaposlena','5 zaposlenih','10 zaposlenih','15 zaposlenih'],a:2},
+ {t:'mc',q:'U zdravstvenoj stanici obavlja se najmanje:',o:['hitna medicinska pomoć, opšta medicina i zdravstvena zaštita dece','samo opšta medicina','stomatologija i laboratorija','samo patronaža'],a:0},
+ {t:'fill',q:'Po teritorijalnom principu obrazuju se ogranak, zdravstvena ___ i zdravstvena ___.',a:[['stanica'],['ambulanta']],unordered:true},
+ {t:'fill',q:'Na primarnom nivou odeljenje ima najmanje ___, a odsek najmanje ___ zaposlena.',a:[['5','pet'],['3','tri']]},
+ {t:'fill',q:'Sistem zdravstva organizovan je u ___ nivoa.',a:[['tri','3']]},
+ {t:'fill',q:'U zdravstvenoj ambulanti obavlja se najmanje delatnost ___ medicine.',a:[['opšte','opšta']]},
+ {t:'fill',q:'Apoteka obavlja ___ zdravstvenu delatnost na primarnom nivou.',a:[['farmaceutsku','farmaceutska']]},
+ {t:'tf',q:'Zdravstvene ustanove mogu se osnovati sredstvima u državnoj ili privatnoj svojini.',a:true},
+ {t:'tf',q:'Dom zdravlja može obrazovati službu za zdravstvenu zaštitu žena.',a:true},
+ {t:'tf',q:'U domu zdravlja obezbeđuje se i zdravstvena zaštita zaposlenih (medicina rada).',a:true},
+ {t:'tf',q:'Ogranak i zdravstvena stanica obrazuju se po funkcionalnom principu.',a:false,e:'To je teritorijalni princip; po funkcionalnom se obrazuju služba, odeljenje i odsek.'},
+ {t:'tf',q:'Apoteka izrađuje magistralne lekove.',a:true}
+]},
+{id:'jov-2',lesson:'Organizacija zdravstvene delatnosti: ustanove i sestrinski menadžment',author:'Ivana Jovčić',title:'Test 2',qs:[
+ {t:'mc',q:'Koji zavod NIJE naveden među zavodima na primarnom nivou?',o:['Zavod za zdravstvenu zaštitu studenata','Zavod za gerontologiju','Zavod za hitnu medicinsku pomoć','Zavod za transfuziju krvi'],a:3,e:'Zavod za transfuziju krvi obavlja delatnost na više nivoa.'},
+ {t:'mc',q:'Opšta bolnica mora imati specijalističko-konsultativnu i stacionarnu delatnost iz:',o:['interne medicine, pedijatrije, ginekologije i akušerstva i opšte hirurgije','interne medicine, neurologije i psihijatrije','hirurgije, ortopedije i urologije','pedijatrije, infektologije i dermatologije'],a:0},
+ {t:'mc',q:'Klinika se može osnovati:',o:['samo u sedištu univerziteta koji ima fakultet zdravstvene struke','u svakoj opštini','samo u sedištu upravnog okruga','samo u glavnom gradu'],a:0},
+ {t:'mc',q:'Klinički centar objedinjuje delatnost:',o:['najmanje dve klinike','tri ili više klinika','pet ili više klinika','jedne klinike i jedne bolnice'],a:1},
+ {t:'mc',q:'Preteče specijalnih bolnica bila su:',o:['samostalna porodilišta','domovi zdravlja','apoteke','zavodi za javno zdravlje'],a:0,e:'Najranije poznato je iz VII veka u Aleksandriji; slede leprozorijumi i bolnice za duševno obolele, tuberkulozu i venerične bolesti.'},
+ {t:'fill',q:'Opšta i specijalna bolnica moraju obezbediti sanitetski prevoz, snabdevanje krvlju i službu za patološku ___.',a:[['anatomiju','anatomija']]},
+ {t:'fill',q:'Specijalna bolnica osniva se za određene ___ ili određene grupe stanovnika.',a:[['bolesti','bolest']]},
+ {t:'fill',q:'Naziv klinika potiče od grčkog korena kline, što znači ___.',a:[['postelja','ležaj','krevet']]},
+ {t:'fill',q:'Klinički centar obavlja visokospecijalizovanu zdravstvenu, obrazovno-nastavnu i ___ delatnost.',a:[['naučnoistraživačku','naučno-istraživačku','naučnoistraživačka']]},
+ {t:'fill',q:'Na primarnom nivou osniva se i Zavod za plućne bolesti i ___.',a:[['TBC','tuberkulozu','tuberkuloza']]},
+ {t:'tf',q:'Opšta bolnica pruža zdravstvenu zaštitu licima svih uzrasta obolelim od raznih vrsta bolesti.',a:true},
+ {t:'tf',q:'Institut mora ispuniti i uslove iz zakona kojim se uređuje naučnoistraživačka delatnost.',a:true},
+ {t:'tf',q:'Kliničko-bolnički centar obavlja visokospecijalizovanu delatnost iz jedne ili više grana medicine.',a:true},
+ {t:'tf',q:'Klinika u državnoj svojini u čijem sedištu ne postoji opšta bolnica obavlja i delatnost opšte bolnice.',a:true},
+ {t:'tf',q:'Broj specijalnih bolnica za tuberkulozu i psihijatrijske poremećaje raste.',a:false,e:'Njihov broj se smanjuje, a raste potreba za bolnicama za oboljenja u starosti (gerijatrija, reumatologija, rehabilitacija).'}
+]},
+{id:'jov-3',lesson:'Organizacija zdravstvene delatnosti: ustanove i sestrinski menadžment',author:'Ivana Jovčić',title:'Test 3',qs:[
+ {t:'mc',q:'Zavod za javno zdravlje obavlja:',o:['socijalno-medicinsku, higijensko-epidemiološku i mikrobiološku delatnost','isključivo bolničko lečenje','samo farmaceutsku delatnost','samo hitnu medicinsku pomoć'],a:0},
+ {t:'mc',q:'Najvažniji princip zdravstvenog osiguranja je princip:',o:['solidarnosti','dobrovoljnosti','profitabilnosti','hijerarhije'],a:0},
+ {t:'mc',q:'U Bizmarkovom sistemu troškovi zdravstvene zaštite pokrivaju se preko:',o:['doprinosa','poreza','donacija','plaćanja iz džepa'],a:0,e:'Bizmarkov sistem: doprinosi; Beveridžov sistem: porezi.'},
+ {t:'mc',q:'Trajno su oslobođeni plaćanja participacije dobrovoljni davaoci koji su krv dali:',o:['najmanje jednom','5 i više puta','10 i više puta','20 i više puta'],a:2},
+ {t:'mc',q:'Šta NIJE osnovna medicinska dokumentacija?',o:['zdravstveni karton','protokol','otpusna lista sa epikrizom','kadrovski plan'],a:3},
+ {t:'fill',q:'Obavezno zdravstveno osiguranje pokriva ___ paket zdravstvenih usluga propisanih zakonom.',a:[['osnovni']]},
+ {t:'fill',q:'Jedino što osiguranici plaćaju, ako nisu oslobođeni, jeste ___.',a:[['participacija','participaciju']]},
+ {t:'fill',q:'Zahtev za refundaciju neosnovano naplaćene participacije podnosi se matičnoj ___.',a:[['filijali','filijala']]},
+ {t:'fill',q:'Davaoci koji su krv dali manje od deset puta oslobođeni su participacije ___ meseci posle svakog davanja.',a:[['12','dvanaest']]},
+ {t:'fill',q:'U osnovnu medicinsku dokumentaciju spada i temperaturno-terapijsko-___ lista.',a:[['dijetetska','dijetetski']]},
+ {t:'tf',q:'Zavod za javno zdravlje koordinira i stručno povezuje rad zdravstvenih ustanova iz Plana mreže.',a:true},
+ {t:'tf',q:'Dobrovoljno osiguranje zaključuju lica koja nisu obavezno osigurana, za osnovni ili dodatni paket usluga.',a:true},
+ {t:'tf',q:'Za svaku naplaćenu participaciju ustanova izdaje račun koji je propisao RFZO.',a:true},
+ {t:'tf',q:'Davaoci krvi oslobođeni su participacije i za lekove sa Liste lekova.',a:false,e:'Oslobođeni su za zdravstvene usluge, osim za lekove sa Liste lekova i za medicinsko-tehnička pomagala i implantate.'},
+ {t:'tf',q:'Zavod za sudsku medicinu spada u zavode koji obavljaju delatnost na više nivoa.',a:true}
+]},
+{id:'jov-4',lesson:'Organizacija zdravstvene delatnosti: ustanove i sestrinski menadžment',author:'Ivana Jovčić',title:'Test 4',qs:[
+ {t:'mc',q:'Na koliko ključnih elemenata ukazuju sve definicije liderstva?',o:['dva','tri','četiri','pet'],a:2},
+ {t:'mc',q:'Organizaciona moć obuhvata:',o:['moć nagrađivanja, moć prisile i legitimnu moć','ekspertsku i referentnu moć','samo legitimnu moć','moć znanja i moć iskustva'],a:0},
+ {t:'mc',q:'Stil rukovođenja sa strogom kontrolom, motivisanjem prinudom i upravljanjem komandama je:',o:['autoritativni','demokratski','princip „nemešanja”','stil usmeren ka ljudima'],a:0},
+ {t:'mc',q:'Stil rukovođenja usmeren na zadatak stavlja naglasak na:',o:['produktivnost','međuljudske odnose','popustljivost','status lidera'],a:0},
+ {t:'mc',q:'Rezolucija SZO koja inicira jačanje menadžerskih i liderskih sposobnosti sestara i babica je iz:',o:['1948. godine','1978. godine','1992. godine','2004. godine'],a:2},
+ {t:'fill',q:'Lična moć obuhvata ekspertsku i ___ moć.',a:[['referentnu','referentna']]},
+ {t:'fill',q:'U demokratskom stilu naglasak je na „___” pre nego na „ja” i „ti”.',a:[['mi']]},
+ {t:'fill',q:'Stil usmeren ka ljudima stavlja naglasak na međuljudske ___.',a:[['odnose','odnosi']]},
+ {t:'fill',q:'Princip „___” je popustljiv (blag) stil sa malo ili nimalo kontrole.',a:[['nemešanja','nemešanje']]},
+ {t:'fill',q:'Važne oblasti procesa menadžmenta su: mobilisanje, osposobljavanje, definisanje, ___ i komunikacija.',a:[['merenje']]},
+ {t:'tf',q:'Liderstvo podrazumeva druge ljude; bez njih su napori i kvaliteti lidera beznačajni.',a:true},
+ {t:'tf',q:'U autoritativnom stilu komunikacija opada, a kritičnost je kažnjiva.',a:true},
+ {t:'tf',q:'U demokratskom stilu donošenje odluka uključuje i ostale.',a:true},
+ {t:'tf',q:'Dominantnost nije navedena među osobinama koje bi lider trebalo da ima.',a:false,e:'Osobine: inteligencija, čestitost, nepristrasnost, odlučnost, sposobnost prosuđivanja, prijatnost, stručno znanje, zdravlje, sposobnost saradnje, samopouzdanje, dominantnost.'},
+ {t:'tf',q:'Lider koji primenjuje princip „nemešanja” ne kritikuje.',a:true}
+]},
+{id:'jov-5',lesson:'Organizacija zdravstvene delatnosti: ustanove i sestrinski menadžment',author:'Ivana Jovčić',title:'Test 5',qs:[
+ {t:'mc',q:'Model procesa zdravstvene nege kao model za donošenje odluka ima snagu jer ima:',o:['mehanizam povratnih informacija','strogu hijerarhiju','mali broj koraka','pisanu formu'],a:0},
+ {t:'mc',q:'Koliko stadijuma (faza) ima motivacija?',o:['tri','četiri','pet','šest'],a:2},
+ {t:'mc',q:'Proces motivacije kao niz počinje:',o:['nezadovoljenom potrebom','postignutim ciljem','smanjenom tenzijom','akcijom prema cilju'],a:0},
+ {t:'mc',q:'Šta NIJE korak najboljeg načina za motivisanje sestara?',o:['informisanje','profesionalni razvoj','adekvatne kritike i pohvale','smanjenje zarade'],a:3,e:'Koraci: informisanje, motivisanje, profesionalni razvoj, adekvatne kritike i pohvale.'},
+ {t:'mc',q:'Šta NIJE princip procesa odlučivanja?',o:['jasno definisati cilj ili problem','prikupiti informacije','smisliti dosta alternativa','odluku odlagati što duže'],a:3,e:'Principi: definisati cilj, prikupiti informacije, smisliti alternative, logično analizirati rešenja, odabrati i raditi odlučno, primeniti, pratiti i evaluirati.'},
+ {t:'fill',q:'Skraćenica PZN znači proces zdravstvene ___.',a:[['nege','nega']]},
+ {t:'fill',q:'Niz motivacije: nezadovoljena potreba → ___ → akcija prema cilju → postignuti cilj → zadovoljena potreba → smanjena tenzija.',a:[['tenzija']]},
+ {t:'fill',q:'Poslednji princip odlučivanja je: primeniti, pratiti i ___.',a:[['evaluirati','evaluacija']]},
+ {t:'fill',q:'Individualni ciljevi ne smeju biti u ___ sa ciljevima ustanove.',a:[['sukobu','sukob']]},
+ {t:'fill',q:'Jačina motivacije zavisi, između ostalog, od jasnoće ___ same organizacije.',a:[['cilja','cilj','ciljeva']]},
+ {t:'tf',q:'Sestre u svakodnevnom radu odlučuju o dobrobiti pacijenata, ponekad i o njihovom preživljavanju.',a:true},
+ {t:'tf',q:'Unutrašnja mobilizacija dolazi iz same osobe i navodi je da bude produktivna.',a:true},
+ {t:'tf',q:'Menadžer koristi pozitivne povratne informacije za nagrađivanje zaposlenih.',a:true},
+ {t:'tf',q:'Peta faza motivacije je napor da se cilj postigne.',a:false,e:'Napor da se cilj postigne je druga faza; peta je sagledavanje uslova uspeha ili neuspeha.'},
+ {t:'tf',q:'Sestra menadžer treba da opomene pre kazne i da kažnjava diskretno.',a:true}
+]},
+{id:'jov-6',lesson:'Organizacija zdravstvene delatnosti: ustanove i sestrinski menadžment',author:'Ivana Jovčić',title:'Test 6',qs:[
+ {t:'mc',q:'Faktori koji presudno utiču na organizacionu strukturu su:',o:['priroda posla, tehnologija, ljudi i kultura','budžet, zakon i tržište','broj postelja i broj lekara','starost i pol zaposlenih'],a:0},
+ {t:'mc',q:'Za efikasnu organizaciju sestrinskog rada neophodni su:',o:['podela rada, organizaciona struktura i koordinacija','kontrola, kazne i nagrade','centralizacija i hijerarhija','plan mreže i kadrovski plan'],a:0},
+ {t:'mc',q:'Šta NIJE navedeno kao vrsta organizacione strukture?',o:['linearna','matrična','ravna','kružna'],a:3,e:'Navedene su: linearna, matrična, ravna i ad hok struktura.'},
+ {t:'mc',q:'Sestra menadžer na centralnom nivou je:',o:['glavna sestra ustanove','glavna sestra odeljenja','sestra u smeni','patronažna sestra'],a:0},
+ {t:'mc',q:'Delegiranje je:',o:['oblik decentralizacije u kojem se deo autoriteta i odgovornosti prenosi na niže delove hijerarhije','oblik centralizovane kontrole','vrsta organizacione šeme','način kažnjavanja zaposlenih'],a:0},
+ {t:'fill',q:'Modeli savremene organizacije sestrinske službe temelje se na profesionalnoj ___ u praksi, sestrinskoj kontroli nad radnom sredinom i efikasnoj ___ između sestara, lekara i rukovodstva.',a:[['autonomiji','autonomija'],['komunikaciji','komunikacija']]},
+ {t:'fill',q:'Organizaciona ___ služi za simbolično predstavljanje organizacione strukture.',a:[['šema','sema']]},
+ {t:'fill',q:'Nivoi menadžera sestara su: centralni, ___ i prvi nivo.',a:[['srednji']]},
+ {t:'fill',q:'Komponente organizacione strukture proističu iz aktivnosti diferenciranja i ___.',a:[['integracije','integracija']]},
+ {t:'fill',q:'Potreba za ___ kontrolom u okviru zdravstvene ustanove odavno je zastarela.',a:[['centralizovanom','centralizovana']]},
+ {t:'tf',q:'Optimalni raspon kontrole zavisi i od zrelosti zaposlenih sestara i kompleksnosti zadataka.',a:true},
+ {t:'tf',q:'Planiranje kadrova uzima u obzir i broj sestara na tržištu rada i dužinu čekanja na posao.',a:true},
+ {t:'tf',q:'Organizaciona šema sestrinske službe zavisi i od nivoa vrednovanja sestrinstva u ustanovi.',a:true},
+ {t:'tf',q:'Vrsta organizacione strukture ne utiče na komunikaciju i autoritete.',a:false,e:'Utiče na organizacionu šemu, komunikaciju, odnose i autoritete.'},
+ {t:'tf',q:'Autoritet, odgovornost, moć i uticaj usko su povezani sa procesom decentralizacije.',a:true}
+]}
+];
+const ORDER=['Organizacija zdravstvene delatnosti: uvod','Komunikacija u delatnosti zdravstvenih radnika','Menadžment i organizacija zdravstvene službe','Organizacija zdravstvene delatnosti','Upravljanje','Osnovni principi organizacije zdravstvene službe','Organizacija zdravstvene delatnosti: ustanove i sestrinski menadžment'];
+const NOTE={'Osnovni principi organizacije zdravstvene službe':'video predavanje uz lekciju 1','Organizacija zdravstvene delatnosti: ustanove i sestrinski menadžment':'video predavanje uz lekciju Menadžment','Organizacija zdravstvene delatnosti':'pripravnici, radni odnos, radno vreme, odmori, zarada, sindikat','Upravljanje':'zdravstveno osiguranje, prigovor i žalba, kancelarijsko poslovanje'};
+const LESSONS=ORDER.filter(l=>TESTS.some(t=>t.lesson===l)).concat([...new Set(TESTS.map(t=>t.lesson))].filter(l=>!ORDER.includes(l)));
+const POOL=TESTS.flatMap(t=>t.qs.map(q=>({...q,src:t.lesson})));
+
+const BASE='';
+const TYPE={mc:'Zaokruži tačan odgovor',fill:'Dopuni',tf:'Tačno ili netačno'};
+const SHORT={mc:'Zaokruživanje',fill:'Dopuna',tf:'Tačno / netačno'};
+const KEY='testovi-zdravstvo-v1',WKEY='testovi-zdravstvo-greske-v1',DAY=24*60*60*1000,PASS=51;
+const app=document.getElementById('app');
+let view='home',S=null,R=null,onlyWrong=false,confirmEnd=false,confirmReset=false,copied=null,tick=null;
+const openL=new Set([0]);
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>{n=Math.round(n*10)/10;return Number.isInteger(n)?String(n):n.toFixed(1).replace('.',',')};
+const clock=ms=>{const s=Math.max(0,Math.floor(ms/1000));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const CYR={'а':'a','б':'b','в':'v','г':'g','д':'d','ђ':'dj','е':'e','ж':'z','з':'z','и':'i','ј':'j','к':'k','л':'l','љ':'lj','м':'m','н':'n','њ':'nj','о':'o','п':'p','р':'r','с':'s','т':'t','ћ':'c','у':'u','ф':'f','х':'h','ц':'c','ч':'c','џ':'dz','ш':'s'};
+const norm=s=>String(s||'').toLowerCase().replace(/[а-яђјљњћџ]/g,c=>CYR[c]??c).replace(/đ/g,'dj').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+function lev(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function matches(input,alts){const x=norm(input);if(!x)return false;
+  return alts.some(a=>{const y=norm(a);if(x===y)return true;const tol=y.length>=10?2:y.length>=5?1:0;return tol>0&&lev(x,y)<=tol})}
+/* Ocenjivanje jednog pitanja: vraća poene (0–1) i tačnost svake praznine */
+function grade(q,ans){
+  if(q.t!=='fill')return{pts:ans===q.a?1:0,ok:[]};
+  const a=ans||[],used=new Set(),ok=q.a.map(()=>false);
+  q.a.forEach((alts,i)=>{
+    if(!q.unordered){ok[i]=matches(a[i],alts);return}
+    const j=q.a.findIndex((g,k)=>!used.has(k)&&matches(a[i],g));
+    if(j>-1){used.add(j);ok[i]=true}
+  });
+  return{pts:ok.filter(Boolean).length/ok.length,ok};
+}
+const answered=(q,a)=>q.t==='fill'?!!(a&&a.some(x=>norm(x))):a!==null&&a!==undefined;
+const mark=p=>p<51?5:p<61?6:p<71?7:p<81?8:p<91?9:10;
+const correctText=q=>q.t==='mc'?'abcd'[q.a]+') '+q.o[q.a]:q.t==='tf'?(q.a?'Tačno':'Netačno'):q.a.map(g=>g[0]).join('; ');
+const givenText=(q,a)=>!answered(q,a)?'bez odgovora':q.t==='mc'?'abcd'[a]+') '+q.o[a]:q.t==='tf'?(a?'Tačno':'Netačno'):a.map(x=>x&&x.trim()?x.trim():'—').join('; ');
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+/* ---------- čuvanje: sve važi 24 sata od trenutka kada je zabeleženo ---------- */
+function load(){try{const h=JSON.parse(localStorage.getItem(KEY))||{},now=Date.now();let cut=false;
+  for(const id of Object.keys(h)){const keep=(h[id]||[]).filter(r=>r.date&&now-r.date<DAY);if(keep.length!==(h[id]||[]).length)cut=true;if(keep.length)h[id]=keep;else delete h[id]}
+  if(cut)localStorage.setItem(KEY,JSON.stringify(h));return h}catch(e){return{}}}
+function save(id,rec){try{const h=load();(h[id]=h[id]||[]).push(rec);localStorage.setItem(KEY,JSON.stringify(h))}catch(e){}}
+function loadWrong(){try{const w=JSON.parse(localStorage.getItem(WKEY))||{},now=Date.now();for(const k of Object.keys(w))if(now-w[k]>=DAY)delete w[k];return w}catch(e){return{}}}
+function saveWrong(w){try{localStorage.setItem(WKEY,JSON.stringify(w))}catch(e){}}
+function wipe(){try{localStorage.removeItem(KEY);localStorage.removeItem(WKEY)}catch(e){}}
+
+/* ---------- pokretanje testova ---------- */
+/* Odgovori kod zaokruživanja mešaju se pri svakom pokušaju */
+function prep(q){if(q.t!=='mc')return{...q};const ix=shuffle(q.o.map((_,i)=>i));return{...q,o:ix.map(i=>q.o[i]),a:ix.indexOf(q.a)}}
+/* Izvlači po n pitanja svake vrste, ravnomerno iz lekcija (svih ili jedne) */
+function draw(n,lesson){
+  const all=lesson?POOL.filter(q=>q.src===lesson):POOL,ls=[...new Set(all.map(q=>q.src))];
+  return['mc','fill','tf'].flatMap(t=>{const pools=shuffle(ls).map(l=>shuffle(all.filter(q=>q.t===t&&q.src===l))),out=[];
+    for(let r=0;out.length<n&&pools.some(p=>p.length);r++){const p=pools[r%pools.length];if(p.length)out.push(p.pop())}
+    return shuffle(out)});
+}
+function begin(id,title,qs,opts){
+  qs=qs.map(prep);
+  S={id,title,qs,ans:qs.map(q=>q.t==='fill'?q.a.map(()=>''):null),flag:qs.map(()=>false),idx:0,start:Date.now(),keep:!!opts.keep,limit:opts.limit||0};
+  view='quiz';confirmEnd=false;render();scrollTo(0,0);
+}
+const dynamic=id=>id==='ispit'||id==='mix'||id==='greske'||id.startsWith('lekcija-');
+function startTest(id){
+  if(id==='ispit')return begin(id,'Simulacija ispita',draw(10),{keep:true,limit:30});
+  if(id==='mix')return begin(id,'Brzi miks',draw(5),{keep:true});
+  if(id==='greske'){const w=loadWrong();return begin(id,'Moje greške',shuffle(POOL.filter(q=>w[q.q])).slice(0,30),{})}
+  if(id.startsWith('lekcija-')){const l=LESSONS[+id.slice(8)];return begin(id,'Ispit iz lekcije · '+l,draw(7,l),{keep:true,limit:20})}
+  const t=TESTS.find(t=>t.id===id);begin(t.id,t.title+' · '+t.lesson,t.qs.map(q=>({...q,src:t.lesson})),{keep:true});
+}
+function finish(timeout){
+  const res=S.qs.map((q,i)=>grade(q,S.ans[i]));
+  const pts=res.reduce((s,r)=>s+r.pts,0),time=S.limit?Math.min(Date.now()-S.start,S.limit*60000):Date.now()-S.start;
+  R={...S,res,pts,max:S.qs.length,time,timeout:!!timeout};
+  const w=loadWrong();S.qs.forEach((q,i)=>{if(res[i].pts<1)w[q.q]=Date.now();else delete w[q.q]});saveWrong(w);
+  if(S.keep)save(S.id,{pts,max:R.max,time,date:Date.now()});
+  view='result';onlyWrong=false;copied=null;S=null;render();scrollTo(0,0);
+}
+
+/* ---------- prikazi ---------- */
+const best=a=>a.reduce((m,x)=>x.pts/x.max>m.pts/m.max?x:m);
+function home(){
+  const h=load(),wn=Object.keys(loadWrong()).length,recs=Object.values(h).flat();
+  const avg=recs.length?Math.round(recs.reduce((s,r)=>s+r.pts/r.max,0)/recs.length*100):null;
+  const chip=id=>{const a=h[id];if(!a||!a.length)return'<span class="chip">nije rađen</span>';
+    const b=best(a),p=Math.round(b.pts/b.max*100);
+    return`<span class="chip ${p>=81?'good':p>=PASS?'warn':'bad'}">najbolje ${fmt(b.pts)}/${b.max} · ${a.length}×</span>`};
+  const rowT=(id,title,meta,label)=>`<div class="test"><div class="grow"><h3>${esc(title)}</h3><p class="meta">${meta}</p></div>${chip(id)}<button class="btn ${label?'':'primary'}" data-act="start" data-id="${id}">${label||'Počni'}</button></div>`;
+  const lessons=LESSONS.map((l,i)=>{const ts=TESTS.filter(t=>t.lesson===l),n=ts.reduce((s,t)=>s+t.qs.length,0);
+    const passed=ts.filter(t=>h[t.id]&&Math.round(best(h[t.id]).pts/best(h[t.id]).max*100)>=PASS).length;
+    return`<details class="sheet" data-l="${i}" ${openL.has(i)?'open':''}><summary><span class="num">${String(i+1).padStart(2,'0')}</span>
+      <span class="grow stack" style="gap:4px"><h2>${esc(l)}</h2><span class="muted small">${esc(ts[0].author||'')}${NOTE[l]?' · '+esc(NOTE[l]):''} · ${ts.length} testova · ${n} pitanja</span>
+      <span class="row" style="gap:8px"><span class="bar grow"><i style="width:${passed/ts.length*100}%"></i></span><span class="mono small muted">${passed}/${ts.length} položeno</span></span></span>
+      <span class="caret" aria-hidden="true">▸</span></summary>
+      <div class="inner tests">${ts.map(t=>rowT(t.id,t.title,t.qs.length+' pitanja · '+t.qs.length+' poena')).join('')}
+      ${rowT('lekcija-'+i,'Ispit iz ove lekcije','21 pitanje iz svih testova lekcije · 20 minuta','Počni ispit')}</div></details>`}).join('');
+  return`<header class="stack"><p class="eyebrow"><a class="link" href="../">← Svi predmeti</a> · Priprema za ispit</p><h1>Testovi iz organizacije zdravstva</h1>
+    <p class="lead">Pet lekcija sa prezentacija i dve iz video predavanja; kombinovani testovi sa zaokruživanjem, dopunom i tačno/netačno. Kad predaš test, dobijaš poene, ocenu i pregled svakog odgovora.</p></header>
+  <div class="stats"><div class="stat"><small>Pitanja u bazi</small><b>${POOL.length}</b></div><div class="stat"><small>Testova</small><b>${TESTS.length}</b></div>
+    <div class="stat"><small>Urađeno (24 h)</small><b>${recs.length}</b></div><div class="stat"><small>Prosek (24 h)</small><b>${avg===null?'–':avg+'%'}</b></div></div>
+  <section class="sheet"><div class="row"><div class="stack" style="gap:4px;flex:1 1 260px;min-width:0"><p class="eyebrow">Prvo nauči</p><h2>Skripta: suština svih sedam lekcija</h2>
+      <p class="muted small">Najbitnije iz svake lekcije i tabela brojki i rokova. Pročitaj lekciju, pa uradi njene testove.</p></div>
+      <a class="btn primary" id="skripta" href="${BASE}skripta.pdf" target="_blank" rel="noopener">Otvori skriptu (PDF)</a></div></section>
+  <section class="sheet stack"><div><p class="eyebrow">Sve lekcije pomešano</p><h2>Simulacija ispita</h2></div>
+    <div class="tests">${rowT('ispit','Simulacija ispita','30 pitanja ravnomerno iz svih lekcija · 30 minuta · predaje se sam kad vreme istekne')}
+    ${rowT('mix','Brzi miks','15 pitanja iz svih lekcija, bez ograničenja vremena','Počni')}
+    <div class="test"><div class="grow"><h3>Moje greške</h3><p class="meta">${wn?'Pitanja na kojima si pogrešio u poslednja 24 sata; tačan odgovor ih skida sa liste':'Ovde se skupljaju pitanja na kojima pogrešiš'}</p></div>
+      <span class="chip ${wn?'bad':''}">${wn} ${wn===1?'pitanje':'pitanja'}</span><button class="btn" id="go-greske" data-act="start" data-id="greske" ${wn?'':'disabled'}>Vežbaj</button></div></div></section>
+  <div class="stack"><p class="eyebrow">Lekcije</p>${lessons}</div>
+  <details class="sheet help" data-l="help" ${openL.has('help')?'open':''}><summary><span class="grow"><h2>Kako se boduje</h2></span><span class="caret" aria-hidden="true">▸</span></summary>
+    <div class="inner"><ul><li>Svako pitanje nosi 1 poen. Kod dopune sa više praznina dobijaš deo poena za svaku tačnu prazninu.</li>
+    <li>Dopune se priznaju i bez kvačica, na ćirilici i sa sitnom greškom u kucanju.</li>
+    <li>Ocene: ispod 51% je 5, zatim 6 (51–60%), 7 (61–70%), 8 (71–80%), 9 (81–90%) i 10 (91–100%).</li>
+    <li>Redosled ponuđenih odgovora menja se pri svakom pokušaju.</li>
+    <li>Rezultati i lista grešaka čuvaju se 24 sata samo na ovom uređaju i ne vidi ih niko drugi.</li></ul></div></details>
+  <div class="row"><p class="grow muted small">Rezultati se čuvaju 24 sata na ovom uređaju, a zatim se sami brišu.</p>
+    <button class="btn" id="reset" data-act="resetAsk" ${recs.length||wn?'':'disabled'}>Obriši rezultate</button></div>
+  ${confirmReset?`<div class="veil" data-act="resetCancel"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt" data-act="noop">
+    <h2 id="mt">Obrisati sve rezultate?</h2><p class="muted">Brišu se najbolji rezultati, broj pokušaja i lista grešaka za sve testove. Ovo ne može da se vrati.</p>
+    <div class="row" style="justify-content:flex-end"><button class="btn" id="reset-no" data-act="resetCancel">Odustani</button><button class="btn danger" id="reset-yes" data-act="resetDo">Obriši</button></div></div></div>`:''}`;
+}
+function body(q,i,a){
+  if(q.t==='mc')return`<div class="opts">${q.o.map((o,k)=>`<button class="opt ${a===k?'sel':''}" id="o-${i}-${k}" data-act="pick" data-v="${k}"><b>${'abcd'[k]})</b><span>${esc(o)}</span></button>`).join('')}</div>`;
+  if(q.t==='tf')return`<div class="tf">${[true,false].map(v=>`<button class="opt ${a===v?'sel':''}" id="o-${i}-${v}" data-act="pick" data-v="${v}">${v?'Tačno':'Netačno'}</button>`).join('')}</div>`;
+  const parts=q.q.split('___');
+  return`<p class="q">${parts.map((p,k)=>esc(p)+(k<parts.length-1?`<input class="blank" id="b-${i}-${k}" data-k="${k}" value="${esc(a[k]||'')}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Praznina ${k+1}">`:'')).join('')}</p>`;
+}
+const remaining=()=>S.limit*60000-(Date.now()-S.start);
+function quiz(){
+  const i=S.idx,q=S.qs[i],a=S.ans[i],last=i===S.qs.length-1;
+  const missing=S.qs.filter((x,k)=>!answered(x,S.ans[k])).length;
+  return`<div class="row"><div class="grow"><p class="eyebrow">${esc(S.title)}</p></div>
+      <span class="mono clock" id="clock">${S.limit?'preostalo '+clock(remaining()):clock(Date.now()-S.start)}</span><button class="btn quiet" data-act="home">Odustani</button></div>
+  <div class="bar"><i style="width:${(i+1)/S.qs.length*100}%"></i></div>
+  <section class="sheet stack" style="gap:18px">
+    <div class="row"><span class="chip">${TYPE[q.t]}</span>${q.src?`<span class="chip">${esc(q.src)}</span>`:''}<span class="grow"></span><span class="mono muted">${i+1} / ${S.qs.length}</span></div>
+    ${q.t==='fill'?'':`<p class="q">${esc(q.q)}</p>`}
+    ${body(q,i,a)}
+    <div class="row"><button class="btn" data-act="prev" ${i===0?'disabled':''}>Nazad</button>
+      <button class="btn ${S.flag[i]?'on':''}" id="flag" data-act="flag" aria-pressed="${S.flag[i]}">${S.flag[i]?'Označeno':'Označi za kasnije'}</button><span class="grow"></span>
+      ${last?'<button class="btn primary" data-act="end">Predaj test</button>':'<button class="btn primary" data-act="next">Dalje</button>'}</div>
+    ${confirmEnd?`<div class="fb warn"><strong>Ostalo je ${missing} ${missing===1?'pitanje':'pitanja'} bez odgovora.</strong> <span>Neodgovorena pitanja nose 0 poena.</span>
+      <div class="row" style="margin-top:10px"><button class="btn" data-act="cancelEnd">Vrati se</button><button class="btn primary" data-act="forceEnd">Predaj svejedno</button></div></div>`:''}
+  </section>
+  <div class="dots" aria-label="Pitanja">${S.qs.map((x,k)=>`<button class="dot ${answered(x,S.ans[k])?'done':''} ${S.flag[k]?'flag':''} ${k===i?'cur':''}" data-act="go" data-v="${k}" aria-label="Pitanje ${k+1}${S.flag[k]?', označeno':''}">${k+1}</button>`).join('')}</div>
+  ${last?'':'<div class="row"><span class="grow"></span><button class="btn quiet" data-act="end">Predaj test</button></div>'}`;
+}
+const summary=()=>{const p=Math.round(R.pts/R.max*100);return`Testovi iz organizacije zdravstva · ${R.title}: ${fmt(R.pts)}/${R.max} (${p}%), ocena ${mark(p)}, vreme ${clock(R.time)}`};
+function result(){
+  const p=Math.round(R.pts/R.max*100),m=mark(p),C=2*Math.PI*54,pass=m>5;
+  const group=(key,label)=>[...new Set(R.qs.map(key))].map(k=>{const ix=R.qs.map((q,i)=>key(q)===k?i:-1).filter(i=>i>-1);return{name:label(k),n:ix.length,pts:ix.reduce((s,i)=>s+R.res[i].pts,0)}});
+  const tile=b=>`<div class="stat"><small>${esc(b.name)}</small><b>${fmt(b.pts)} / ${b.n}</b><div class="bar" style="margin-top:6px"><i style="width:${b.pts/b.n*100}%"></i></div></div>`;
+  const byType=group(q=>q.t,k=>SHORT[k]),byLesson=group(q=>q.src||'',k=>k);
+  const wrong=R.qs.filter((q,i)=>R.res[i].pts<1).length;
+  const rows=R.qs.map((q,i)=>{const g=R.res[i];if(onlyWrong&&g.pts===1)return'';
+    const c=g.pts===1?'good':g.pts===0?'bad':'warn';
+    return`<div class="rev"><div class="row"><span class="mono muted">${i+1}.</span><span class="chip ${c}">${g.pts===1?'tačno':g.pts===0?'netačno':'delimično'} · ${fmt(g.pts)}</span><span class="chip">${SHORT[q.t]}</span>${byLesson.length>1?`<span class="chip">${esc(q.src)}</span>`:''}</div>
+      <p>${esc(q.q.replace(/___/g,'_____'))}</p>
+      <p class="ans">Tvoj odgovor: <strong>${esc(givenText(q,R.ans[i]))}</strong></p>
+      ${g.pts<1?`<p class="ans">Tačan odgovor: <strong style="color:var(--good)">${esc(correctText(q))}</strong></p>`:''}
+      ${q.e&&g.pts<1?`<p class="ans">${esc(q.e)}</p>`:''}</div>`}).join('');
+  return`<header class="stack"><p class="eyebrow">Rezultat · ${esc(R.title)}</p><h1>${pass?(m>=9?'Odlično urađeno':'Položeno'):'Još jedan krug ponavljanja'}</h1></header>
+  ${R.timeout?'<div class="fb bad"><strong>Vreme je isteklo.</strong> <span>Test je predat sa odgovorima koje si do tada uneo.</span></div>':''}
+  <section class="sheet stack" style="gap:18px"><div class="score">
+    <svg class="ring" viewBox="0 0 132 132" role="img" aria-label="${p}%"><circle cx="66" cy="66" r="54" fill="none" stroke="var(--line)" stroke-width="12"/>
+      <circle cx="66" cy="66" r="54" fill="none" stroke="var(--${pass?'good':'bad'})" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C*p/100} ${C}" transform="rotate(-90 66 66)"/>
+      <text x="66" y="74" text-anchor="middle" fill="var(--ink)" font-family="var(--mono)" font-size="24">${p}%</text></svg>
+    <div class="stack grow" style="gap:4px"><span class="big">${fmt(R.pts)} <span class="muted" style="font-size:1.4rem">/ ${R.max}</span></span>
+      <span>Ocena <strong>${m}</strong> ${pass?'':'(potrebno 51% za prolaz)'}</span><span class="muted">Vreme ${clock(R.time)} · ${R.max-wrong} tačnih, ${wrong} sa greškom</span></div></div>
+    <div class="stack"><p class="eyebrow">Po vrsti pitanja</p><div class="stats">${byType.map(tile).join('')}</div></div>
+    ${byLesson.length>1?`<div class="stack"><p class="eyebrow">Po lekciji</p><div class="stats">${byLesson.map(tile).join('')}</div></div>`:''}
+    <div class="dots">${R.res.map((g,k)=>`<span class="dot ${g.pts===1?'ok':g.pts===0?'no':'half'}">${k+1}</span>`).join('')}</div>
+    <div class="row"><button class="btn primary" data-act="again">Ponovi test</button>${wrong?`<button class="btn" data-act="wrongOnly">Vežbaj samo greške (${wrong})</button>`:''}
+      <button class="btn" id="copy" data-act="copy">${copied===true?'Kopirano':'Kopiraj rezultat'}</button><button class="btn quiet" data-act="home">Svi testovi</button></div>
+    ${copied===false?`<p class="copybox">${esc(summary())}</p>`:''}
+  </section>
+  <section class="sheet"><div class="row" style="margin-bottom:6px"><h2 class="grow">Pregled odgovora</h2>
+    ${wrong?`<div class="seg"><button data-act="filter" data-v="0" aria-pressed="${!onlyWrong}">Sve</button><button data-act="filter" data-v="1" aria-pressed="${onlyWrong}">Samo greške</button></div>`:''}</div>${rows}</section>`;
+}
+function render(){
+  clearInterval(tick);
+  app.innerHTML=view==='home'?home():view==='quiz'?quiz():result();
+  if(view==='quiz'){tick=setInterval(()=>{if(!S)return;const c=document.getElementById('clock');
+      if(S.limit){const r=remaining();if(r<=0)return finish(true);if(c){c.textContent='preostalo '+clock(r);c.classList.toggle('low',r<5*60000)}}
+      else if(c)c.textContent=clock(Date.now()-S.start)},1000);
+    const b=app.querySelector('.blank');if(b&&!b.value)b.focus({preventScroll:true})}
+}
+function step(d){S.idx=Math.max(0,Math.min(S.qs.length-1,S.idx+d));confirmEnd=false;render()}
+
+app.addEventListener('toggle',e=>{const d=e.target,l=d.dataset&&d.dataset.l;if(l===undefined)return;const k=l==='help'?l:+l;d.open?openL.add(k):openL.delete(k)},true);
+app.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;const act=b.dataset.act,v=b.dataset.v;
+  if(act==='noop')return;
+  if(act==='resetAsk'){confirmReset=true;render();const n=document.getElementById('reset-no');if(n)n.focus()}
+  else if(act==='resetCancel'){confirmReset=false;render()}
+  else if(act==='resetDo'){wipe();confirmReset=false;render()}
+  else if(act==='start')startTest(b.dataset.id);
+  else if(act==='home'){view='home';S=null;R=null;render();scrollTo(0,0)}
+  else if(act==='pick'){const q=S.qs[S.idx];S.ans[S.idx]=q.t==='mc'?+v:v==='true';render()}
+  else if(act==='flag'){S.flag[S.idx]=!S.flag[S.idx];render()}
+  else if(act==='next')step(1);else if(act==='prev')step(-1);
+  else if(act==='go'){S.idx=+v;confirmEnd=false;render()}
+  else if(act==='end'){if(S.qs.some((q,k)=>!answered(q,S.ans[k]))){confirmEnd=true;render()}else finish()}
+  else if(act==='cancelEnd'){confirmEnd=false;render()}
+  else if(act==='forceEnd')finish();
+  else if(act==='filter'){onlyWrong=v==='1';render()}
+  else if(act==='again'){const r=R;if(dynamic(r.id))startTest(r.id);else begin(r.id,r.title,r.qs,{keep:r.keep,limit:r.limit})}
+  else if(act==='wrongOnly'){const r=R;begin(r.id+'~greske',r.title+' · samo greške',r.qs.filter((q,i)=>r.res[i].pts<1),{})}
+  else if(act==='copy'){const done=ok=>{copied=ok;if(view==='result')render()};
+    try{navigator.clipboard.writeText(summary()).then(()=>done(true),()=>done(false))}catch(err){done(false)}}
+});
+app.addEventListener('input',e=>{
+  if(!e.target.classList.contains('blank')||!S)return;
+  S.ans[S.idx][+e.target.dataset.k]=e.target.value;
+  const d=app.querySelectorAll('.dot')[S.idx];if(d)d.classList.toggle('done',answered(S.qs[S.idx],S.ans[S.idx]));
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&confirmReset){confirmReset=false;render();return}
+  if(view!=='quiz'||!S)return;const inField=e.target.tagName==='INPUT',q=S.qs[S.idx];
+  if(e.key==='Enter'&&e.target.tagName!=='BUTTON'){e.preventDefault();
+    if(inField){const all=[...app.querySelectorAll('.blank')],n=all[all.indexOf(e.target)+1];if(n){n.focus();return}}
+    if(S.idx<S.qs.length-1)step(1);return}
+  if(inField)return;const k=e.key.toLowerCase();
+  if(q.t==='mc'&&k.length===1&&'abcd1234'.includes(k)){const n='abcd1234'.indexOf(k)%4;if(n<q.o.length){S.ans[S.idx]=n;render()}}
+  else if(q.t==='tf'&&(k==='t'||k==='n')){S.ans[S.idx]=k==='t';render()}
+  else if(e.key==='ArrowRight')step(1);else if(e.key==='ArrowLeft')step(-1);
+});
+
+function boot(d){if(d&&d.view){view=d.view;S=d.S||null;R=d.R||null;if((view==='quiz'&&!S)||(view==='result'&&!R))view='home'}render()}
+try{window.claude?.hot?.snapshot?.(()=>({view,S,R}))}catch(e){}
+window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
+try{const h=location.hash.slice(1);if(h==='ispit'||h==='mix'){history.replaceState(null,'',location.pathname+location.search);startTest(h)}}catch(e){}
+</script>
+</body>
+</html>
