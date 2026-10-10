@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Interaktivni testovi i skripta za pripremu ispita iz veština poslovne komunikacije: 14 lekcija, simulacija ispita na vreme, automatsko bodovanje.">
-<title>Testovi iz veština poslovne komunikacije</title>
+<title>Veštine poslovne komunikacije · testovi</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
 /* Layout: one narrow exam-sheet column; home = exam block + lessons as collapsible sheets, runner = one question per screen, result = score sheet + full review. */
@@ -806,7 +806,7 @@ function home(){
       <span class="caret" aria-hidden="true">▸</span></summary>
       <div class="inner tests">${ts.map(t=>rowT(t.id,t.title,t.qs.length+' pitanja · '+t.qs.length+' poena')).join('')}
       ${rowT('lekcija-'+i,'Ispit iz ove lekcije',(Math.min(21,n)===21?'21 pitanje':n+' pitanja')+' iz svih testova lekcije · 20 minuta','Počni ispit')}</div></details>`}).join('');
-  return`<header class="stack"><p class="eyebrow"><a class="link" href="../">← Svi predmeti</a> · Priprema za ispit</p><h1>Testovi iz veština poslovne komunikacije</h1>
+  return`<header class="stack"><p class="eyebrow"><a class="link" href="../">← Svi predmeti</a> · Priprema za ispit</p><h1>Veštine poslovne komunikacije</h1>
     <p class="lead">Četrnaest lekcija (msms Dragana Korajlija; mejl komunikacija: Marija Papić); kombinovani testovi sa zaokruživanjem, dopunom i tačno/netačno. Kad predaš test, dobijaš poene, ocenu i pregled svakog odgovora.</p></header>
   <div class="stats"><div class="stat"><small>Pitanja u bazi</small><b>${POOL.length}</b></div><div class="stat"><small>Testova</small><b>${TESTS.length}</b></div>
     <div class="stat"><small>Urađeno (24 h)</small><b>${recs.length}</b></div><div class="stat"><small>Prosek (24 h)</small><b>${avg===null?'–':avg+'%'}</b></div></div>
@@ -857,7 +857,7 @@ function quiz(){
   <div class="dots" aria-label="Pitanja">${S.qs.map((x,k)=>`<button class="dot ${answered(x,S.ans[k])?'done':''} ${S.flag[k]?'flag':''} ${k===i?'cur':''}" data-act="go" data-v="${k}" aria-label="Pitanje ${k+1}${S.flag[k]?', označeno':''}">${k+1}</button>`).join('')}</div>
   ${last?'':'<div class="row"><span class="grow"></span><button class="btn quiet" data-act="end">Predaj test</button></div>'}`;
 }
-const summary=()=>{const p=Math.round(R.pts/R.max*100);return`Testovi iz veština poslovne komunikacije · ${R.title}: ${fmt(R.pts)}/${R.max} (${p}%), ocena ${mark(p)}, vreme ${clock(R.time)}`};
+const summary=()=>{const p=Math.round(R.pts/R.max*100);return`Veštine poslovne komunikacije · testovi · ${R.title}: ${fmt(R.pts)}/${R.max} (${p}%), ocena ${mark(p)}, vreme ${clock(R.time)}`};
 function result(){
   const p=Math.round(R.pts/R.max*100),m=mark(p),C=2*Math.PI*54,pass=m>5;
   const group=(key,label)=>[...new Set(R.qs.map(key))].map(k=>{const ix=R.qs.map((q,i)=>key(q)===k?i:-1).filter(i=>i>-1);return{name:label(k),n:ix.length,pts:ix.reduce((s,i)=>s+R.res[i].pts,0)}});

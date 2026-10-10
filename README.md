@@ -6,7 +6,7 @@ Sajt: https://stankovic-dusan-skp.github.io/ljubicica-ispiti/
 
 | Predmet | Folder |
 | --- | --- |
-| Organizacija zdravstva | `organizacija-zdravstva/` |
+| Organizacija zdravstvene delatnosti | `organizacija-zdravstva/` |
 | Javno zdravlje | `javno-zdravlje/` |
 | Veštine poslovne komunikacije | `poslovna-komunikacija/` |
 | Metodologija zdravstvenog obrazovanja i promocija zdravlja | `metodologija-zo/` |
