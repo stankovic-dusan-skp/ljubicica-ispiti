@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Interaktivni testovi i skripta za pripremu ispita iz metodologije zdravstvenog obrazovanja i promocije zdravlja: 6 lekcija, simulacija ispita, automatsko bodovanje.">
+<title>Testovi iz metodologije zdravstvenog obrazovanja</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one narrow exam-sheet column; home = exam block + lessons as collapsible sheets, runner = one question per screen, result = score sheet + full review. */
+:root{
+  --bg:#eaf0f2; --surface:#ffffff; --sunk:#f3f7f8; --ink:#13242d; --muted:#586b76; --line:#cfdbe0;
+  --accent:#0b6b78; --accent-ink:#ffffff; --accent-soft:#d9eef1;
+  --good:#1b7646; --good-bg:#def3e6; --bad:#b2362b; --bad-bg:#fbe3e0; --warn:#8a5a00; --warn-bg:#fbefd2; --veil:rgba(8,16,20,.55);
+  --display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e171b; --surface:#17232a; --sunk:#121c21; --ink:#e5eef1; --muted:#93a6b0; --line:#2b3c45;
+  --accent:#55c4d0; --accent-ink:#06262b; --accent-soft:#143840;
+  --good:#63d193; --good-bg:#143524; --bad:#f28b80; --bad-bg:#3e1d1a; --warn:#f0c268; --warn-bg:#3a2e12; --veil:rgba(0,0,0,.65);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e171b; --surface:#17232a; --sunk:#121c21; --ink:#e5eef1; --muted:#93a6b0; --line:#2b3c45;
+  --accent:#55c4d0; --accent-ink:#06262b; --accent-soft:#143840;
+  --good:#63d193; --good-bg:#143524; --bad:#f28b80; --bad-bg:#3e1d1a; --warn:#f0c268; --warn-bg:#3a2e12; --veil:rgba(0,0,0,.65);
+  color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:28px 56px}
+#app{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3,p,ul{margin:0}
+h1{font-family:var(--display);font-size:clamp(1.8rem,5vw,2.5rem);line-height:1.08;text-wrap:balance;letter-spacing:-.01em}
+h2{font-family:var(--display);font-size:1.2rem;line-height:1.2;text-wrap:balance}
+.eyebrow{font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lead{color:var(--muted);max-width:62ch}
+.muted{color:var(--muted)} .small{font-size:.9rem}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grow{flex:1 1 0;min-width:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 16px;font-weight:600}
+a.btn{display:inline-block;text-decoration:none;color:var(--ink)}
+a.btn.primary{color:var(--accent-ink)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.link{color:var(--accent);font-weight:600;text-decoration:none}
+.link:hover{text-decoration:underline}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.quiet{background:transparent}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.btn.on{background:var(--warn-bg);border-color:var(--warn);color:var(--warn)}
+.btn:disabled{opacity:.45;cursor:default}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:8px 14px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.stat{background:var(--sunk);border-radius:8px;padding:10px 12px}
+.sheet .stat{background:var(--sunk)} #app>.stats .stat{background:var(--surface);border:1px solid var(--line)}
+.stat b{display:block;font-family:var(--mono);font-size:1.15rem;font-weight:500}
+.stat small{color:var(--muted)}
+.tests{display:flex;flex-direction:column}
+.test{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+.test:first-of-type{border-top:0;padding-top:4px}
+.test h3{font-size:1.02rem;font-weight:600}
+.test .meta{color:var(--muted);font-size:.88rem}
+.chip{font-size:.8rem;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.chip.good{background:var(--good-bg);color:var(--good)} .chip.bad{background:var(--bad-bg);color:var(--bad)} .chip.warn{background:var(--warn-bg);color:var(--warn)}
+details.sheet{padding:0}
+details.sheet>summary{list-style:none;cursor:pointer;padding:18px 20px;display:flex;gap:14px;align-items:center;border-radius:12px}
+details.sheet>summary::-webkit-details-marker{display:none}
+details.sheet>summary .num{font-family:var(--mono);color:var(--accent);font-size:1.05rem;flex:none}
+details.sheet>summary .caret{flex:none;color:var(--muted);transition:transform .2s}
+details.sheet[open]>summary .caret{transform:rotate(90deg)}
+details.sheet>.inner{padding:0 20px 16px}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.help li{margin-bottom:6px;max-width:66ch}
+.help ul{padding-left:20px}
+/* runner */
+.q{font-size:1.18rem;font-weight:500;line-height:1.45;text-wrap:pretty}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:12px 14px;width:100%}
+.opt b{font-family:var(--mono);font-weight:500;color:var(--muted);flex:none}
+.opt:hover{border-color:var(--accent)}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.tf{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tf .opt{justify-content:center;font-weight:600}
+.blank{font:inherit;color:inherit;background:var(--sunk);border:0;border-bottom:2px solid var(--accent);border-radius:4px 4px 0 0;padding:2px 8px;width:11.5em;max-width:100%;margin:3px 2px}
+.fb{border-radius:8px;padding:12px 14px;font-size:.95rem}
+.fb.warn{background:var(--warn-bg);color:var(--warn)} .fb.bad{background:var(--bad-bg);color:var(--bad)}
+.fb span{color:var(--ink)}
+.dots{display:grid;grid-template-columns:repeat(auto-fill,minmax(36px,1fr));gap:6px}
+.dot{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 0;font-family:var(--mono);font-size:.82rem;text-align:center}
+.dot.done{background:var(--accent-soft);border-color:var(--accent-soft)}
+.dot.flag{border-color:var(--warn);box-shadow:inset 0 -3px 0 var(--warn)}
+.dot.cur{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.dot.ok{background:var(--good-bg);border-color:var(--good-bg);color:var(--good)} .dot.no{background:var(--bad-bg);border-color:var(--bad-bg);color:var(--bad)} .dot.half{background:var(--warn-bg);border-color:var(--warn-bg);color:var(--warn)}
+.clock.low{color:var(--bad)}
+/* result */
+.score{display:flex;flex-wrap:wrap;gap:20px 28px;align-items:center}
+.ring{width:132px;height:132px;flex:none}
+.big{font-family:var(--display);font-size:2.6rem;line-height:1}
+.rev{border-top:1px solid var(--line);padding:14px 0;display:flex;flex-direction:column;gap:6px}
+.rev:first-of-type{border-top:0}
+.rev .ans{font-size:.94rem;color:var(--muted)}
+.rev .ans strong{color:var(--ink);font-weight:600}
+.copybox{font-family:var(--mono);font-size:.85rem;background:var(--sunk);border-radius:8px;padding:10px 12px;user-select:all;overflow-wrap:anywhere}
+.veil{position:fixed;inset:0;background:var(--veil);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:22px;max-width:420px;width:100%;display:flex;flex-direction:column;gap:14px}
+@media (prefers-reduced-motion:reduce){.bar i,details.sheet>summary .caret{transition:none}}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+/* ============================================================
+   BAZA TESTOVA — novi test se dodaje kao novi objekat u ovaj niz.
+   Tipovi pitanja:
+   mc   → {t:'mc', q:'tekst', o:['a','b','c','d'], a:indeks tačnog (0=prvi), e:'objašnjenje'}
+   fill → {t:'fill', q:'tekst sa ___ za svaku prazninu', a:[['prihvaćen odgovor','varijanta'], ...], unordered:true ako redosled nije bitan}
+   tf   → {t:'tf', q:'tvrdnja', a:true/false, e:'objašnjenje'}
+   Redosled lekcija na početnoj strani određuje niz ORDER.
+   ============================================================ */
+const IM='spec. sms Vesna Imbronjev';
+const SI='prof. dr Slađana Šimon';
+const L1='Zdravlje i kvalitet života';
+const L2='Zdravstveno ponašanje i zdravstveno vaspitanje';
+const L3='Promocija zdravlja: definicija, ciljevi i dokumenti';
+const L4='Planiranje i programiranje zdravstveno vaspitnog rada';
+const L5='Zdravstveno vaspitne intervencije';
+const L6='Razvoj stavova u raspravi i debati';
+const TESTS=[
+{id:'mzo1-1',lesson:L1,author:IM,title:'Test 1',qs:[
+ {t:'mc',q:'Prema Milleru, životni sistem je:',o:['hijerarhija međusobno zavisnih delova u kojoj je viši nivo izgrađen od nižih podsistema','skup nezavisnih organa','isključivo biološki sistem pojedinca','statičko stanje bez promena'],a:0},
+ {t:'mc',q:'U Millerovoj hijerarhiji zdravlje se može definisati kao:',o:['stanje dinamičke ravnoteže ili proces koji tu ravnotežu održava','potpuno odsustvo bolesti','stalno nepromenljivo stanje organizma','idealno stanje koje se ne može izmeriti'],a:0},
+ {t:'mc',q:'Šta se dešava kada parametri organizma pređu svoj najviši limit?',o:['nastaje stres kao odgovor, a ako duže traje, ozbiljan poremećaj','organizam odmah ozdravi','ništa, jer parametri ne osciliraju','nastaje isključivo bolja adaptacija'],a:0},
+ {t:'mc',q:'Koji je, prema slajdovima, veoma važan zdravstveni resurs?',o:['potencijal delovanja, odnosno sposobnost da se kontroliše nova situacija','broj bolnica','visina plate','broj lekara po stanovniku'],a:0},
+ {t:'mc',q:'Na koje štetne navike je usmerena društvena akcija u mnogim razvijenim zemljama?',o:['neadekvatna ishrana, pušenje i nedovoljna fizička aktivnost','samo na zarazne bolesti','samo na saobraćajne nesreće','samo na genetske bolesti'],a:0},
+ {t:'fill',q:'Dve dimenzije zdravlja su zdravstvena ___ i zdravstveni ___.',a:[['ravnoteža','ravnoteza'],['potencijal']]},
+ {t:'fill',q:'Na individualnom nivou zdravstvena ravnoteža je unutrašnje stanje izraženo u vidu dinamičkog ___.',a:[['ekvilibrijuma','ekvilibrijum']]},
+ {t:'fill',q:'Zdravstvena ravnoteža pojedinca utvrđuje se na osnovu bioloških i ___ parametara.',a:[['psiholoških','psiholoskih','psihološki']]},
+ {t:'fill',q:'Kod zajednice se zdravstvena ravnoteža utvrđuje putem ___ indikatora.',a:[['epidemioloških','epidemioloskih','epidemiološki']]},
+ {t:'fill',q:'Parametri kao što su krvni pritisak i šećer u krvi stalno osciliraju između višeg i ___ limita.',a:[['nižeg','nizeg','donjeg']]},
+ {t:'tf',q:'Definicija zdravlja SZO je cilj koji treba ostvariti u tačno određenom roku.',a:false,e:'To je idealni cilj kome treba težiti, ali nema ograničeno vreme za ostvarivanje.'},
+ {t:'tf',q:'Prema Milleru, individua nije deo porodice ni zajednice, već samostalan sistem.',a:false,e:'Individua je deo porodice, koja je deo lokalne zajednice, a ova šire zajednice.'},
+ {t:'tf',q:'Dobar nutricioni status i imunološka otpornost pripadaju zdravstvenom potencijalu pojedinca.',a:true},
+ {t:'tf',q:'Poremećaji koji ne prelaze određeni nivo i trajanje ne mogu se tolerisati.',a:false,e:'Takvi poremećaji mogu se tolerisati ili kontrolisati.'},
+ {t:'tf',q:'Zdravstveni potencijal na nivou zajednice treba da bude deo socijalno-zdravstvene politike.',a:true}
+]},
+{id:'mzo1-2',lesson:L1,author:IM,title:'Test 2',qs:[
+ {t:'mc',q:'Prema Hipokratu, zdravlje ili bolest proizilazi iz:',o:['ravnoteže između faktora spoljne sredine i načina života individue','isključivo nasleđa','volje bogova','delovanja mikroorganizama'],a:0},
+ {t:'mc',q:'Šta je zajedničko Hipokratovom modelu i tradicionalnoj kineskoj medicini?',o:['oba su imala ekološki okvir','oba se zasnivaju na genetici','oba odbacuju ravnotežu','oba su nastala u XX veku'],a:0},
+ {t:'mc',q:'Koje tri dimenzije moraju biti zastupljene u merenju zdravlja ili kvaliteta života?',o:['fizička funkcija, psihološki status i sposobnost uključivanja u društvenu interakciju','visina, težina i krvni pritisak','prihod, stanovanje i obrazovanje','morbiditet, mortalitet i natalitet'],a:0},
+ {t:'mc',q:'Kvantitet života izražava se:',o:['brojem godina života','stanjem od perfektnog zdravlja do terminalnog stadijuma','subjektivnim osećanjem','brojem bolesti'],a:0},
+ {t:'mc',q:'Socijalno-ekološki model integriše:',o:['biomedicinsku, psihosocijalnu i socijalno-medicinsku perspektivu','samo biomedicinsku perspektivu','samo ekonomsku perspektivu','samo genetsku perspektivu'],a:0},
+ {t:'fill',q:'Kvalitet života je ___ pojam od zdravlja i uključuje životni standard, stanovanje i radne uslove.',a:[['širi','siri']]},
+ {t:'fill',q:'Tradicionalna kineska medicina nastala je pre oko ___ godina.',a:[['4000','4.000','četiri hiljade']]},
+ {t:'fill',q:'Otkrića u vezi sa imunitetom dala su osnov za prevenciju putem ___.',a:[['imunizacije','imunizacija','vakcinacije']]},
+ {t:'fill',q:'Kvalitet života izražava se stanjem koje varira od „perfektnog zdravlja” do „___ stadijuma bolesti”.',a:[['terminalnog','terminalni']]},
+ {t:'fill',q:'Klinička ispitivanja kojima se procenjuje u kom obimu pacijent pod terapijom može da funkcioniše zovu se ___ merenja.',a:[['funkcionalna','funkcionalno']]},
+ {t:'tf',q:'Prema tradicionalnoj kineskoj medicini, bolest može nastati i zbog disharmonije u porodici i društvu.',a:true},
+ {t:'tf',q:'Hipokrat je smatrao da način života nema uticaja na zdravlje.',a:false,e:'Hipokrat je ravnotežu video između spoljne sredine i načina života (ishrana, piće, rad, rekreacija...).'},
+ {t:'tf',q:'Beda, slaba ishranjenost i fizička iscrpljenost mogu biti stresogeni i rizik za obolevanje.',a:true},
+ {t:'tf',q:'Merenje kvaliteta života obuhvata samo fizičke funkcije.',a:false,e:'Uključuje fizičke funkcije, mentalno stanje, težinu oboljenja, socijalne funkcije i subjektivno osećanje zdravlja.'},
+ {t:'tf',q:'Od koje će bolesti osoba oboleti zavisi isključivo od spoljne sredine.',a:false,e:'Zavisi od genetskih i stečenih konstitucionalnih faktora i interakcije osobe i sredine.'}
+]},
+{id:'mzo1-3',lesson:L1,author:IM,title:'Test 3',qs:[
+ {t:'mc',q:'Šta za laike znači „biti zdrav”?',o:['ne biti bolestan','biti bez medicinski definisanih bolesti i nesposobnosti','imati savršene laboratorijske nalaze','redovno ići na preglede'],a:0},
+ {t:'mc',q:'Model trougla bolesti čine:',o:['uzročnik, domaćin i spoljna sredina','geni, način života i služba','lekar, pacijent i bolnica','natalitet, mortalitet i morbiditet'],a:0},
+ {t:'mc',q:'Model dijamanta obuhvata:',o:['genetske faktore, način života i ponašanje, socioekonomske faktore i pristupačnost i rad zdravstvene službe','samo uzročnika i domaćina','samo spoljnu sredinu','samo socijalnu podršku'],a:0},
+ {t:'mc',q:'Ko je sproveo istraživanje u kome je praćen mortalitet u odnosu na 7 bazičnih zdravih navika (Alameda studija)?',o:['Lester Breslow','Hochbaum','Winslow','Miller'],a:0},
+ {t:'mc',q:'Šta NIJE jedna od 7 bazičnih zdravih navika?',o:['dva obroka dnevno bez doručka','redovna fizička aktivnost','7–8 sati redovnog spavanja','bez jela između obroka'],a:0,e:'Doručak je obavezan.'},
+ {t:'fill',q:'Aspekti zdravlja su fizičko, mentalno, emocionalno, socijalno zdravlje i zdravlje ___.',a:[['zajednice','zajednica']]},
+ {t:'fill',q:'Bolesti koje izaziva sama zdravstvena služba nazivaju se ___ bolesti.',a:[['jatrogene','jatrogena','ijatrogene']]},
+ {t:'fill',q:'Zračenje i lekovi mogu dovesti do trajnih promena gena, odnosno ___.',a:[['mutacija','mutacije']]},
+ {t:'fill',q:'Uticaj konstitucije i sredine ispitivan je kod identičnih i neidentičnih blizanaca za pojavu ___ pluća.',a:[['TBC','tuberkuloze','tbc']]},
+ {t:'fill',q:'Winslow: krajnji cilj mera je da svaki pojedinac uživa svoje urođeno pravo na zdravlje i ___ život.',a:[['dug','duži']]},
+ {t:'tf',q:'Model trougla nastao je proučavanjem zaraznih bolesti, ali je primenjiv i na nezarazne.',a:true},
+ {t:'tf',q:'Prevencija abnormalnosti genetskog porekla je starija od suzbijanja štetnih faktora spoljne sredine.',a:false,e:'Prevencija genetskih abnormalnosti je novijeg datuma.'},
+ {t:'tf',q:'Osobe koje se razbolevaju i pod normalnim uslovima zahtevaju posebne mere i u normalnim uslovima.',a:true},
+ {t:'tf',q:'Ljudi sa rizičnim ponašanjima i slabom socijalnom vezom žive duže.',a:false,e:'Ljudi sa rizičnim ponašanjima i slabom socijalnom vezom ne žive dugo.'},
+ {t:'tf',q:'Grci i Rimljani su smatrali da zdravlje i bolest nemaju veze sa uslovima života.',a:false,e:'Smatrali su da zdravlje i bolest odražavaju uslove života.'}
+]},
+{id:'mzo2-1',lesson:L2,author:IM,title:'Test 1',qs:[
+ {t:'mc',q:'Koji oblik zdravstvenog ponašanja preduzimaju osobe koje se smatraju bolesnima da bi utvrdile svoje stanje i mogućnosti lečenja?',o:['bolesničko ponašanje','pozitivno zdravstveno ponašanje','preventivno zdravstveno ponašanje','ponašanje u ulozi bolesnika'],a:0},
+ {t:'mc',q:'Ispunjavanje uputa i saveta o lečenju kada je „objektivno” prihvaćeno da su osobe bolesne je:',o:['ponašanje u ulozi bolesnika','bolesničko ponašanje','preventivno ponašanje','pozitivno ponašanje'],a:0},
+ {t:'mc',q:'Model zdravstvenog verovanja postavio je:',o:['G. M. Hochbaum 60-ih godina','I. M. Rosenstock 1990.','Lester Breslow','Green 1991.'],a:0},
+ {t:'mc',q:'Koje tri postavke čine model zdravstvenog verovanja?',o:['vlastita osetljivost, ozbiljnost pretnje, koristi i poteškoće','znanje, stav, ponašanje','uzročnik, domaćin, sredina','planiranje, izvođenje, evaluacija'],a:0},
+ {t:'mc',q:'„Koliko se aktivnost isplati?” je ključno pitanje kog elementa modela zdravstvenog verovanja?',o:['koristi i poteškoće','vlastite osetljivosti','ozbiljnosti pretnje','socijalnog uticaja'],a:0},
+ {t:'fill',q:'Model zdravstvenog verovanja kasnije je razradio I. M. Rosenstock ___. godine.',a:[['1974']]},
+ {t:'fill',q:'Vlastita osetljivost dovodi pojedinca do „spremnosti da preduzme ___”.',a:[['akciju','akcija']]},
+ {t:'fill',q:'Aktivnosti radi unapređenja sopstvenog zdravlja kod osoba koje smatraju da su zdrave čine ___ zdravstveno ponašanje.',a:[['pozitivno','pozitivan']]},
+ {t:'fill',q:'Prevencija ili rana dijagnostika bolesti je cilj ___ zdravstvenog ponašanja.',a:[['preventivnog','preventivno']]},
+ {t:'fill',q:'Na engleskom se model zdravstvenog verovanja zove Health ___ model.',a:[['Belief','belief']]},
+ {t:'tf',q:'Prema Hochbaumu, akcije koje preduzimamo često su manje vezane za brigu o zdravlju, a više za druge potrebe i okolnosti.',a:true},
+ {t:'tf',q:'Ozbiljnost pretnje je subjektivna procena kolika je mogućnost da osoba uopšte oboli.',a:false,e:'To je vlastita osetljivost; ozbiljnost pretnje je ocena koliko ozbiljno osoba može biti bolesna.'},
+ {t:'tf',q:'Prepreke u modelu zdravstvenog verovanja mogu biti emocionalne, fizičke i novčane.',a:true},
+ {t:'tf',q:'Zdravstvenih ponašanja, prema slajdu, ima šest oblika.',a:false,e:'Navedena su četiri oblika.'},
+ {t:'tf',q:'Teorije o zdravstvenom ponašanju nemaju praktičnu vrednost za zdravstveno vaspitanje.',a:false,e:'Teorije o zdravom i preventivnom ponašanju imaju praktično značenje u ZV.'}
+]},
+{id:'mzo2-2',lesson:L2,author:IM,title:'Test 2',qs:[
+ {t:'mc',q:'Primer da se pozitivni motivi ne podudaraju nužno sa zdravstvenim razlozima je:',o:['pojedinac pere zube da bi lepo izgledao, ali i da bi sprečio karijes','pojedinac ide kod lekara jer je bolestan','pojedinac uzima lek po preporuci','pojedinac se vakciniše zbog epidemije'],a:0},
+ {t:'mc',q:'Kako najčešće rešavamo sukob motiva?',o:['kompromisom, obično u korist motiva koji osećamo kao važniji','uvek u korist zdravlja','tako što odustanemo od oba motiva','tako što pitamo lekara'],a:0},
+ {t:'mc',q:'Kako ljudi reaguju kada se boje?',o:['nerazumno: ili negiraju opasnost ili pokazuju preteranu brigu do panike','uvek racionalno','isključivo odlaskom kod lekara','ne reaguju uopšte'],a:0},
+ {t:'mc',q:'ZV je, za razliku od zdravstvene propagande i prosvećivanja:',o:['naučna disciplina sa principima, teorijom i praksom','samo širenje informacija','samo popularizacija medicine','reklama za lekove'],a:0},
+ {t:'mc',q:'Prema SZO, zdravstveno vaspitanje je:',o:['ne samo širenje informacija o zdravlju, već aktivni proces učenja kroz iskustva','samo širenje informacija','skup zakona o zdravlju','isključivo rad lekara u bolnici'],a:0},
+ {t:'fill',q:'Učenje o zdravlju počinje u ___.',a:[['porodici','porodica']]},
+ {t:'fill',q:'Navike koje dete stvara razvijaju se ___ i često su vezane za zadovoljstvo ili nagradu.',a:[['ponavljanjem','ponavljanje']]},
+ {t:'fill',q:'Širenje zdravstvenih informacija naziva se zdravstvena ___.',a:[['propaganda']]},
+ {t:'fill',q:'Wood: ZV je skup ___ koja pozitivno utiču na navike, stavove i znanja u vezi sa zdravljem.',a:[['iskustava','iskustva']]},
+ {t:'fill',q:'Popularizacija medicine naziva se zdravstveno ___.',a:[['prosvećivanje','prosvecivanje']]},
+ {t:'tf',q:'Strah kao motiv ima dvostruku ulogu.',a:true},
+ {t:'tf',q:'Za praktičnu primenu ZV neophodne su moderno opremljene zdravstvene ustanove.',a:false,e:'Ne podrazumeva moderno opremljene ustanove, već zdravstvene radnike koji poznaju metodologiju rada sa ljudima.'},
+ {t:'tf',q:'Odgađanje odlaska lekaru izgovorom „Danas nemam vremena” primer je rešavanja sukoba motiva.',a:true},
+ {t:'tf',q:'Definiciju ZV kao procesa učenja koji proističe iz potreba za zdravljem na slajdu je dao Wood.',a:false,e:'Tu definiciju na slajdu daje Turner („Turne”); Wood govori o skupu iskustava.'},
+ {t:'tf',q:'Zdravstvena propaganda je sadržajnija i efikasnija od zdravstvenog vaspitanja.',a:false,e:'ZV je naučna disciplina i zato je sadržajnije i efikasnije od zdravstvene propagande i prosvećivanja.'}
+]},
+{id:'mzo2-3',lesson:L2,author:IM,title:'Test 3',qs:[
+ {t:'mc',q:'Šta NIJE jedan od opštih ciljeva ZV prema Komitetu eksperata SZO?',o:['povećati broj bolničkih kreveta','učiniti zdravlje cenjenom društvenom vrednošću','pomoći pojedincima da postanu odgovorni za svoje zdravlje','unapređivati razvitak i pravilno korišćenje zdravstvene službe'],a:0},
+ {t:'mc',q:'Gde je prvenstveno mesto ZV u zdravstvenoj zaštiti?',o:['u primarnoj zdravstvenoj zaštiti','isključivo u bolnicama','samo u tercijarnoj zaštiti','samo u školama'],a:0},
+ {t:'mc',q:'Ko sprovodi ZV u porodici sa malom decom?',o:['patronažna sestra','školski nastavnik','socijalni radnik','farmaceut'],a:0},
+ {t:'mc',q:'Zašto su rezultati ZV kao mere sekundarne prevencije najslabiji?',o:['jer se oštećenje zdravlja ponekad ne može vratiti u prvobitno stanje','jer motivacija ne postoji','jer se ZV tada ne sprovodi','jer pacijenti ne žele informacije'],a:0},
+ {t:'mc',q:'Najpouzdaniji izvor podataka za oboljenja koja su vodeći zdravstveni problem zajednice je:',o:['registar određenih bolesti','redovna statistika','lični utisak lekara','anketa jedne škole'],a:0},
+ {t:'fill',q:'Specifični ciljevi ZV su kognitivni, afektivni, bihevioralni i ___.',a:[['socijalni','socijalno']]},
+ {t:'fill',q:'ZV kod rekonvalescenata je mera ___ prevencije.',a:[['tercijarne','tercijerne','tercijarna']]},
+ {t:'fill',q:'Direktni indikatori zdravstvenog stanja su morbiditet i ___.',a:[['mortalitet']]},
+ {t:'fill',q:'Za manje teritorije pogodna su istraživanja putem ankete i ___.',a:[['skrininga','skrining']]},
+ {t:'fill',q:'Proučavanje zdravstvenog stanja stanovništva je jedan od osnovnih zadataka ___ medicine.',a:[['socijalne','socijalna']]},
+ {t:'tf',q:'ZV kao mera sekundarne prevencije ima brzo i efikasno dejstvo jer je motivacija za zdravlje snažna.',a:true},
+ {t:'tf',q:'Jedan indikator sam za sebe može biti osnov za ocenu zdravstvenog stanja stanovništva.',a:false,e:'Nijedan indikator sam za sebe ne može biti osnov za ocenu.'},
+ {t:'tf',q:'Podaci iz redovne statistike su potpuno pouzdani za morbiditet i mortalitet prema uzroku.',a:false,e:'Nisu potpuno pouzdani, naročito za morbiditet i mortalitet prema uzroku.'},
+ {t:'tf',q:'Ankete i skrining daju sliku o stvarnom, a ne samo „primećenom” morbiditetu.',a:true},
+ {t:'tf',q:'Kritičko i objektivno istraživanje stvarnosti je jedna od dve strategije važne za socijalnu medicinu.',a:true}
+]},
+{id:'mzo3-1',lesson:L3,author:IM,title:'Test 1',qs:[
+ {t:'mc',q:'Promocija zdravlja je:',o:['proces učenja kojim nastojimo da pojedinac ili zajednica ovlada determinantama zdravlja','lečenje bolesti u bolnici','reklamiranje zdravstvenih usluga','isključivo vakcinacija'],a:0},
+ {t:'mc',q:'Izraz „promocija zdravlja” znači:',o:['„način razmišljanja u javnom zdravstvu”','„lečenje u kući”','„medicinska reklama”','„nadzor nad bolnicama”'],a:0},
+ {t:'mc',q:'Šta NIJE jedna od osnovnih vrednosti promocije zdravlja?',o:['centralizacija odlučivanja','poštovanje autonomije','briga za jednakost i socijalnu pravdu','priznanje i poštovanje različitosti'],a:0},
+ {t:'mc',q:'Koji je cilj promocije zdravlja?',o:['razviti javne politike koje štite i promovišu zdravlje i društveno blagostanje','povećati broj specijalista','smanjiti broj škola','povećati cene lekova'],a:0},
+ {t:'mc',q:'Koju novu dimenziju promocija zdravlja dodaje radu zdravstvene struke?',o:['odgovornost pojedinca i zajednice','veće plate','novu opremu','strožu hijerarhiju'],a:0},
+ {t:'fill',q:'Promocija zdravlja podrazumeva unapređenje zdravlja ___ nego što se pojavi bolest.',a:[['pre','prije']]},
+ {t:'fill',q:'Promocija zdravlja posebno naglašava zdravu politiku i promenu ___ života.',a:[['stila','stil']]},
+ {t:'fill',q:'Važnu ulogu u promociji zdravlja ima „olakšavanje zdravih ___”.',a:[['izbora','izbor']]},
+ {t:'fill',q:'Osnovnih vrednosti promocije zdravlja ima ___.',a:[['5','pet']]},
+ {t:'fill',q:'Cilj promocije zdravlja: ohrabriti i podržati ljude da preuzmu ___ za svoje živote.',a:[['odgovornost']]},
+ {t:'tf',q:'Za ciljeve promocije zdravlja potrebno je i ojačati privredni razvoj i poboljšati socijalno-ekonomski status.',a:true},
+ {t:'tf',q:'Promocija zdravlja počinje tek kada se bolest pojavi.',a:false,e:'Podrazumeva unapređenje zdravlja pre nego što se pojavi bolest.'},
+ {t:'tf',q:'Poštovanje autonomije nije vrednost promocije zdravlja.',a:false,e:'Poštovanje autonomije je jedna od 5 osnovnih vrednosti.'},
+ {t:'tf',q:'Smanjiti uzroke bolesti i onesposobljenja je jedan od ciljeva promocije zdravlja.',a:true},
+ {t:'tf',q:'Škole i radne organizacije nisu mesta gde se može raditi na poboljšanju zdravlja.',a:false,e:'Obrazovanje, radne organizacije, lokalna samouprava i mediji su sektori gde se radi na zdravlju.'}
+]},
+{id:'mzo3-2',lesson:L3,author:IM,title:'Test 2',qs:[
+ {t:'mc',q:'Koliko osnovnih ciljeva ZV navodi UNESCO?',o:['6','3','4','9'],a:0},
+ {t:'mc',q:'Koji je cilj ZV prema UNESCO-u?',o:['omogućiti svim ljudima da žive u miru','povećati broj bolnica','smanjiti broj zdravstvenih radnika','uvesti obavezne preglede'],a:0},
+ {t:'mc',q:'Koji je globalni cilj ZV i promocije zdravlja?',o:['politiku promocije zdravlja integrisati sa politikom drugih sektora (stanovanje, rad, socijalne službe, PZZ)','ograničiti promociju na bolnice','zameniti PZZ privatnim sektorom','isključiti zajednicu iz odlučivanja'],a:0},
+ {t:'mc',q:'Šta je jedan od užih ciljeva ZV i promocije zdravlja?',o:['razviti samopomoć (self-help) i samozaštitu (self-care)','povećati broj operacija','smanjiti informisanost','centralizovati zdravstvenu službu'],a:0},
+ {t:'mc',q:'Uži cilj „razvijati zaštitu u kojoj ... prelazi u ...” znači prelaz:',o:['„medical care” u „health care”','„health care” u „medical care”','„self-care” u „medical care”','„primary care” u „hospital care”'],a:0},
+ {t:'fill',q:'UNESCO je vaspitna, naučna i kulturna organizacija ___ naroda.',a:[['Ujedinjenih','ujedinjenih']]},
+ {t:'fill',q:'UNESCO: pomoći ljudima da se prilagođavaju ___ koje se dešavaju u savremenom svetu.',a:[['promenama','promjenama','promene']]},
+ {t:'fill',q:'Uži cilj: obavestiti sve ljude o zdravlju u pravo vreme i na pravi ___.',a:[['način','nacin']]},
+ {t:'fill',q:'Uži cilj: ___ napore za postizanje zdravlja.',a:[['kolektivizirati','kolektivizovati']]},
+ {t:'fill',q:'Globalni cilj: omogućiti ljudima da promocijom zdravlja eliminišu ___ u zdravlju pojedinca i zajednice.',a:[['razlike','razliku']]},
+ {t:'tf',q:'Opšti ciljevi ZV prema dokumentima SZO uključuju da zajednica smatra zdravlje visokom društvenom vrednošću.',a:true},
+ {t:'tf',q:'Prema UNESCO-u, cilj ZV je i da ohrabri ljude da razvijaju svoju kulturu.',a:true},
+ {t:'tf',q:'Globalnih ciljeva ZV i promocije zdravlja na slajdu ima šest.',a:false,e:'Globalnih ciljeva ima tri; šest ciljeva navodi UNESCO.'},
+ {t:'tf',q:'Celokupna radnja ZV i promocije zdravlja usmerena je samo na telesno zdravlje.',a:false,e:'Usmerena je na telesno, mentalno i duševno zdravlje i društveno blagostanje.'},
+ {t:'tf',q:'Prema UNESCO-u, cilj ZV je da osposobi ljude da budu ravnopravni članovi savremenog sveta.',a:true}
+]},
+{id:'mzo3-3',lesson:L3,author:IM,title:'Test 3',qs:[
+ {t:'mc',q:'Konferencija o primarnoj zdravstvenoj zaštiti održana je u:',o:['Alma-Ati 1978.','Otavi 1986.','Adelaidi 1988.','Beču 1988.'],a:0},
+ {t:'mc',q:'Dokumenti o promociji zdravlja sa 5 principa potiču iz:',o:['Otave 1986.','Alma-Ate 1978.','Sundsvalla 1991.','Adelaide 1988.'],a:0},
+ {t:'mc',q:'Šta je jedan od 5 principa Otavske strategije?',o:['reorganizacija zdravstvene službe','podrška zdravlju žena','zdrava ishrana','suzbijanje duvana i alkohola'],a:0,e:'Ostale tri opcije su prioriteti iz Adelaide.'},
+ {t:'mc',q:'Koja 4 prioriteta preporučuje konferencija u Adelaidi?',o:['podrška zdravlju žena, zdrava ishrana, suzbijanje duvana i alkohola, stvaranje pogodne sredine','imunizacija, skrining, dojenje, škole zdravlja','javna politika, sredina, zajednica, lične sposobnosti','voda, otpad, ishrana, stres'],a:0},
+ {t:'mc',q:'Na kom nivou se, prema Alma-Ati, najviše može uticati na razvoj?',o:['na najnižem nivou, u lokalnoj zajednici','na nivou države','na nivou Evrope','na nivou bolnica'],a:0},
+ {t:'fill',q:'Preporuke iz Beča (1988) odnose se na zdrave ___.',a:[['gradove','grad']]},
+ {t:'fill',q:'Izjava iz ___ (1991) govori o okolini koja pomaže zdravlje.',a:[['Sundsvalla','Sundsvall','Sundsvala']]},
+ {t:'fill',q:'Prema Alma-Ati, zdravlje je ___ preduslov za društveni i ekonomski razvoj.',a:[['nezamenjiv','nezamjenjiv','nezamenljiv']]},
+ {t:'fill',q:'Strategija zdravlja za sve u Evropskom regionu doneta je ___. godine.',a:[['1980']]},
+ {t:'fill',q:'Princip Otave: jačanje ___ u zajednici.',a:[['akcije','akcija']]},
+ {t:'tf',q:'Prema Alma-Ati, razvoj ne znači samo rast, već i strukturalne i kvalitetne promene.',a:true},
+ {t:'tf',q:'Stvaranje pogodne sredine pojavljuje se i u Otavskoj strategiji i među prioritetima Adelaide.',a:true},
+ {t:'tf',q:'Preporuke iz Adelaide odnose se na zdrave gradove.',a:false,e:'Adelaida (1988): javna politika koja promoviše zdravlje; zdravi gradovi su preporuke iz Beča (1988).'},
+ {t:'tf',q:'Prema Alma-Ati, kućna nega i kućno lečenje ne spadaju u primarnu zdravstvenu zaštitu.',a:false,e:'PZZ omogućava da se u porodici sprovode kućna nega i kućno lečenje.'},
+ {t:'tf',q:'Evropski dokument o okolini i zdravlju donet je 1978. godine.',a:false,e:'Donet je 1990; 1978. je Alma-Ata.'}
+]},
+{id:'mzo3-4',lesson:L3,author:IM,title:'Test 4',qs:[
+ {t:'mc',q:'Šta treba da uključi sistem PZZ prema slajdu o ulozi promocije zdravlja?',o:['standardnu imunizaciju, skrining, savetovališta i javno informisanje','samo hirurške intervencije','samo bolničko lečenje','samo prodaju lekova'],a:0},
+ {t:'mc',q:'Kako pridobiti zdravu osobu da uči o zdravlju?',o:['osloniti se na neku njenu osnovnu potrebu (npr. prekid pušenja kod lečenja steriliteta)','zastrašiti je','ignorisati je dok ne oboli','dati joj samo brošuru'],a:0},
+ {t:'mc',q:'Znanje je:',o:['verovanje čiju istinitost možemo potvrditi, dokazati','verovanje čija istinitost nije uvek potvrđena','isto što i mišljenje','osećaj prema nekoj pojavi'],a:0},
+ {t:'mc',q:'Šta NIJE osnova za postavljanje zdravstveno vaspitne dijagnoze?',o:['reklamne kampanje','snimanje znanja, stavova i prakse','statistički izveštaji o zdravstvenom stanju','lični uvid'],a:0},
+ {t:'mc',q:'Šta zdravstveni radnici kao edukatori treba da poznaju?',o:['verovanja, ophođenja, tabue i običaje ljudi','samo cene lekova','samo zakone','samo stručne izraze'],a:0},
+ {t:'fill',q:'Mišljenje je „verovanje čija istinitost nije uvek ___”.',a:[['potvrđena','potvrdjena','potvrđeno']]},
+ {t:'fill',q:'Dva važna faktora koja određuju čovekovo zdravlje su znanje i ___.',a:[['ponašanje','ponasanje']]},
+ {t:'fill',q:'ZV je planirani uticaj na formiranje ___.',a:[['ponašanja','ponasanja','ponašanje']]},
+ {t:'fill',q:'Primeri zdravstvenih mera u PZZ: promocija dojenja, bolnice-prijatelji ___ i škole zdravlja.',a:[['dece','djece']]},
+ {t:'fill',q:'ZV dijagnoza se postavlja i na osnovu ___ istraživanja.',a:[['sondažnih','sondiranim','sondaznih','sondažna']]},
+ {t:'tf',q:'Zdrava osoba obično vodi mnogo brige o svom zdravlju.',a:false,e:'Zdrava osoba ne vodi brigu o zdravlju.'},
+ {t:'tf',q:'Mnogi ljudi znaju da je pušenje štetno, ali i dalje puše.',a:true},
+ {t:'tf',q:'Kad osoba oboli i bolest se komplikuje nezdravom navikom, motivacija za napuštanje te navike je naglašena.',a:true},
+ {t:'tf',q:'Nadrilekarstvo je primer kulturnog fenomena koji zdravstveni edukator treba da poznaje.',a:true},
+ {t:'tf',q:'Metodologija ZV ne uzima u obzir postojeći fond znanja pacijenta.',a:false,e:'Naslanja se na utvrđeni fond znanja pacijenta ili grupe i na postojeće interese i potrebe.'}
+]},
+{id:'mzo4-1',lesson:L4,author:IM,title:'Test 1',qs:[
+ {t:'mc',q:'Prva faza zdravstveno vaspitnog programa je:',o:['snimanje osnove','analiza podataka i izdvajanje prioriteta','izrada programa','evaluacija'],a:0},
+ {t:'mc',q:'U kojoj fazi se postavlja „dijagnoza” zdravstvenog stanja stanovništva?',o:['II faza: analiza podataka i izdvajanje prioriteta','I faza: snimanje osnove','IV faza: izvođenje','V faza: evaluacija'],a:0},
+ {t:'mc',q:'Ko učestvuje u izvođenju ZV programa (IV faza)?',o:['svi zdravstveni radnici i saradnici iz zajednice (roditelji, prosvetni radnici, aktivisti, sportisti)','samo lekari specijalisti','samo direktor doma zdravlja','samo mediji'],a:0},
+ {t:'mc',q:'Kada treba vršiti evaluaciju programa?',o:['tokom sprovođenja programa i na kraju','samo na početku','samo posle pet godina','nikada'],a:0},
+ {t:'mc',q:'Ko je, u našoj sredini, nosilac zdravstveno vaspitnog programa?',o:['zdravstvena služba, uz aktivno uključivanje saradnika iz zajednice','škola','mesna zajednica bez zdravstvene službe','farmaceutske kompanije'],a:0},
+ {t:'fill',q:'ZV program prolazi kroz ___ faza.',a:[['5','pet']]},
+ {t:'fill',q:'Treća faza ZV programa je ___ programa.',a:[['izrada','izradu']]},
+ {t:'fill',q:'U prvoj fazi, pored rutinske statistike, koriste se dopunska istraživanja kroz ___ stanovništva i zdravstvenih radnika.',a:[['ankete','anketu','anketa']]},
+ {t:'fill',q:'Peta faza ZV programa je ___.',a:[['evaluacija']]},
+ {t:'fill',q:'U III fazi program razrađuje i ___ za evaluaciju.',a:[['elemente','element']]},
+ {t:'tf',q:'ZV program treba da bude deo programa zdravstvene zaštite i da prolazi kroz iste faze.',a:true},
+ {t:'tf',q:'Svi ZV programi su isti, bez obzira na probleme ciljnih grupa.',a:false,e:'Svaki ZV program je specifičan.'},
+ {t:'tf',q:'U III fazi razrađuju se i kadrovi i njihova edukacija, kao i finansijska sredstva.',a:true},
+ {t:'tf',q:'Osnovu planiranja ZV rada čine i podaci o morbiditetu i mortalitetu stanovništva.',a:true},
+ {t:'tf',q:'Sadržaji ZV rada su isti u svakoj sredini, bez obzira na potrebe populacije.',a:false,e:'Sadržaji zavise od potreba sredine i populacije na koju program deluje.'}
+]},
+{id:'mzo4-2',lesson:L4,author:IM,title:'Test 2',qs:[
+ {t:'mc',q:'Intervju je:',o:['razgovor dve osobe koji ima definisanu svrhu','razgovor grupe od 15 osoba','predavanje za veliku grupu','pisani upitnik'],a:0},
+ {t:'mc',q:'Koji je princip intervjua?',o:['najpre se prouči i pridobije intervjuisana osoba, pa tek onda podvrgne vaspitnom procesu','odmah se daju saveti','prvo se kritikuje osoba','intervju se vodi samo telefonom'],a:0},
+ {t:'mc',q:'Empatija je, prema slajdu o intervjuu:',o:['razumevanje osećanja, briga i potreba bez identifikacije sa ličnošću pacijenta','potpuna identifikacija sa pacijentom','sažaljenje','slaganje sa svim što pacijent kaže'],a:0},
+ {t:'mc',q:'Koliko članova ima mala grupa u ZV radu?',o:['10–15','2–3','30 i više','50–100'],a:0},
+ {t:'mc',q:'Koja je uloga zdravstvenog radnika u maloj grupi?',o:['stručni konsultant, savetnik','predsednik grupe','posmatrač','nema ulogu'],a:0},
+ {t:'fill',q:'U radu sa stanovništvom koriste se individualne i ___ metode.',a:[['grupne','grupna']]},
+ {t:'fill',q:'Mala grupa je ___ po svojim ciljevima (npr. grupa za odvikavanje od pušenja).',a:[['homogena','homogen']]},
+ {t:'fill',q:'Mala grupa bira ___ koji će je voditi i ___ koji prati rad.',a:[['predsednika','predsjednika'],['posmatrača','posmatraca']]},
+ {t:'fill',q:'Prvi vid aktivnosti u grupi, koji prethodi grupnoj odluci, je ___.',a:[['diskusija']]},
+ {t:'fill',q:'Kod intervjua je uspostavljanje prvog ___ presudno za dalji rad.',a:[['kontakta','kontakt']]},
+ {t:'tf',q:'Planirani intervju je jedna od najvažnijih metoda rada sa ljudima.',a:true},
+ {t:'tf',q:'Mala grupa ne može biti produktivna ako članovi nemaju isti nivo obrazovanja.',a:false,e:'Homogena grupa (istih interesa) može biti produktivna i ako članovi nemaju isti nivo obrazovanja.'},
+ {t:'tf',q:'Intervju se može voditi isključivo u bolnici.',a:false,e:'Može se voditi u domu zdravlja, bolnici, kućnoj poseti.'},
+ {t:'tf',q:'Pojedinac želi da bude prihvaćen u grupi, ali se plaši i odbacivanja od grupe.',a:true},
+ {t:'tf',q:'Male grupe ne mogu da rešavaju zdravstvene probleme zajednice kao što su pušenje ili astma.',a:false,e:'Pomoću malih grupa rešavaju se problemi kao odvikavanje od pušenja, povišen pritisak, astma.'}
+]},
+{id:'mzo4-3',lesson:L4,author:IM,title:'Test 3',qs:[
+ {t:'mc',q:'Koliko članova ima velika grupa?',o:['30 i više','10–15','5–8','tačno 20'],a:0},
+ {t:'mc',q:'Najčešći oblik rada velike grupe je:',o:['predavanje','intervju','životna demonstracija','igranje uloga'],a:0},
+ {t:'mc',q:'Tehnika Phillips podrazumeva da se velika grupa podeli na:',o:['6 malih grupica koje diskutuju po 6 minuta','2 grupe koje diskutuju po sat vremena','10 grupa po 10 minuta','parove'],a:0},
+ {t:'mc',q:'Kada se najčešće organizuje panel diskusija?',o:['kada su stavovi i mišljenja o nekom problemu podeljeni','kada svi imaju isto mišljenje','samo za decu','samo u bolnici'],a:0},
+ {t:'mc',q:'Sokratovska metoda (dvostruki put obrazovanja) se svodi na:',o:['diskusionu grupu','predavanje','plakat','film'],a:0},
+ {t:'fill',q:'Izlaganje na predavanju treba da traje do ___ minuta, da ostane vreme za diskusiju.',a:[['15','petnaest']]},
+ {t:'fill',q:'Kod panel diskusije ___ povezuje auditorijum sa grupom stručnjaka.',a:[['moderator']]},
+ {t:'fill',q:'Dramske predstave kao ZV metod koriste se naročito kod ___.',a:[['dece','djece']]},
+ {t:'fill',q:'Metod životne ___ podrazumeva učenje kroz iskustvo.',a:[['demonstracije','demonstracija']]},
+ {t:'fill',q:'Predavanje je izuzetno ___ model, pa se uvodi diskusioni sastanak „pitanja i odgovori”.',a:[['pasivan','pasivni']]},
+ {t:'tf',q:'Kod životne demonstracije vaspitni efekat je velik.',a:true},
+ {t:'tf',q:'Panel diskusija ne može se organizovati preko televizije i radija.',a:false,e:'Organizuje se preko televizije, radija ili novina i dobija širok publicitet.'},
+ {t:'tf',q:'Sokratovska metoda pretpostavlja da ljudi već imaju neke informacije, osećanja i uverenja o zdravlju.',a:true},
+ {t:'tf',q:'Sokratovska metoda svodi se na predavanje bez diskusije.',a:false,e:'Svodi se na diskusionu grupu i omogućava razmenu i povratnu informaciju.'},
+ {t:'tf',q:'Pitanja i odgovori ne pomažu zdravstvenom radniku da upozna auditorijum.',a:false,e:'Kroz pitanja i odgovore radnik bolje upoznaje auditorijum, nivo znanja i podesne osobe za malu grupu.'}
+]},
+{id:'mzo4-4',lesson:L4,author:IM,title:'Test 4',qs:[
+ {t:'mc',q:'Zdravstveno vaspitna sredstva imaju dvostruku ulogu:',o:['pomažu vaspitaču u radu i pomažu ljudima da lakše shvate i prihvate poruku','zamenjuju zdravstvenog radnika i smanjuju troškove','služe samo za reklamu i zabavu','služe samo za evaluaciju'],a:0},
+ {t:'mc',q:'Koliko traju zdravstveni filmovi?',o:['12–45 minuta','2–5 minuta','90–120 minuta','do 1 minut'],a:0},
+ {t:'mc',q:'Niz slika i crteža na filmskoj traci koji se projektuje dijaprojektorom je:',o:['dijafilm','album','plakat','video traka'],a:0},
+ {t:'mc',q:'Koje dve pogodnosti postoje u bolnici za ZV rad?',o:['bolesnici su visoko motivisani i imaju blizak odnos sa zdravstvenim radnicima','bolesnici imaju malo vremena i nisu zainteresovani','bolnica ima najveći auditorijum','u bolnici nema stresa'],a:0},
+ {t:'mc',q:'Koji je cilj ZV u zajednici?',o:['da zajednica shvati zdravlje kao najviši cilj i usmeri snage na zdravlje svih','da zajednica preuzme lečenje','da se smanji broj zdravstvenih radnika','da se zatvore savetovališta'],a:0},
+ {t:'fill',q:'Plakati, slikovnice, flajeri, agitke i brošure su ___ sredstva.',a:[['štampana','stampana']]},
+ {t:'fill',q:'Vreme dok je bolesnicima u bolnici dosadno koristi se za ___ terapiju.',a:[['okupacionu','okupaciona']]},
+ {t:'fill',q:'Socijalno-medicinski pristup kao cilj ima ___ zdravstvenog stanja.',a:[['unapređenje','unapredjenje']]},
+ {t:'fill',q:'Prvo pitanje u planiranju glasi: „Gde želimo da budemo?”, odnosno „___”.',a:[['TAMO','tamo']]},
+ {t:'fill',q:'Indikatori su merila koja omogućavaju da se mere ___ u toku određenog vremenskog perioda.',a:[['promene','promjene']]},
+ {t:'tf',q:'ZV u zdravstvenim ustanovama je stručna, etička i zakonska obaveza svih zdravstvenih radnika.',a:true},
+ {t:'tf',q:'Sredstva masovne komunikacije mogu i obmanuti ljude neosnovanim obaveštenjima.',a:true},
+ {t:'tf',q:'Klinički pristup ima za cilj unapređenje zdravstvenog stanja zajednice.',a:false,e:'Klinički pristup ima za cilj lečenje obolelog; unapređenje zdravstvenog stanja je cilj socijalno-medicinskog pristupa.'},
+ {t:'tf',q:'Zdravstveno vaspitanje je jedan od 8 bazičnih elemenata primarne zdravstvene zaštite.',a:true},
+ {t:'tf',q:'Svi zdravstveni indikatori su isključivo kvalitativni.',a:false,e:'Najveći broj indikatora je kvantitativne prirode.'}
+]},
+{id:'mzo5-1',lesson:L5,author:IM,title:'Test 1',qs:[
+ {t:'mc',q:'Najpoznatiji model u promociji zdravlja je:',o:['PRECEDE-PROCEED','MHEP','CHEM','CHEDS'],a:0},
+ {t:'mc',q:'Ko je autor PRECEDE-PROCEED modela (1991)?',o:['Green','Sullivan','Patton','Ross i Mico'],a:0},
+ {t:'mc',q:'Prva faza PRECEDE-PROCEED modela je:',o:['socijalna dijagnoza','epidemiološka dijagnoza','implementacija','ishodna evaluacija'],a:0},
+ {t:'mc',q:'U kojoj fazi se utvrđuju zdravstveni problemi, njihova raširenost i faktori koji joj doprinose?',o:['epidemiološka dijagnoza','socijalna dijagnoza','administrativna dijagnoza','procesna evaluacija'],a:0},
+ {t:'mc',q:'Analiza političkih resursa i okoline koji mogu pomoći ili otežati intervenciju je:',o:['administrativna i politička dijagnoza','obrazovna dijagnoza','dijagnoza ponašanja','evaluacija uticaja'],a:0},
+ {t:'fill',q:'PRECEDE-PROCEED model posmatra primenu programa kroz ___ faza.',a:[['9','devet']]},
+ {t:'fill',q:'Model MHEP potiče od autora Ross i ___ (1980).',a:[['Mico']]},
+ {t:'fill',q:'Model CHEM je postavio ___ 1973. godine.',a:[['Sullivan']]},
+ {t:'fill',q:'Faktori identifikovani u obrazovnoj dijagnozi su ___ ciljevi zdravstveno obrazovnog programa.',a:[['neposredni','neposredne']]},
+ {t:'fill',q:'Šesta faza PRECEDE-PROCEED modela je ___ intervencije.',a:[['implementacija']]},
+ {t:'tf',q:'PRECEDE-PROCEED model ima pet faza.',a:false,e:'Ima devet faza.'},
+ {t:'tf',q:'U socijalnoj dijagnozi podaci se prikupljaju anketom i ličnim uvidom.',a:true},
+ {t:'tf',q:'Obrazovna (organizatorska) dijagnoza ispituje razloge ponašanja povezane sa zdravstvenim stanjem ili kvalitetom života.',a:true},
+ {t:'tf',q:'Model MHERPD su postavili Bates i Winden 1973. godine.',a:false,e:'Bates i Winden, 1984; 1973. je CHEM (Sullivan).'},
+ {t:'tf',q:'Epidemiološka dijagnoza je poslednja faza PRECEDE-PROCEED modela.',a:false,e:'Poslednja (9.) je ishodna evaluacija; epidemiološka dijagnoza je 2. faza.'}
+]},
+{id:'mzo5-2',lesson:L5,author:IM,title:'Test 2',qs:[
+ {t:'mc',q:'Procesna evaluacija u PRECEDE-PROCEED modelu:',o:['počinje često odmah sa implementacijom i procenjuje prve efekte','vrši se samo posle deset godina','prethodi socijalnoj dijagnozi','procenjuje samo troškove'],a:0},
+ {t:'mc',q:'Koja faza daje uvid u zdravstvene indikatore i predstavlja završnu fazu?',o:['ishodna evaluacija (evaluacija posledica)','evaluacija uticaja','procesna evaluacija','implementacija'],a:0},
+ {t:'mc',q:'Zašto upozorenje „pušenje skraćuje život” na kutijama cigareta nije dovoljno?',o:['proste informacije nisu dovoljne; ljude treba naučiti kako da ih primene','jer niko ne čita kutije','jer pušenje ne skraćuje život','jer su upozorenja zabranjena'],a:0},
+ {t:'mc',q:'Na šta deluje ZV program, prema lekciji o intervencijama?',o:['na povećanje fonda znanja, motivacije i veština','samo na znanje','samo na strah','samo na cenu cigareta'],a:0},
+ {t:'mc',q:'Koje su posebne ciljne grupe zdravstvenog prosvećivanja?',o:['deca i omladina, odrasli, hronični bolesnici, migranti i raseljena lica','samo penzioneri','samo zdravstveni radnici','samo sportisti'],a:0},
+ {t:'fill',q:'Pušačima koji žele da prestanu može pomoći ___ program odvikavanja od pušenja.',a:[['petodnevni','petodnevni program','5-dnevni']]},
+ {t:'fill',q:'Evaluacija ___ određuje trenutne efekte programa na ciljano ponašanje ili faktore okoline.',a:[['uticaja','uticaj']]},
+ {t:'fill',q:'Osnovna dužnost zdravstvenog edukatora je da promoviše zdrav način ___.',a:[['življenja','zivljenja','života']]},
+ {t:'fill',q:'Osposobljavanje kadrova vrši se i kroz kontinuiranu medicinsku edukaciju, skraćeno ___.',a:[['KME','kme']]},
+ {t:'fill',q:'Zdravstveno obrazovanje se obavlja i u domovima za stara lica i u ___ organizacijama.',a:[['verskim','vjerskim']]},
+ {t:'tf',q:'Zdravstveno obrazovanje i promocija zdravlja obavljaju se na svakom mestu, od porodice do udruženja.',a:true},
+ {t:'tf',q:'Zdravstveno prosvećivanje je obaveza samo specijalista za promociju zdravlja.',a:false,e:'Obaveza svih zdravstvenih radnika je da sprovode zdravstveno prosvećivanje.'},
+ {t:'tf',q:'U ZV aktivnostima u zdravstvenim, socijalnim i obrazovnim ustanovama prioritet imaju zdravstveni profesionalci.',a:true},
+ {t:'tf',q:'Sociolozi, pravnici i ekonomisti ne mogu doprineti zdravstvenom obrazovanju.',a:false,e:'Navedeni su među onima koji mogu doprineti.'},
+ {t:'tf',q:'Principi o ličnim kvalitetima edukatora važe bez obzira da li je reč o zdravstvenom profesionalcu ili ne.',a:true}
+]},
+{id:'mzo5-3',lesson:L5,author:IM,title:'Test 3',qs:[
+ {t:'mc',q:'CINDI program je program za prevenciju:',o:['masovnih nezaraznih bolesti','zaraznih bolesti dece','saobraćajnih nesreća','profesionalnih bolesti'],a:0},
+ {t:'mc',q:'Ko je bio nosilac CINDI programa u bivšoj Jugoslaviji?',o:['Dom zdravlja „Novi Sad”','Institut „Batut”','Klinički centar Srbije','Ministarstvo zdravlja'],a:0},
+ {t:'mc',q:'U kojim gradovima je 1986. počeo CINDI program u bivšoj Jugoslaviji?',o:['Beograd, Ljubljana i Novi Sad','Zagreb, Sarajevo i Skoplje','Niš, Kragujevac i Subotica','Podgorica, Split i Rijeka'],a:0},
+ {t:'mc',q:'Ko koordinira rad na CINDI programu?',o:['Odbor za zdravlje','Crveni krst','Ministarstvo prosvete','UNICEF'],a:0},
+ {t:'mc',q:'Kako se meri evaluacija CINDI programa?',o:['incidencijom i prevalencijom masovnih nezaraznih bolesti pre i posle programa i zadovoljstvom korisnika','brojem prodatih lekova','brojem lekara','brojem bolnica'],a:0},
+ {t:'fill',q:'Evropska regionalna kancelarija SZO počela je da razvija globalni program ___. godine.',a:[['1982']]},
+ {t:'fill',q:'CINDI program je u bivšoj Jugoslaviji počeo ___. godine.',a:[['1986']]},
+ {t:'fill',q:'U „bolnicama prijateljima dece” beba se stavlja na podoj ___ sata posle rođenja.',a:[['pola','pol','1/2']]},
+ {t:'fill',q:'Kvizovi, tribine i igrokazi u kojima mladi odgajaju mlade su ___ grupe.',a:[['PIER','pier','peer']]},
+ {t:'fill',q:'U starijim školskim razredima uvode se programi „Škole ___”.',a:[['zdravlja']]},
+ {t:'tf',q:'Promocija dojenja je sastavni deo CINDI projekta.',a:true},
+ {t:'tf',q:'Škole za trudnice edukuju samo buduću majku, bez partnera.',a:false,e:'Škole za trudnice edukuju oba bračna partnera.'},
+ {t:'tf',q:'Mere primarne prevencije sa decom do 3 godine sprovode se kroz savetovališta na nivou PZZ.',a:true},
+ {t:'tf',q:'Upravljanje krupnim otpadom i palijativna nega su među problemima koji se rešavaju zdravstvenim obrazovanjem.',a:true},
+ {t:'tf',q:'U CINDI programu faktori rizika se ocenjuju u različitim vremenskim periodima za različite ispitanike.',a:false,e:'Ocena faktora rizika vrši se u istom vremenskom periodu za sve ispitanike, po metodologiji SZO.'}
+]},
+{id:'mzo6-1',lesson:L6,author:SI,title:'Test 1',qs:[
+ {t:'mc',q:'Stav je:',o:['socijalizacijom stečena, relativno trajna mentalna dispozicija da se misli, oseća i postupa na određeni način','kratkotrajno raspoloženje','urođena osobina','isto što i znanje'],a:0},
+ {t:'mc',q:'Rasprava je:',o:['oblik verbalne komunikacije u kojem sagovornici imaju suprotna ili drugačija mišljenja o istom pitanju','razgovor u kojem se svi slažu','pisani izveštaj','monolog jednog govornika'],a:0},
+ {t:'mc',q:'Rasprava bez pravila ponašanja i bez voditelja, u kojoj pobeđuje jači, je:',o:['svađa','okrugli sto','debata','panel'],a:0},
+ {t:'mc',q:'Kod okruglog stola, o pobedniku odlučuje:',o:['publika','sudija','voditelj','najglasniji učesnik'],a:0},
+ {t:'mc',q:'Kod debate, ko odlučuje ko je pobednik?',o:['sudija','publika','voditelj','afirmacijska ekipa'],a:0},
+ {t:'fill',q:'Raspravlja se uvek o nekoj ___.',a:[['tvrdnji','tvrdnja','tezi']]},
+ {t:'fill',q:'Postoje ___ vrste rasprava.',a:[['3','tri']]},
+ {t:'fill',q:'Debata je ___ argumentovana rasprava.',a:[['strukturisana','strukturirana']]},
+ {t:'fill',q:'Rečenice kojima pokušavamo da dokažemo ili osporimo istinitost teze su ___.',a:[['argumenti','argument']]},
+ {t:'fill',q:'Rasprava razvija kritičko, logičko i ___ razmišljanje.',a:[['kreativno','kreativni']]},
+ {t:'tf',q:'Stavovi se osećaju kao pozitivna ili negativna reakcija.',a:true},
+ {t:'tf',q:'U debati postoji voditelj koji daje i uzima reč.',a:false,e:'Debata je bez voditelja; svi učesnici znaju pravila, a sudija odlučuje. Voditelja ima okrugli sto.'},
+ {t:'tf',q:'Rasprava podrazumeva i uljudno „napadanje” suprotstavljenih stavova.',a:true},
+ {t:'tf',q:'Stav je kratkotrajna, površna reakcija bez dubljih psiholoških struktura.',a:false,e:'Stav je relativno trajna dispozicija i ima dublje psihološke strukture.'},
+ {t:'tf',q:'U debati se obrazlažu razlozi ZA i PROTIV.',a:true}
+]},
+{id:'mzo6-2',lesson:L6,author:SI,title:'Test 2',qs:[
+ {t:'mc',q:'Prvi korak afirmacijske argumentacijske linije je:',o:['definisati ključne reči','pobijati argumente negacije','suočiti obe linije','dati argumente'],a:0},
+ {t:'mc',q:'Šta radi negacijska linija sa definicijom?',o:['prihvata definiciju ili nudi svoju','uvek odbacuje svaku definiciju','ne bavi se definicijom','definiše ključne reči pre afirmacije'],a:0},
+ {t:'mc',q:'Prvi korak pripreme argumentacijske linije je:',o:['„oluja mozgova”: svako donosi ideje, stavove i znanja','organizovanje argumenata u sled','određivanje kriterijuma','obraćanje sudiji'],a:0},
+ {t:'mc',q:'Karl Popperova debata ima:',o:['dve ekipe, svaka po tri člana','tri ekipe po dva člana','jednu ekipu i sudiju','neograničen broj govornika'],a:0},
+ {t:'mc',q:'Ko je rekao: „U naše vreme ima moć onaj koji zna govoriti”?',o:['R. C. Salisbury','Karl Popper','Sokrat','Winston Churchill'],a:0},
+ {t:'fill',q:'Uvodni govor afirmacijskog i negacijskog govornika u Popperovoj debati traje ___ sekundi.',a:[['90','devedeset']]},
+ {t:'fill',q:'Napad pitanjima u Popperovoj debati traje ___ sekundi, a završni govor ___ sekundi.',a:[['60','šezdeset'],['45','četrdeset pet']]},
+ {t:'fill',q:'Zlatno pravilo: reci o čemu ćeš govoriti, govori, pa reci o čemu si ___.',a:[['govorio','govorila','govorio/la']]},
+ {t:'fill',q:'U govoru se procenjuju sadržaj i ___.',a:[['prezentacija']]},
+ {t:'fill',q:'U vežbi „Jedna reč je dovoljna” peti govornici (A5 i N5) imaju po jednu ___.',a:[['reč','rec','riječ']]},
+ {t:'tf',q:'Ključ uspeha u debati su dobro izvedeni argumenti, a ne samo dobar javni nastup.',a:true},
+ {t:'tf',q:'Debateri uvek zastupaju samo stavove koji su im lično bliski.',a:false,e:'Često zastupaju stavove koji im nisu bliski; zato je ključ u kvalitetnoj pripremi.'},
+ {t:'tf',q:'U debati su dozvoljeni prekidanje govornika, zamena teza i paušalne ocene.',a:false,e:'U debati nema prekidanja, zamene teza, beskrajnih monologa, paušalnih ocena, uvreda i nasilja.'},
+ {t:'tf',q:'Debata je jedan od najsigurnijih modela u izgradnji modernog, ravnopravnog i tolerantnog društva.',a:true},
+ {t:'tf',q:'U primeru debate osnovnu školu obavezno pohađaju deca od 6 do 15 godina.',a:true}
+]}
+];
+const ORDER=[L1,L2,L3,L4,L5,L6];
+const NOTE={};
+const LESSONS=ORDER.filter(l=>TESTS.some(t=>t.lesson===l)).concat([...new Set(TESTS.map(t=>t.lesson))].filter(l=>!ORDER.includes(l)));
+const POOL=TESTS.flatMap(t=>t.qs.map(q=>({...q,src:t.lesson})));
+
+const BASE='';
+const TYPE={mc:'Zaokruži tačan odgovor',fill:'Dopuni',tf:'Tačno ili netačno'};
+const SHORT={mc:'Zaokruživanje',fill:'Dopuna',tf:'Tačno / netačno'};
+const KEY='testovi-metodologija-zo-v1',WKEY='testovi-metodologija-zo-greske-v1',DAY=24*60*60*1000,PASS=51;
+const app=document.getElementById('app');
+let view='home',S=null,R=null,onlyWrong=false,confirmEnd=false,confirmReset=false,copied=null,tick=null;
+const openL=new Set([0]);
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>{n=Math.round(n*10)/10;return Number.isInteger(n)?String(n):n.toFixed(1).replace('.',',')};
+const clock=ms=>{const s=Math.max(0,Math.floor(ms/1000));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const CYR={'а':'a','б':'b','в':'v','г':'g','д':'d','ђ':'dj','е':'e','ж':'z','з':'z','и':'i','ј':'j','к':'k','л':'l','љ':'lj','м':'m','н':'n','њ':'nj','о':'o','п':'p','р':'r','с':'s','т':'t','ћ':'c','у':'u','ф':'f','х':'h','ц':'c','ч':'c','џ':'dz','ш':'s'};
+const norm=s=>String(s||'').toLowerCase().replace(/[а-яђјљњћџ]/g,c=>CYR[c]??c).replace(/đ/g,'dj').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+function lev(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function matches(input,alts){const x=norm(input);if(!x)return false;
+  return alts.some(a=>{const y=norm(a);if(x===y)return true;const tol=y.length>=10?2:y.length>=5?1:0;return tol>0&&lev(x,y)<=tol})}
+/* Ocenjivanje jednog pitanja: vraća poene (0–1) i tačnost svake praznine */
+function grade(q,ans){
+  if(q.t!=='fill')return{pts:ans===q.a?1:0,ok:[]};
+  const a=ans||[],used=new Set(),ok=q.a.map(()=>false);
+  q.a.forEach((alts,i)=>{
+    if(!q.unordered){ok[i]=matches(a[i],alts);return}
+    const j=q.a.findIndex((g,k)=>!used.has(k)&&matches(a[i],g));
+    if(j>-1){used.add(j);ok[i]=true}
+  });
+  return{pts:ok.filter(Boolean).length/ok.length,ok};
+}
+const answered=(q,a)=>q.t==='fill'?!!(a&&a.some(x=>norm(x))):a!==null&&a!==undefined;
+const mark=p=>p<51?5:p<61?6:p<71?7:p<81?8:p<91?9:10;
+const correctText=q=>q.t==='mc'?'abcd'[q.a]+') '+q.o[q.a]:q.t==='tf'?(q.a?'Tačno':'Netačno'):q.a.map(g=>g[0]).join('; ');
+const givenText=(q,a)=>!answered(q,a)?'bez odgovora':q.t==='mc'?'abcd'[a]+') '+q.o[a]:q.t==='tf'?(a?'Tačno':'Netačno'):a.map(x=>x&&x.trim()?x.trim():'—').join('; ');
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+/* ---------- čuvanje: sve važi 24 sata od trenutka kada je zabeleženo ---------- */
+function load(){try{const h=JSON.parse(localStorage.getItem(KEY))||{},now=Date.now();let cut=false;
+  for(const id of Object.keys(h)){const keep=(h[id]||[]).filter(r=>r.date&&now-r.date<DAY);if(keep.length!==(h[id]||[]).length)cut=true;if(keep.length)h[id]=keep;else delete h[id]}
+  if(cut)localStorage.setItem(KEY,JSON.stringify(h));return h}catch(e){return{}}}
+function save(id,rec){try{const h=load();(h[id]=h[id]||[]).push(rec);localStorage.setItem(KEY,JSON.stringify(h))}catch(e){}}
+function loadWrong(){try{const w=JSON.parse(localStorage.getItem(WKEY))||{},now=Date.now();for(const k of Object.keys(w))if(now-w[k]>=DAY)delete w[k];return w}catch(e){return{}}}
+function saveWrong(w){try{localStorage.setItem(WKEY,JSON.stringify(w))}catch(e){}}
+function wipe(){try{localStorage.removeItem(KEY);localStorage.removeItem(WKEY)}catch(e){}}
+
+/* ---------- pokretanje testova ---------- */
+/* Odgovori kod zaokruživanja mešaju se pri svakom pokušaju */
+function prep(q){if(q.t!=='mc')return{...q};const ix=shuffle(q.o.map((_,i)=>i));return{...q,o:ix.map(i=>q.o[i]),a:ix.indexOf(q.a)}}
+/* Izvlači po n pitanja svake vrste, ravnomerno iz lekcija (svih ili jedne) */
+function draw(n,lesson){
+  const all=lesson?POOL.filter(q=>q.src===lesson):POOL,ls=[...new Set(all.map(q=>q.src))];
+  return['mc','fill','tf'].flatMap(t=>{const pools=shuffle(ls).map(l=>shuffle(all.filter(q=>q.t===t&&q.src===l))),out=[];
+    for(let r=0;out.length<n&&pools.some(p=>p.length);r++){const p=pools[r%pools.length];if(p.length)out.push(p.pop())}
+    return shuffle(out)});
+}
+function begin(id,title,qs,opts){
+  qs=qs.map(prep);
+  S={id,title,qs,ans:qs.map(q=>q.t==='fill'?q.a.map(()=>''):null),flag:qs.map(()=>false),idx:0,start:Date.now(),keep:!!opts.keep,limit:opts.limit||0};
+  view='quiz';confirmEnd=false;render();scrollTo(0,0);
+}
+const dynamic=id=>id==='ispit'||id==='mix'||id==='greske'||id.startsWith('lekcija-');
+function startTest(id){
+  if(id==='ispit')return begin(id,'Simulacija ispita',draw(10),{keep:true,limit:30});
+  if(id==='mix')return begin(id,'Brzi miks',draw(5),{keep:true});
+  if(id==='greske'){const w=loadWrong();return begin(id,'Moje greške',shuffle(POOL.filter(q=>w[q.q])).slice(0,30),{})}
+  if(id.startsWith('lekcija-')){const l=LESSONS[+id.slice(8)];return begin(id,'Ispit iz lekcije · '+l,draw(7,l),{keep:true,limit:20})}
+  const t=TESTS.find(t=>t.id===id);begin(t.id,t.title+' · '+t.lesson,t.qs.map(q=>({...q,src:t.lesson})),{keep:true});
+}
+function finish(timeout){
+  const res=S.qs.map((q,i)=>grade(q,S.ans[i]));
+  const pts=res.reduce((s,r)=>s+r.pts,0),time=S.limit?Math.min(Date.now()-S.start,S.limit*60000):Date.now()-S.start;
+  R={...S,res,pts,max:S.qs.length,time,timeout:!!timeout};
+  const w=loadWrong();S.qs.forEach((q,i)=>{if(res[i].pts<1)w[q.q]=Date.now();else delete w[q.q]});saveWrong(w);
+  if(S.keep)save(S.id,{pts,max:R.max,time,date:Date.now()});
+  view='result';onlyWrong=false;copied=null;S=null;render();scrollTo(0,0);
+}
+
+/* ---------- prikazi ---------- */
+const best=a=>a.reduce((m,x)=>x.pts/x.max>m.pts/m.max?x:m);
+function home(){
+  const h=load(),wn=Object.keys(loadWrong()).length,recs=Object.values(h).flat();
+  const avg=recs.length?Math.round(recs.reduce((s,r)=>s+r.pts/r.max,0)/recs.length*100):null;
+  const chip=id=>{const a=h[id];if(!a||!a.length)return'<span class="chip">nije rađen</span>';
+    const b=best(a),p=Math.round(b.pts/b.max*100);
+    return`<span class="chip ${p>=81?'good':p>=PASS?'warn':'bad'}">najbolje ${fmt(b.pts)}/${b.max} · ${a.length}×</span>`};
+  const rowT=(id,title,meta,label)=>`<div class="test"><div class="grow"><h3>${esc(title)}</h3><p class="meta">${meta}</p></div>${chip(id)}<button class="btn ${label?'':'primary'}" data-act="start" data-id="${id}">${label||'Počni'}</button></div>`;
+  const lessons=LESSONS.map((l,i)=>{const ts=TESTS.filter(t=>t.lesson===l),n=ts.reduce((s,t)=>s+t.qs.length,0);
+    const passed=ts.filter(t=>h[t.id]&&Math.round(best(h[t.id]).pts/best(h[t.id]).max*100)>=PASS).length;
+    return`<details class="sheet" data-l="${i}" ${openL.has(i)?'open':''}><summary><span class="num">${String(i+1).padStart(2,'0')}</span>
+      <span class="grow stack" style="gap:4px"><h2>${esc(l)}</h2><span class="muted small">${esc(ts[0].author||'')}${NOTE[l]?' · '+esc(NOTE[l]):''} · ${ts.length} ${ts.length===1?'test':'testa'} · ${n} pitanja</span>
+      <span class="row" style="gap:8px"><span class="bar grow"><i style="width:${passed/ts.length*100}%"></i></span><span class="mono small muted">${passed}/${ts.length} položeno</span></span></span>
+      <span class="caret" aria-hidden="true">▸</span></summary>
+      <div class="inner tests">${ts.map(t=>rowT(t.id,t.title,t.qs.length+' pitanja · '+t.qs.length+' poena')).join('')}
+      ${rowT('lekcija-'+i,'Ispit iz ove lekcije',(Math.min(21,n)===21?'21 pitanje':n+' pitanja')+' iz svih testova lekcije · 20 minuta','Počni ispit')}</div></details>`}).join('');
+  return`<header class="stack"><p class="eyebrow"><a class="link" href="../">← Svi predmeti</a> · Priprema za ispit</p><h1>Testovi iz metodologije zdravstvenog obrazovanja</h1>
+    <p class="lead">Šest lekcija (spec. sms Vesna Imbronjev; rasprava i debata: prof. dr Slađana Šimon); kombinovani testovi sa zaokruživanjem, dopunom i tačno/netačno. Kad predaš test, dobijaš poene, ocenu i pregled svakog odgovora.</p></header>
+  <div class="stats"><div class="stat"><small>Pitanja u bazi</small><b>${POOL.length}</b></div><div class="stat"><small>Testova</small><b>${TESTS.length}</b></div>
+    <div class="stat"><small>Urađeno (24 h)</small><b>${recs.length}</b></div><div class="stat"><small>Prosek (24 h)</small><b>${avg===null?'–':avg+'%'}</b></div></div>
+  <section class="sheet"><div class="row"><div class="stack" style="gap:4px;flex:1 1 260px;min-width:0"><p class="eyebrow">Prvo nauči</p><h2>Skripta: suština svih 6 lekcija</h2>
+      <p class="muted small">Najbitnije iz svake lekcije i tabela svih procenata, brojki i lista. Pročitaj lekciju, pa uradi njene testove.</p></div>
+      <a class="btn primary" id="skripta" href="${BASE}skripta.pdf" target="_blank" rel="noopener">Otvori skriptu (PDF)</a></div></section>
+  <section class="sheet stack"><div><p class="eyebrow">Sve lekcije pomešano</p><h2>Simulacija ispita</h2></div>
+    <div class="tests">${rowT('ispit','Simulacija ispita','30 pitanja ravnomerno iz svih lekcija · 30 minuta · predaje se sam kad vreme istekne')}
+    ${rowT('mix','Brzi miks','15 pitanja iz svih lekcija, bez ograničenja vremena','Počni')}
+    <div class="test"><div class="grow"><h3>Moje greške</h3><p class="meta">${wn?'Pitanja na kojima si pogrešio u poslednja 24 sata; tačan odgovor ih skida sa liste':'Ovde se skupljaju pitanja na kojima pogrešiš'}</p></div>
+      <span class="chip ${wn?'bad':''}">${wn} ${wn===1?'pitanje':'pitanja'}</span><button class="btn" id="go-greske" data-act="start" data-id="greske" ${wn?'':'disabled'}>Vežbaj</button></div></div></section>
+  <div class="stack"><p class="eyebrow">Lekcije</p>${lessons}</div>
+  <details class="sheet help" data-l="help" ${openL.has('help')?'open':''}><summary><span class="grow"><h2>Kako se boduje</h2></span><span class="caret" aria-hidden="true">▸</span></summary>
+    <div class="inner"><ul><li>Svako pitanje nosi 1 poen. Kod dopune sa više praznina dobijaš deo poena za svaku tačnu prazninu.</li>
+    <li>Dopune se priznaju i bez kvačica, na ćirilici i sa sitnom greškom u kucanju.</li>
+    <li>Ocene: ispod 51% je 5, zatim 6 (51–60%), 7 (61–70%), 8 (71–80%), 9 (81–90%) i 10 (91–100%).</li>
+    <li>Redosled ponuđenih odgovora menja se pri svakom pokušaju.</li>
+    <li>Rezultati i lista grešaka čuvaju se 24 sata samo na ovom uređaju i ne vidi ih niko drugi.</li></ul></div></details>
+  <div class="row"><p class="grow muted small">Rezultati se čuvaju 24 sata na ovom uređaju, a zatim se sami brišu.</p>
+    <button class="btn" id="reset" data-act="resetAsk" ${recs.length||wn?'':'disabled'}>Obriši rezultate</button></div>
+  ${confirmReset?`<div class="veil" data-act="resetCancel"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt" data-act="noop">
+    <h2 id="mt">Obrisati sve rezultate?</h2><p class="muted">Brišu se najbolji rezultati, broj pokušaja i lista grešaka za sve testove. Ovo ne može da se vrati.</p>
+    <div class="row" style="justify-content:flex-end"><button class="btn" id="reset-no" data-act="resetCancel">Odustani</button><button class="btn danger" id="reset-yes" data-act="resetDo">Obriši</button></div></div></div>`:''}`;
+}
+function body(q,i,a){
+  if(q.t==='mc')return`<div class="opts">${q.o.map((o,k)=>`<button class="opt ${a===k?'sel':''}" id="o-${i}-${k}" data-act="pick" data-v="${k}"><b>${'abcd'[k]})</b><span>${esc(o)}</span></button>`).join('')}</div>`;
+  if(q.t==='tf')return`<div class="tf">${[true,false].map(v=>`<button class="opt ${a===v?'sel':''}" id="o-${i}-${v}" data-act="pick" data-v="${v}">${v?'Tačno':'Netačno'}</button>`).join('')}</div>`;
+  const parts=q.q.split('___');
+  return`<p class="q">${parts.map((p,k)=>esc(p)+(k<parts.length-1?`<input class="blank" id="b-${i}-${k}" data-k="${k}" value="${esc(a[k]||'')}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Praznina ${k+1}">`:'')).join('')}</p>`;
+}
+const remaining=()=>S.limit*60000-(Date.now()-S.start);
+function quiz(){
+  const i=S.idx,q=S.qs[i],a=S.ans[i],last=i===S.qs.length-1;
+  const missing=S.qs.filter((x,k)=>!answered(x,S.ans[k])).length;
+  return`<div class="row"><div class="grow"><p class="eyebrow">${esc(S.title)}</p></div>
+      <span class="mono clock" id="clock">${S.limit?'preostalo '+clock(remaining()):clock(Date.now()-S.start)}</span><button class="btn quiet" data-act="home">Odustani</button></div>
+  <div class="bar"><i style="width:${(i+1)/S.qs.length*100}%"></i></div>
+  <section class="sheet stack" style="gap:18px">
+    <div class="row"><span class="chip">${TYPE[q.t]}</span>${q.src?`<span class="chip">${esc(q.src)}</span>`:''}<span class="grow"></span><span class="mono muted">${i+1} / ${S.qs.length}</span></div>
+    ${q.t==='fill'?'':`<p class="q">${esc(q.q)}</p>`}
+    ${body(q,i,a)}
+    <div class="row"><button class="btn" data-act="prev" ${i===0?'disabled':''}>Nazad</button>
+      <button class="btn ${S.flag[i]?'on':''}" id="flag" data-act="flag" aria-pressed="${S.flag[i]}">${S.flag[i]?'Označeno':'Označi za kasnije'}</button><span class="grow"></span>
+      ${last?'<button class="btn primary" data-act="end">Predaj test</button>':'<button class="btn primary" data-act="next">Dalje</button>'}</div>
+    ${confirmEnd?`<div class="fb warn"><strong>Ostalo je ${missing} ${missing===1?'pitanje':'pitanja'} bez odgovora.</strong> <span>Neodgovorena pitanja nose 0 poena.</span>
+      <div class="row" style="margin-top:10px"><button class="btn" data-act="cancelEnd">Vrati se</button><button class="btn primary" data-act="forceEnd">Predaj svejedno</button></div></div>`:''}
+  </section>
+  <div class="dots" aria-label="Pitanja">${S.qs.map((x,k)=>`<button class="dot ${answered(x,S.ans[k])?'done':''} ${S.flag[k]?'flag':''} ${k===i?'cur':''}" data-act="go" data-v="${k}" aria-label="Pitanje ${k+1}${S.flag[k]?', označeno':''}">${k+1}</button>`).join('')}</div>
+  ${last?'':'<div class="row"><span class="grow"></span><button class="btn quiet" data-act="end">Predaj test</button></div>'}`;
+}
+const summary=()=>{const p=Math.round(R.pts/R.max*100);return`Testovi iz metodologije zdravstvenog obrazovanja · ${R.title}: ${fmt(R.pts)}/${R.max} (${p}%), ocena ${mark(p)}, vreme ${clock(R.time)}`};
+function result(){
+  const p=Math.round(R.pts/R.max*100),m=mark(p),C=2*Math.PI*54,pass=m>5;
+  const group=(key,label)=>[...new Set(R.qs.map(key))].map(k=>{const ix=R.qs.map((q,i)=>key(q)===k?i:-1).filter(i=>i>-1);return{name:label(k),n:ix.length,pts:ix.reduce((s,i)=>s+R.res[i].pts,0)}});
+  const tile=b=>`<div class="stat"><small>${esc(b.name)}</small><b>${fmt(b.pts)} / ${b.n}</b><div class="bar" style="margin-top:6px"><i style="width:${b.pts/b.n*100}%"></i></div></div>`;
+  const byType=group(q=>q.t,k=>SHORT[k]),byLesson=group(q=>q.src||'',k=>k);
+  const wrong=R.qs.filter((q,i)=>R.res[i].pts<1).length;
+  const rows=R.qs.map((q,i)=>{const g=R.res[i];if(onlyWrong&&g.pts===1)return'';
+    const c=g.pts===1?'good':g.pts===0?'bad':'warn';
+    return`<div class="rev"><div class="row"><span class="mono muted">${i+1}.</span><span class="chip ${c}">${g.pts===1?'tačno':g.pts===0?'netačno':'delimično'} · ${fmt(g.pts)}</span><span class="chip">${SHORT[q.t]}</span>${byLesson.length>1?`<span class="chip">${esc(q.src)}</span>`:''}</div>
+      <p>${esc(q.q.replace(/___/g,'_____'))}</p>
+      <p class="ans">Tvoj odgovor: <strong>${esc(givenText(q,R.ans[i]))}</strong></p>
+      ${g.pts<1?`<p class="ans">Tačan odgovor: <strong style="color:var(--good)">${esc(correctText(q))}</strong></p>`:''}
+      ${q.e&&g.pts<1?`<p class="ans">${esc(q.e)}</p>`:''}</div>`}).join('');
+  return`<header class="stack"><p class="eyebrow">Rezultat · ${esc(R.title)}</p><h1>${pass?(m>=9?'Odlično urađeno':'Položeno'):'Još jedan krug ponavljanja'}</h1></header>
+  ${R.timeout?'<div class="fb bad"><strong>Vreme je isteklo.</strong> <span>Test je predat sa odgovorima koje si do tada uneo.</span></div>':''}
+  <section class="sheet stack" style="gap:18px"><div class="score">
+    <svg class="ring" viewBox="0 0 132 132" role="img" aria-label="${p}%"><circle cx="66" cy="66" r="54" fill="none" stroke="var(--line)" stroke-width="12"/>
+      <circle cx="66" cy="66" r="54" fill="none" stroke="var(--${pass?'good':'bad'})" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C*p/100} ${C}" transform="rotate(-90 66 66)"/>
+      <text x="66" y="74" text-anchor="middle" fill="var(--ink)" font-family="var(--mono)" font-size="24">${p}%</text></svg>
+    <div class="stack grow" style="gap:4px"><span class="big">${fmt(R.pts)} <span class="muted" style="font-size:1.4rem">/ ${R.max}</span></span>
+      <span>Ocena <strong>${m}</strong> ${pass?'':'(potrebno 51% za prolaz)'}</span><span class="muted">Vreme ${clock(R.time)} · ${R.max-wrong} tačnih, ${wrong} sa greškom</span></div></div>
+    <div class="stack"><p class="eyebrow">Po vrsti pitanja</p><div class="stats">${byType.map(tile).join('')}</div></div>
+    ${byLesson.length>1?`<div class="stack"><p class="eyebrow">Po lekciji</p><div class="stats">${byLesson.map(tile).join('')}</div></div>`:''}
+    <div class="dots">${R.res.map((g,k)=>`<span class="dot ${g.pts===1?'ok':g.pts===0?'no':'half'}">${k+1}</span>`).join('')}</div>
+    <div class="row"><button class="btn primary" data-act="again">Ponovi test</button>${wrong?`<button class="btn" data-act="wrongOnly">Vežbaj samo greške (${wrong})</button>`:''}
+      <button class="btn" id="copy" data-act="copy">${copied===true?'Kopirano':'Kopiraj rezultat'}</button><button class="btn quiet" data-act="home">Svi testovi</button></div>
+    ${copied===false?`<p class="copybox">${esc(summary())}</p>`:''}
+  </section>
+  <section class="sheet"><div class="row" style="margin-bottom:6px"><h2 class="grow">Pregled odgovora</h2>
+    ${wrong?`<div class="seg"><button data-act="filter" data-v="0" aria-pressed="${!onlyWrong}">Sve</button><button data-act="filter" data-v="1" aria-pressed="${onlyWrong}">Samo greške</button></div>`:''}</div>${rows}</section>`;
+}
+function render(){
+  clearInterval(tick);
+  app.innerHTML=view==='home'?home():view==='quiz'?quiz():result();
+  if(view==='quiz'){tick=setInterval(()=>{if(!S)return;const c=document.getElementById('clock');
+      if(S.limit){const r=remaining();if(r<=0)return finish(true);if(c){c.textContent='preostalo '+clock(r);c.classList.toggle('low',r<5*60000)}}
+      else if(c)c.textContent=clock(Date.now()-S.start)},1000);
+    const b=app.querySelector('.blank');if(b&&!b.value)b.focus({preventScroll:true})}
+}
+function step(d){S.idx=Math.max(0,Math.min(S.qs.length-1,S.idx+d));confirmEnd=false;render()}
+
+app.addEventListener('toggle',e=>{const d=e.target,l=d.dataset&&d.dataset.l;if(l===undefined)return;const k=l==='help'?l:+l;d.open?openL.add(k):openL.delete(k)},true);
+app.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;const act=b.dataset.act,v=b.dataset.v;
+  if(act==='noop')return;
+  if(act==='resetAsk'){confirmReset=true;render();const n=document.getElementById('reset-no');if(n)n.focus()}
+  else if(act==='resetCancel'){confirmReset=false;render()}
+  else if(act==='resetDo'){wipe();confirmReset=false;render()}
+  else if(act==='start')startTest(b.dataset.id);
+  else if(act==='home'){view='home';S=null;R=null;render();scrollTo(0,0)}
+  else if(act==='pick'){const q=S.qs[S.idx];S.ans[S.idx]=q.t==='mc'?+v:v==='true';render()}
+  else if(act==='flag'){S.flag[S.idx]=!S.flag[S.idx];render()}
+  else if(act==='next')step(1);else if(act==='prev')step(-1);
+  else if(act==='go'){S.idx=+v;confirmEnd=false;render()}
+  else if(act==='end'){if(S.qs.some((q,k)=>!answered(q,S.ans[k]))){confirmEnd=true;render()}else finish()}
+  else if(act==='cancelEnd'){confirmEnd=false;render()}
+  else if(act==='forceEnd')finish();
+  else if(act==='filter'){onlyWrong=v==='1';render()}
+  else if(act==='again'){const r=R;if(dynamic(r.id))startTest(r.id);else begin(r.id,r.title,r.qs,{keep:r.keep,limit:r.limit})}
+  else if(act==='wrongOnly'){const r=R;begin(r.id+'~greske',r.title+' · samo greške',r.qs.filter((q,i)=>r.res[i].pts<1),{})}
+  else if(act==='copy'){const done=ok=>{copied=ok;if(view==='result')render()};
+    try{navigator.clipboard.writeText(summary()).then(()=>done(true),()=>done(false))}catch(err){done(false)}}
+});
+app.addEventListener('input',e=>{
+  if(!e.target.classList.contains('blank')||!S)return;
+  S.ans[S.idx][+e.target.dataset.k]=e.target.value;
+  const d=app.querySelectorAll('.dot')[S.idx];if(d)d.classList.toggle('done',answered(S.qs[S.idx],S.ans[S.idx]));
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&confirmReset){confirmReset=false;render();return}
+  if(view!=='quiz'||!S)return;const inField=e.target.tagName==='INPUT',q=S.qs[S.idx];
+  if(e.key==='Enter'&&e.target.tagName!=='BUTTON'){e.preventDefault();
+    if(inField){const all=[...app.querySelectorAll('.blank')],n=all[all.indexOf(e.target)+1];if(n){n.focus();return}}
+    if(S.idx<S.qs.length-1)step(1);return}
+  if(inField)return;const k=e.key.toLowerCase();
+  if(q.t==='mc'&&k.length===1&&'abcd1234'.includes(k)){const n='abcd1234'.indexOf(k)%4;if(n<q.o.length){S.ans[S.idx]=n;render()}}
+  else if(q.t==='tf'&&(k==='t'||k==='n')){S.ans[S.idx]=k==='t';render()}
+  else if(e.key==='ArrowRight')step(1);else if(e.key==='ArrowLeft')step(-1);
+});
+
+function boot(d){if(d&&d.view){view=d.view;S=d.S||null;R=d.R||null;if((view==='quiz'&&!S)||(view==='result'&&!R))view='home'}render()}
+try{window.claude?.hot?.snapshot?.(()=>({view,S,R}))}catch(e){}
+window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
+try{const h=location.hash.slice(1);if(h==='ispit'||h==='mix'){history.replaceState(null,'',location.pathname+location.search);startTest(h)}}catch(e){}
+</script>
+</body>
+</html>
