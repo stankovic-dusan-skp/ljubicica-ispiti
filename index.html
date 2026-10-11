@@ -2,231 +2,25 @@
 <html lang="sr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Svi predmeti na jednom mestu: testovi, skripte, napredak i odbrojavanje do ispita.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Moji ispiti</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
-<style>
-:root{
-  --bg:#eaf0f2; --surface:#ffffff; --sunk:#f3f7f8; --ink:#13242d; --muted:#586b76; --line:#cfdbe0;
-  --accent:#0b6b78; --accent-ink:#ffffff; --accent-soft:#d9eef1;
-  --good:#1b7646; --good-bg:#def3e6; --bad:#b2362b; --bad-bg:#fbe3e0; --warn:#8a5a00; --warn-bg:#fbefd2;
-  --display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
-  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0e171b; --surface:#17232a; --sunk:#121c21; --ink:#e5eef1; --muted:#93a6b0; --line:#2b3c45;
-  --accent:#55c4d0; --accent-ink:#06262b; --accent-soft:#143840;
-  --good:#63d193; --good-bg:#143524; --bad:#f28b80; --bad-bg:#3e1d1a; --warn:#f0c268; --warn-bg:#3a2e12;
-  color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0e171b; --surface:#17232a; --sunk:#121c21; --ink:#e5eef1; --muted:#93a6b0; --line:#2b3c45;
-  --accent:#55c4d0; --accent-ink:#06262b; --accent-soft:#143840;
-  --good:#63d193; --good-bg:#143524; --bad:#f28b80; --bad-bg:#3e1d1a; --warn:#f0c268; --warn-bg:#3a2e12;
-  color-scheme:dark}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding:28px 16px 56px}
-#app{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
-h1,h2,h3,p{margin:0}
-h1{font-family:var(--display);font-size:clamp(2rem,6vw,2.8rem);line-height:1.05;letter-spacing:-.015em}
-h2{font-family:var(--display);font-size:1.3rem;line-height:1.2;text-wrap:balance}
-.eyebrow{font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.lead{color:var(--muted);max-width:62ch}
-.muted{color:var(--muted)} .small{font-size:.9rem}
-.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.stack{display:flex;flex-direction:column;gap:10px}
-.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.grow{flex:1 1 0;min-width:0}
-.btn{display:inline-block;text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}
-.btn:hover{border-color:var(--accent)}
-.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.btn.quiet{background:transparent;padding:6px 10px;font-size:.88rem}
-a:focus-visible,.btn:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
-.stat b{display:block;font-family:var(--mono);font-size:1.2rem;font-weight:500}
-.stat small{color:var(--muted)}
-.sheet{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
-.next{border-left:6px solid var(--accent);display:flex;flex-wrap:wrap;gap:16px;align-items:center}
-.passbtn{color:var(--good);border-color:var(--line);background:transparent}
-.passbtn:hover{border-color:var(--good);background:var(--good-bg)}
-.done-list{display:flex;flex-direction:column;gap:0;padding:6px 20px}
-.done-head{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;padding:12px 0}
-.done-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--line);cursor:default;user-select:none}
-.done-row .check{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--good-bg);color:var(--good);font-weight:700}
-.done-row .t{font-weight:600;color:var(--muted);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--muted) 45%,transparent)}
-.done-row .sub{font-size:.82rem;color:var(--muted);opacity:.85}
-.grade{flex:none;min-width:44px;text-align:center;font-family:var(--mono);font-size:1.15rem;padding:4px 10px;border-radius:8px;background:var(--sunk);color:var(--ink);border:1px solid var(--line)}
-.grade.none{font-size:.8rem;color:var(--muted);font-family:var(--body)}
-.undo{flex:none;background:none;border:0;padding:4px 6px;font:inherit;font-size:.8rem;color:var(--muted);opacity:.6;cursor:pointer;text-decoration:underline}
-.undo:hover{opacity:1}
-.veil{position:fixed;inset:0;background:rgba(8,16,20,.55);display:grid;place-items:center;padding:16px;z-index:50}
-.modal{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:420px;width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
-.grades{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.gbtn{font:inherit;font-family:var(--mono);font-size:1.1rem;padding:12px 0;border-radius:10px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);cursor:pointer}
-.gbtn[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:var(--surface)}
-.btn.ok{background:var(--good);border-color:var(--good);color:var(--surface)}
-.btn.danger{background:var(--bad);border-color:var(--bad);color:var(--surface)}
-.sec{display:flex;align-items:baseline;gap:10px;margin-top:6px}
-.sync{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center}
-.toast{color:var(--good);font-weight:600}
-.count{font-family:var(--display);font-size:clamp(2.4rem,9vw,3.4rem);line-height:1;color:var(--accent)}
-.cards{display:grid;gap:16px}
-.card{display:flex;flex-direction:column;gap:14px}
-.card h2 a{color:inherit;text-decoration:none}
-.card h2 a:hover{color:var(--accent)}
-.meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:.9rem}
-.bar{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
-.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
-.chip{display:inline-block;font-size:.8rem;font-weight:600;padding:3px 10px;border-radius:99px;background:var(--sunk);color:var(--muted);white-space:nowrap}
-.chip.good{background:var(--good-bg);color:var(--good)} .chip.bad{background:var(--bad-bg);color:var(--bad)} .chip.warn{background:var(--warn-bg);color:var(--warn)} .chip.acc{background:var(--accent-soft);color:var(--accent)}
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.mini{background:var(--sunk);border-radius:8px;padding:8px 12px}
-.mini small{color:var(--muted);display:block;font-size:.78rem}
-.mini b{font-family:var(--mono);font-weight:500}
-.tip{border-top:1px solid var(--line);padding-top:12px;font-size:.92rem}
-.date{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.9rem}
-input[type=date]{font:inherit;color:var(--ink);background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-width:0}
-.actions{display:flex;flex-wrap:wrap;gap:8px}
-footer{color:var(--muted);font-size:.85rem;text-align:center}
-@media (max-width:520px){.btn{flex:1 1 auto;text-align:center}}
-</style>
+<meta name="description" content="Svi predmeti na jednom mestu: plan za danas, testovi, skripte, napredak i odbrojavanje do ispita.">
+<meta name="theme-color" content="#F3F5F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1422" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Moji ispiti">
+<link rel="preload" href="assets/fonts/onest-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/onest-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/ui.css?v=aeb8326c9f">
+<script src="assets/core.js?v=aeb8326c9f"></script>
 </head>
 <body>
-<div id="app"></div>
-<script>
-/* ============================================================
-   PREDMETI — novi predmet: dodaj folder sa index.html + skripta.pdf
-   i dodaj ga u ovaj niz (pokreni build da se brojke osveže).
-   ============================================================ */
-const SUBJECTS=[{"slug": "organizacija-zdravstva", "title": "Organizacija zdravstvene delatnosti", "key": "testovi-zdravstvo-v1", "wkey": "testovi-zdravstvo-greske-v1", "authors": ["dr med. Miloš Potkrajac", "Zlatko Ćirić", "Ivana Jovčić"], "lessons": ["Organizacija zdravstvene delatnosti: uvod", "Komunikacija u delatnosti zdravstvenih radnika", "Menadžment i organizacija zdravstvene službe", "Organizacija zdravstvene delatnosti", "Upravljanje", "Osnovni principi organizacije zdravstvene službe", "Organizacija zdravstvene delatnosti: ustanove i sestrinski menadžment"], "tests": [["ozd-uvod-1", 0], ["ozd-uvod-2", 0], ["ozd-uvod-3", 0], ["ozd-uvod-4", 0], ["ozd-uvod-5", 0], ["kom-8", 1], ["men-1", 2], ["men-2", 2], ["men-3", 2], ["men-4", 2], ["men-5", 2], ["men-6", 2], ["men-7", 2], ["men-8", 2], ["kom-1", 1], ["kom-2", 1], ["kom-3", 1], ["kom-4", 1], ["kom-5", 1], ["kom-6", 1], ["kom-7", 1], ["rad-1", 3], ["rad-2", 3], ["rad-3", 3], ["rad-4", 3], ["rad-5", 3], ["rad-6", 3], ["rad-7", 3], ["upr-1", 4], ["upr-2", 4], ["upr-3", 4], ["upr-4", 4], ["osn-1", 5], ["osn-2", 5], ["osn-3", 5], ["jov-1", 6], ["jov-2", 6], ["jov-3", 6], ["jov-4", 6], ["jov-5", 6], ["jov-6", 6]], "q": 615}, {"slug": "javno-zdravlje", "title": "Javno zdravlje", "key": "testovi-javno-zdravlje-v1", "wkey": "testovi-javno-zdravlje-greske-v1", "authors": ["prof. dr Mirjana Martinov Cvejin"], "lessons": ["Pojam, definicije i vodeći principi", "Načela, izazovi, razvoj i sistem javnog zdravlja", "Funkcije, osnovne usluge i nivoi delovanja", "Determinante i pokazatelji zdravstvenog stanja", "Javno zdravlje u Srbiji", "Javno zdravlje u Evropi, dostignuća i izazovi"], "tests": [["jz1-1", 0], ["jz1-2", 0], ["jz2-1", 1], ["jz2-2", 1], ["jz2-3", 1], ["jz3-1", 2], ["jz3-2", 2], ["jz3-3", 2], ["jz3-4", 2], ["jz4-1", 3], ["jz4-2", 3], ["jz4-3", 3], ["jz4-4", 3], ["jz4-5", 3], ["jz5-1", 4], ["jz5-2", 4], ["jz5-3", 4], ["jz5-4", 4], ["jz5-5", 4], ["jz6-1", 5], ["jz6-2", 5], ["jz6-3", 5], ["jz6-4", 5]], "q": 345}, {"slug": "poslovna-komunikacija", "title": "Veštine poslovne komunikacije", "key": "testovi-poslovna-komunikacija-v1", "wkey": "testovi-poslovna-komunikacija-greske-v1", "authors": ["msms Dragana Korajlija", "Marija Papić, master obrazovnih politika"], "lessons": ["Interpersonalna poslovna komunikacija u zdravstvu", "Asertivna komunikacija", "Mejl komunikacija", "Dobar slušalac", "Feedback i sendvič tehnika", "Javni nastup: obraćanje grupama", "Kako se snaći u najtežim razgovorima", "Komunikacija sa starijim osobama", "Komunikacione veštine zdravstvenih radnika", "Konflikti i rešavanje konflikta", "Osnove komunikacije, poslovna komunikacija", "Poslovni bonton", "Šta je neverbalna komunikacija", "Zašto je ton glasa važan"], "tests": [["vpk1-1", 0], ["vpk1-2", 0], ["vpk2-1", 1], ["vpk2-2", 1], ["vpk2-3", 1], ["vpk3-1", 2], ["vpk3-2", 2], ["vpk3-3", 2], ["vpk4-1", 3], ["vpk4-2", 3], ["vpk5-1", 4], ["vpk5-2", 4], ["vpk6-1", 5], ["vpk6-2", 5], ["vpk6-3", 5], ["vpk6-4", 5], ["vpk7-1", 6], ["vpk7-2", 6], ["vpk8-1", 7], ["vpk8-2", 7], ["vpk9-1", 8], ["vpk10-1", 9], ["vpk10-2", 9], ["vpk11-1", 10], ["vpk11-2", 10], ["vpk11-3", 10], ["vpk12-1", 11], ["vpk12-2", 11], ["vpk12-3", 11], ["vpk12-4", 11], ["vpk13-1", 12], ["vpk13-2", 12], ["vpk14-1", 13]], "q": 495}, {"slug": "metodologija-zo", "title": "Metodologija zdravstvenog obrazovanja i promocija zdravlja", "key": "testovi-metodologija-zo-v1", "wkey": "testovi-metodologija-zo-greske-v1", "authors": ["spec. sms Vesna Imbronjev", "prof. dr Slađana Šimon"], "lessons": ["Zdravlje i kvalitet života", "Zdravstveno ponašanje i zdravstveno vaspitanje", "Promocija zdravlja: definicija, ciljevi i dokumenti", "Planiranje i programiranje zdravstveno vaspitnog rada", "Zdravstveno vaspitne intervencije", "Razvoj stavova u raspravi i debati"], "tests": [["mzo1-1", 0], ["mzo1-2", 0], ["mzo1-3", 0], ["mzo2-1", 1], ["mzo2-2", 1], ["mzo2-3", 1], ["mzo3-1", 2], ["mzo3-2", 2], ["mzo3-3", 2], ["mzo3-4", 2], ["mzo4-1", 3], ["mzo4-2", 3], ["mzo4-3", 3], ["mzo4-4", 3], ["mzo5-1", 4], ["mzo5-2", 4], ["mzo5-3", 4], ["mzo6-1", 5], ["mzo6-2", 5]], "q": 285}];
-const SHORT={'organizacija-zdravstva':'dr Miloš Potkrajac, Zlatko Ćirić, Ivana Jovčić','javno-zdravlje':'prof. dr Mirjana Martinov Cvejin','poslovna-komunikacija':'msms Dragana Korajlija, Marija Papić','metodologija-zo':'spec. sms Vesna Imbronjev, prof. dr Slađana Šimon'};
-const DKEY='ispiti-datumi-v1',PKEY='ispiti-polozeno-v2',DAY=864e5,PASS=51;
-const app=document.getElementById('app');
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
-const get=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
-const dates=()=>get(DKEY)||{};
-function setDate(slug,v){try{const d=dates();if(v)d[slug]=v;else delete d[slug];localStorage.setItem(DKEY,JSON.stringify(d))}catch(e){}render()}
-/* Unapred upisani položeni predmeti (važe na svakom uređaju; „Poništi” ih gasi samo u tom pregledaču) */
-const PRESET={'organizacija-zdravstva':{d:'2026-10-10',o:10}};
-const passedRaw=()=>get(PKEY)||{};
-const passedMap=()=>{const r=passedRaw(),o={};for(const k in r)if(r[k])o[k]=r[k];for(const k in PRESET)o[k]=PRESET[k];return o};
-function setPassed(slug,val){try{const p=passedRaw();p[slug]=val||false;localStorage.setItem(PKEY,JSON.stringify(p))}catch(e){}render()}
-const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
-/* Prenos podešavanja (datumi + položeno) na drugi uređaj preko linka */
-function exportLink(){const data=JSON.stringify({d:dates(),p:passedRaw()});return location.origin+location.pathname+'?s='+encodeURIComponent(btoa(unescape(encodeURIComponent(data))))}
-function importFromUrl(){try{const q=new URLSearchParams(location.search).get('s');if(!q)return false;const o=JSON.parse(decodeURIComponent(escape(atob(q))));
-  if(o.d)localStorage.setItem(DKEY,JSON.stringify(Object.assign(dates(),o.d)));if(o.p)localStorage.setItem(PKEY,JSON.stringify(Object.assign(passedRaw(),o.p)));
-  history.replaceState(null,'',location.pathname);return true}catch(e){return false}}
-let flash='';
-try{localStorage.removeItem('ispiti-polozeno-v1')}catch(e){}
-function say(m){flash=m;render();setTimeout(()=>{flash='';render()},4000)}
-function daysTo(iso){if(!iso)return null;const t=new Date(iso+'T00:00:00'),n=new Date();n.setHours(0,0,0,0);return Math.round((t-n)/DAY)}
-const pl=(n,a,b,c)=>{const m=n%10,h=n%100;return m===1&&h!==11?a:m>=2&&m<=4&&(h<12||h>14)?b:c};
-const dani=n=>n===1?'dan':(n%10===1&&n%100!==11)?'dan':'dana';
-const fmtDate=iso=>{const [y,m,d]=iso.split('-');return `${+d}. ${+m}. ${y}.`};
-/* Rezultati iz svakog predmeta: {idTesta:[{pts,max,time,date}]}, važe 24 h */
-function stats(s){
-  const h=get(s.key)||{},now=Date.now(),w=get(s.wkey)||{};
-  const fresh=id=>(h[id]||[]).filter(r=>r.date&&now-r.date<DAY);
-  const all=Object.keys(h).flatMap(fresh);
-  const best={};s.tests.forEach(([id])=>{const r=fresh(id);if(r.length)best[id]=Math.max(...r.map(x=>x.pts/x.max*100))});
-  const passed=Object.values(best).filter(p=>p>=PASS).length;
-  const les=s.lessons.map((l,i)=>{const ps=s.tests.filter(t=>t[1]===i&&best[t[0]]!==undefined).map(t=>best[t[0]]);return{l,i,avg:ps.length?ps.reduce((a,b)=>a+b,0)/ps.length:null,done:ps.length,total:s.tests.filter(t=>t[1]===i).length}});
-  const tried=les.filter(x=>x.avg!==null),untried=les.filter(x=>x.avg===null);
-  const weak=tried.length?tried.reduce((a,b)=>b.avg<a.avg?b:a):null;
-  const sim=fresh('ispit').map(r=>r.pts/r.max*100);
-  return{done:all.length,avg:all.length?Math.round(all.reduce((a,r)=>a+r.pts/r.max*100,0)/all.length):null,passed,wrong:Object.keys(w).filter(k=>now-w[k]<DAY).length,weak,untried,sim:sim.length?Math.round(Math.max(...sim)):null}
-}
-function tip(s,st){
-  if(!st.done)return`Još nisi počeo. Kreni od lekcije <b>${esc(s.lessons[0])}</b>: pročitaj je u skripti pa uradi njen prvi test.`;
-  if(st.weak&&st.weak.avg<PASS)return`Najslabija lekcija: <b>${esc(st.weak.l)}</b> (${Math.round(st.weak.avg)}%). Ponovi je u skripti, pa uradi njene testove ponovo.`;
-  if(st.untried.length)return`Nisi još radio lekciju <b>${esc(st.untried[0].l)}</b>${st.untried.length>1?` i još ${st.untried.length-1}`:''}. Sledeći korak: njen prvi test.`;
-  if(st.wrong)return`Sve lekcije su pokrivene. Imaš ${st.wrong} ${st.wrong===1?'pitanje':'pitanja'} u „Mojim greškama”; prođi ih, pa uradi simulaciju.`;
-  return st.sim!==null&&st.sim>=PASS?`Simulacija: ${st.sim}%. Spreman si; uradi još jednu simulaciju za sigurnost.`:'Sve lekcije su urađene. Vreme je za simulaciju ispita (30 pitanja, 30 minuta).';
-}
-function card(s){
-  const st=stats(s),d=dates()[s.slug],n=daysTo(d),T=s.tests.length;
-  const when=d==null?'<span class="chip">datum nije unet</span>':n<0?'<span class="chip">ispit je prošao</span>':n===0?'<span class="chip bad">ispit je danas</span>':`<span class="chip ${n<=7?'bad':n<=21?'warn':'acc'}">za ${n} ${dani(n)}</span>`;
-  return`<article class="sheet card" id="p-${s.slug}">
-    <div class="row" style="align-items:flex-start"><div class="grow stack" style="gap:4px">
-      <h2><a href="${s.slug}/">${esc(s.title)}</a></h2>
-      <div class="meta"><span>${esc(SHORT[s.slug]||s.authors.join(', '))}</span><span class="mono">${s.lessons.length} ${pl(s.lessons.length,'lekcija','lekcije','lekcija')} · ${T} ${pl(T,'test','testa','testova')} · ${s.q} ${pl(s.q,'pitanje','pitanja','pitanja')}</span></div></div>${when}</div>
-    <div class="stack" style="gap:6px"><div class="row small"><span class="grow muted">Položeni testovi (24 h)</span><span class="mono">${st.passed}/${T}</span></div>
-      <div class="bar"><i style="width:${st.passed/T*100}%"></i></div></div>
-    <div class="grid2">
-      <div class="mini"><small>Urađeno (24 h)</small><b>${st.done}</b></div>
-      <div class="mini"><small>Prosek (24 h)</small><b>${st.avg===null?'–':st.avg+'%'}</b></div>
-      <div class="mini"><small>Simulacija, najbolje</small><b>${st.sim===null?'–':st.sim+'%'}</b></div>
-      <div class="mini"><small>Moje greške</small><b>${st.wrong}</b></div></div>
-    <p class="tip">${tip(s,st)}</p>
-    <div class="row" style="justify-content:space-between">
-      <label class="date"><span class="muted">Datum ispita</span><input type="date" data-slug="${s.slug}" value="${d||''}">${d?`<button class="btn quiet" data-clear="${s.slug}">Obriši</button>`:''}</label>
-      <div class="actions"><a class="btn primary" href="${s.slug}/">Testovi</a><a class="btn" href="${s.slug}/#ispit">Simulacija</a><a class="btn" href="${s.slug}/skripta.pdf" target="_blank" rel="noopener">Skripta</a></div></div>
-    <div class="row" style="justify-content:flex-end;border-top:1px solid var(--line);padding-top:12px"><button class="btn passbtn" data-pass="${s.slug}">✓ Označi kao položeno</button></div>
-  </article>`
-}
-function doneRow(s){
-  const v=passedMap()[s.slug];
-  return`<div class="done-row" id="p-${s.slug}">
-    <span class="check" aria-hidden="true">✓</span>
-    <div class="grow stack" style="gap:2px"><span class="t">${esc(s.title)}</span><span class="sub">${esc(SHORT[s.slug]||s.authors.join(', '))} ${v.d?' · položeno '+fmtDate(v.d):' · položeno'}</span></div>
-    ${v.o?`<span class="grade" title="Ocena">${v.o}</span>`:'<span class="grade none">bez ocene</span>'}
-    ${s.slug in PRESET?'':`<button class="undo" data-unpass="${s.slug}" aria-label="Poništi: ${esc(s.title)}">Poništi</button>`}
-  </div>`
-}
-let modal=null;
-function modalHtml(){
-  if(!modal)return'';const s=SUBJECTS.find(x=>x.slug===modal.slug);if(!s)return'';
-  if(modal.type==='pass')return`<div class="veil" data-close="1"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
-    <div class="stack" style="gap:4px"><p class="eyebrow">Označi kao položeno</p><h2 id="mt">${esc(s.title)}</h2>
-    <p class="muted small">Predmet se zaključava i seli u „Položeni predmeti”. Ocenu možeš i da preskočiš.</p></div>
-    <div class="grades">${[6,7,8,9,10].map(g=>`<button class="gbtn" data-g="${g}" aria-pressed="${modal.g===g}">${g}</button>`).join('')}</div>
-    <div class="row" style="justify-content:flex-end"><button class="btn quiet" data-close="1">Otkaži</button><button class="btn ok" data-confirm="pass">${modal.g?'Položeno · ocena '+modal.g:'Položeno bez ocene'}</button></div></div></div>`;
-  return`<div class="veil" data-close="1"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
-    <div class="stack" style="gap:4px"><p class="eyebrow">Poništi</p><h2 id="mt">Vratiti „${esc(s.title)}” u aktivne predmete?</h2>
-    <p class="muted small">Oznaka „položeno” i ocena biće obrisane.</p></div>
-    <div class="row" style="justify-content:flex-end"><button class="btn quiet" data-close="1">Ne</button><button class="btn danger" data-confirm="unpass">Da, vrati</button></div></div></div>`;
-}
-function render(){
-  const D=dates(),P=passedMap(),all=SUBJECTS.map((s,i)=>({s,i,n:daysTo(D[s.slug])})),list=all.filter(x=>!P[x.s.slug]),doneL=all.filter(x=>P[x.s.slug]);
-  const grades=doneL.map(x=>P[x.s.slug].o).filter(Boolean),gAvg=grades.length?(grades.reduce((a,b)=>a+b,0)/grades.length).toFixed(2).replace('.',','):null;
-  list.sort((a,b)=>{const x=a.n!==null&&a.n>=0,y=b.n!==null&&b.n>=0;return x&&y?a.n-b.n:x?-1:y?1:a.i-b.i});
-  const up=list.find(x=>x.n!==null&&x.n>=0);
-  const S=SUBJECTS.map(stats),done=S.reduce((a,b)=>a+b.done,0),avgs=S.filter(x=>x.avg!==null);
-  const avg=avgs.length?Math.round(avgs.reduce((a,b)=>a+b.avg*b.done,0)/avgs.reduce((a,b)=>a+b.done,0)):null;
-  app.innerHTML=`<header class="stack"><p class="eyebrow">Priprema za ispite</p><h1>Moji ispiti</h1>
-    <p class="lead">Svi predmeti na jednom mestu: testovi, skripte, napredak i odbrojavanje do ispita. Unesi datum ispita na kartici predmeta i predmeti će se poređati po tome šta je najhitnije.</p></header>
-  <div class="stats"><div class="stat"><small>Položeno</small><b>${doneL.length}/${SUBJECTS.length}${gAvg?' · ø '+gAvg:''}</b></div><div class="stat"><small>Pitanja u bazi</small><b>${SUBJECTS.reduce((a,s)=>a+s.q,0)}</b></div>
-    <div class="stat"><small>Urađeno (24 h)</small><b>${done}</b></div><div class="stat"><small>Prosek (24 h)</small><b>${avg===null?'–':avg+'%'}</b></div></div>
-  ${up?`<section class="sheet next"><div class="count mono">${up.n===0?'danas':up.n}</div><div class="grow stack" style="gap:2px;min-width:180px">
-      <p class="eyebrow">Sledeći ispit${up.n===0?'':' · '+dani(up.n)+' do ispita'}</p><h2>${esc(up.s.title)}</h2><p class="muted small">${fmtDate(D[up.s.slug])}</p></div>
-      <div class="actions"><a class="btn primary" href="${up.s.slug}/#ispit">Simulacija ispita</a><a class="btn" href="${up.s.slug}/">Testovi</a></div></section>`
-    :`<section class="sheet next"><div class="grow stack" style="gap:4px"><p class="eyebrow">Sledeći ispit</p><h2>Unesi datume ispita</h2><p class="muted small">Na svakoj kartici ispod je polje „Datum ispita”. Dashboard onda pokazuje koliko je dana ostalo i stavlja najhitniji predmet na vrh.</p></div></section>`}
-  ${list.length?`<div class="cards">${list.map(x=>card(x.s)).join('')}</div>`:`<section class="sheet"><h2>Svi predmeti su položeni 🎉</h2></section>`}
-  ${doneL.length?`<section class="sheet done-list" aria-label="Položeni predmeti"><div class="done-head"><h2>Položeni predmeti</h2><span class="chip good">${doneL.length}/${SUBJECTS.length}${gAvg?' · prosek '+gAvg:''}</span></div>${doneL.map(x=>doneRow(x.s)).join('')}</section>`:''}
-  <section class="sheet stack" style="gap:8px"><p class="eyebrow">Telefon i drugi uređaji</p>
-    <p class="muted small">Datumi ispita i položeni predmeti čuvaju se u ovom pregledaču. Da bi isto video na telefonu, kopiraj link i otvori ga tamo (ili ga pošalji sebi porukom).</p>
-    <div class="sync"><button class="btn" id="copy-sync">Kopiraj link za prenos</button>${flash?`<span class="toast">${flash}</span>`:''}</div></section>
-  <footer>Rezultati testova čuvaju se 24 sata u ovom pregledaču; datumi ispita i položeni predmeti ostaju sačuvani dok ih ne promeniš.</footer>${modalHtml()}`;
-  const f=app.querySelector('.modal .gbtn[aria-pressed="true"],.modal [data-confirm]');if(f)f.focus();
-}
-app.addEventListener('change',e=>{if(e.target.matches('input[type=date]'))setDate(e.target.dataset.slug,e.target.value);});
-app.addEventListener('click',e=>{const b=e.target.closest('[data-clear]');if(b)return setDate(b.dataset.clear,'');
-  const ps=e.target.closest('[data-pass]');if(ps){modal={type:'pass',slug:ps.dataset.pass,g:null};return render()}
-  const up=e.target.closest('[data-unpass]');if(up){modal={type:'unpass',slug:up.dataset.unpass};return render()}
-  const gb=e.target.closest('[data-g]');if(gb&&modal){modal.g=modal.g===+gb.dataset.g?null:+gb.dataset.g;return render()}
-  const cf=e.target.closest('[data-confirm]');if(cf&&modal){const m=modal;modal=null;
-    if(m.type==='pass'){setPassed(m.slug,{d:today(),o:m.g});say('Čestitam! Predmet je označen kao položen.')}else{setPassed(m.slug,null)}return}
-  if(e.target.matches('[data-close]')){modal=null;return render()}
-  if(e.target.id==='copy-sync'){const l=exportLink();const ok=()=>say('Link je kopiran.');
-    try{navigator.clipboard.writeText(l).then(ok,()=>{prompt('Kopiraj ovaj link:',l)})}catch(err){prompt('Kopiraj ovaj link:',l)}}});
-addEventListener('keydown',e=>{if(e.key==='Escape'&&modal){modal=null;render()}});
-if(importFromUrl())setTimeout(()=>say('Podešavanja su preneta na ovaj uređaj.'),0);
-addEventListener('pageshow',render);addEventListener('storage',render);
-render();
-</script>
+<main id="app" class="wrap"></main>
+<noscript><div class="wrap"><p>Za kontrolnu tablu je potreban JavaScript.</p></div></noscript>
+<script src="assets/predmeti.js?v=aeb8326c9f"></script>
+<script src="assets/kontrolna.js?v=aeb8326c9f"></script>
+<script>if('serviceWorker' in navigator&&window.isSecureContext&&!/[?&]nosw/.test(location.search))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
 </body>
 </html>

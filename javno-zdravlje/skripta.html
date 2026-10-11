@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="sr" data-s="jz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Skripta · Javno zdravlje</title>
+<meta name="description" content="Skripta za ispit: Javno zdravlje.">
+<meta name="theme-color" content="#F3F5F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1422" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../assets/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Moji ispiti">
+<link rel="preload" href="../assets/fonts/onest-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/onest-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/ui.css?v=aeb8326c9f">
+<script src="../assets/core.js?v=aeb8326c9f"></script>
+</head>
+<body>
+<a class="skip" href="#sadrzaj">Preskoči na sadržaj</a>
+<header class="reader-top noprint"><div class="in">
+  <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><a class="back" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Testovi</span></a>
+    <span class="row" style="gap:6px;flex-wrap:nowrap"><span class="muted small" id="readcount"></span><a class="btn sm" href="skripta.pdf" target="_blank" rel="noopener">PDF</a></span></div>
+  <div class="search" role="search"><div class="sbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input class="input" id="q" type="search" placeholder="Pretraži skriptu (pojam, broj, autor)" aria-label="Pretraži skriptu" autocomplete="off" enterkeyhint="search"></div>
+    <div class="hits" id="hits" role="listbox" hidden></div></div>
+  <nav class="toc" id="toc" aria-label="Lekcije"><a href="#uvod">Uvod</a><a href="#l1" data-li="0">1 · Pojam i principi</a><a href="#l2" data-li="1">2 · Načela i razvoj</a><a href="#l3" data-li="2">3 · Funkcije i usluge</a><a href="#l4" data-li="3">4 · Pokazatelji</a><a href="#l5" data-li="4">5 · Srbija</a><a href="#l6" data-li="5">6 · Evropa i izazovi</a><a href="#brojke">Brojke i autori</a></nav>
+</div></header>
+<main class="wrap narrow" id="sadrzaj" style="padding-top:22px">
+<header class="reader-head"><p class="muted">Skripta za ispit</p><h1 class="h1">Javno zdravlje</h1><p class="lead">Cela prezentacija prof. dr Mirjane Martinov Cvejin u šest lekcija, sa formulama i tabelom brojki, godina i autora na kraju.</p></header>
+<div class="sections">
+<section class="prose first" aria-labelledby="uvod"><h2 id="uvod">Kako učiti iz skripte</h2>
+<p>Skripta pokriva celu prezentaciju „Javno zdravlje" (prof. dr Mirjana Martinov Cvejin, 150 slajdova), podeljenu u šest lekcija prema pauzama u samoj prezentaciji. Izbačeni su naslovni slajdovi i fotografije; ostalo je sve što može da se pita, uključujući definicije sa autorima i godinama, liste i brojke. Dopunjena je i detaljima koje je profesorka rekla na dva snimljena predavanja, a nema ih na slajdovima; oni su označeni sa <strong>„Iz predavanja"</strong> ili <em>„Na predavanju"</em>. Gde se brojka sa predavanja razlikuje od slajda, navedene su obe.</p>
+<ol>
+<li>Pročitaj jednu lekciju i odmah uradi njene testove.</li>
+<li>Pitanja na kojima pogrešiš vrati u skriptu i podvuci.</li>
+<li>Lekcija 4 (pokazatelji, formule, granice) i odeljak „Brojke, godine i autori" nose najviše poena; ponovi ih dan pred ispit.</li>
+<li>Na kraju uradi simulaciju ispita (30 pitanja, 30 minuta).</li>
+</ol>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 1"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Lekcija</th>
+<th>Slajdovi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Pojam, definicije i vodeći principi javnog zdravlja</td>
+<td>1–18</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Načela, izazovi, razvoj i sistem javnog zdravlja</td>
+<td>20–35</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Funkcije, osnovne usluge i nivoi delovanja</td>
+<td>37–61</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Determinante i pokazatelji zdravstvenog stanja</td>
+<td>62–82</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Javno zdravlje u Srbiji</td>
+<td>84–122</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Javno zdravlje u Evropi, dostignuća i izazovi</td>
+<td>124–150</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section class="prose" data-li="0" aria-labelledby="l1"><h2 id="l1"><span class="ln">Lekcija 1</span>Pojam, definicije i vodeći principi</h2>
+<p><em>Slajdovi 1–18.</em> Lekcija odgovara na pitanje šta je javno zdravlje, ko ga je kako definisao i na kojim principima počiva.</p>
+<h3 id="l1-1">Pojam javnog zdravlja</h3>
+<ul>
+<li>Mnogi ljudi, pa i visokopozicionirani političari, ne znaju tačno šta je javno zdravlje ni kako utiče na svakodnevni život. <strong>Obaveza zdravstvenih radnika</strong> je da ih u tome podučavaju.</li>
+<li>Pojam <strong>„public health"</strong> pojavljuje se <strong>sredinom 19. veka u SAD</strong>. Doslovno znači „javno zdravlje", ali se često koristi i termin „javno zdravstvo". Neki ga prevode i kao <strong>„narodno zdravlje"</strong>; termin „javno zdravstvo" koristi se npr. u <strong>Hrvatskoj</strong>.</li>
+<li><strong>„Zdravlje" i „zdravstvo" nemaju isto značenje</strong>, ali razvijenost i sveobuhvatnost zdravstvene zaštite u svojoj osnovi podrazumeva i pojam zdravlja.</li>
+<li><strong>Javno zdravlje</strong> je zdravlje svakog pojedinca, svakog pripadnika neke zajednice. <strong>Javno zdravstvo</strong> daje institucionalni okvir za postizanje tog ideala.</li>
+</ul>
+<p><strong>Kako se menjalo shvatanje odgovornosti:</strong></p>
+<ul>
+<li><strong>Nekada:</strong> svaki čovek je sam odgovoran za svoje zdravlje, a zajednica (država) s tim nema nikakve veze.</li>
+<li><strong>Sa napretkom nauke i medicine</strong> razvija se svest o međuzavisnosti zdravlja i ekonomskih prilika, životnih uslova, radnih uslova i o uspešnosti preventivnih mera.</li>
+<li><strong>Danas:</strong> za zdravlje nisu odgovorni samo pojedinci; značajnu ulogu ima i država.</li>
+</ul>
+<h3 id="l1-2">Definicije javnog zdravlja</h3>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 2"><table>
+<thead>
+<tr>
+<th>Autor i godina</th>
+<th>Definicija</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Charles-Edward A. Winslow, 1920</td>
+<td>Nauka i umetnost preveniranja bolesti, produženja života, unapređenja fizičkog zdravlja i efikasnosti kroz organizovane napore zajednice (vidi ispod)</td>
+</tr>
+<tr>
+<td>Donald Acheson, 1988; SZO (WHO), 1999</td>
+<td>Nauka i veština sprečavanja bolesti, unapređenja zdravlja i produženja života putem organizovanih mera društva; naglašava odgovornost države za zdravlje građana</td>
+</tr>
+<tr>
+<td>IOM (Institute of Medicine), 1988</td>
+<td>Ono što mi, kao društvo, zajedno činimo da bismo obezbedili uslove da ljudi budu zdravi</td>
+</tr>
+<tr>
+<td>Javno zdravlje kao nauka</td>
+<td>Nauka koja doprinosi osnovama za unapređenje zdravlja, objašnjava odnos zdravlja i društva i istražuje uzroke, pojavu, incidenciju, prevalenciju i posledice bolesti u populaciji, kao i organizaciju i funkcionisanje sistema zdravstvene zaštite</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Winslow (1920), organizovani napori zajednice za:</strong></p>
+<ol>
+<li>sanaciju okoline;</li>
+<li>kontrolu infekcija u zajednici;</li>
+<li>edukaciju pojedinaca o principima lične higijene;</li>
+<li>organizovanje zdravstvene službe za ranu dijagnozu i preventivnu terapiju bolesti;</li>
+<li>razvoj socijalnih mehanizama koji će svakom pojedincu obezbediti standard života koji mu omogućava da očuva zdravlje.</li>
+</ol>
+<h3 id="l1-3">Vodeći principi javnog zdravlja (5)</h3>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 3"><table>
+<thead>
+<tr>
+<th>Princip</th>
+<th>Šta znači</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jednakost i solidarnost</td>
+<td>jednakost u zdravlju; solidarnost sa ranjivim populacionim grupama; pravičnost u pružanju usluga: jednake usluge za jednake potrebe</td>
+</tr>
+<tr>
+<td>Održivost</td>
+<td>razvoj kojim se garantuje da trenutna upotreba resursa ne ugrožava zdravlje budućih generacija</td>
+</tr>
+<tr>
+<td>Efikasnost</td>
+<td>raspodela resursa između programa i intervencija tako da se postigne kombinacija ciljeva koja je društveno najpoželjnija u odnosu na dostupne resurse</td>
+</tr>
+<tr>
+<td>Učestvovanje</td>
+<td>ravnopravno učestvovanje svih članova grupe ili zajednice u odlučivanju i aktivnostima; učestvovanje građana u odlučivanju u svim oblastima društvenog života i zaposlenih u odlučivanju o poslovima organizacije</td>
+</tr>
+<tr>
+<td>Pravda i mir</td>
+<td>uslov za zdravlje; ilustrovano Černobiljem i Fukušimom, ratovima i glađu</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Efikasnost, dodatno:</strong> postizanje maksimalnih rezultata uz minimalna ulaganja; dostizanje ciljeva uz ekonomsku isplativost; optimalna upotreba resursa u jednoj zdravstvenoj intervenciji, tako da nema gubitka resursa.</p>
+<p><strong>Pravda i mir, primeri sa slajdova:</strong></p>
+<ul>
+<li>Radioaktivno zračenje posle kvara u nuklearnoj elektrani u <strong>Černobilu, 1986</strong>.</li>
+<li>Nuklearna kriza u <strong>Japanu 2011</strong>, reaktor <strong>Fukušima</strong>.</li>
+<li>Ratovi i glad (npr. podatak sa slike: u Nigeru je za mesec dana od gladi umrlo više od 2.500 dece mlađe od 5 godina).</li>
+</ul>
+<blockquote>
+<p><strong>Iz predavanja:</strong> ranjive (vulnerabilne) grupe su <strong>deca, žene, stari, invalidi i radno aktivno stanovništvo</strong>. Za princip učestvovanja potrebno je učešće svih građana, a u Srbiji, nažalost, <strong>nema mnogo građanske inicijative</strong> za učešće u odlukama o zdravlju.</p>
+</blockquote>
+<div class="lesson-end" data-li="0"><button class="btn read" data-read="0" aria-pressed="false">Označi kao pročitano</button><a class="btn primary" href="index.html#lekcija=1">Testovi iz lekcije 1</a><a class="btn" href="index.html#kartice=1">Kartice</a></div></section>
+<section class="prose" data-li="1" aria-labelledby="l2"><h2 id="l2"><span class="ln">Lekcija 2</span>Načela, izazovi, razvoj i sistem javnog zdravlja</h2>
+<p><em>Slajdovi 20–35.</em> Lekcija daje načela (ista kao poglavlja Zakona o javnom zdravlju), izazove, istorijske faze i to šta sve čini sistem javnog zdravlja.</p>
+<h3 id="l2-1">Načela javnog zdravlja (7)</h3>
+<ol>
+<li>Fizičko, mentalno i socijalno zdravlje stanovništva.</li>
+<li>Promocija zdravlja.</li>
+<li>Životna sredina i zdravlje stanovništva.</li>
+<li>Radna okolina i zdravlje stanovništva.</li>
+<li>Zdravstveni menadžment, kvalitet i efikasnost zdravstvenog sistema.</li>
+<li>Integrisani informacioni sistem javnog zdravlja za praćenje, procenu i analizu zdravstvenog stanja stanovništva i izveštavanje nadležnih organa i javnosti.</li>
+<li>Javno zdravlje u elementarnim i drugim većim nepogodama i vanrednim prilikama.</li>
+</ol>
+<h3 id="l2-2">Izazovi</h3>
+<p><strong>Globalni izazovi danas (4):</strong></p>
+<ol>
+<li>Globalno zagrevanje: poplave i širenje pustinja.</li>
+<li>Globalne podele: siromaštvo i glad.</li>
+<li>Globalna bezbednost: građanski ratovi i terorizam.</li>
+<li>Globalno zdravlje: ljudska prava za sve.</li>
+</ol>
+<p><strong>Zdravlje je povezano sa:</strong> ekonomskim razvojem; demokratijom i ljudskim vrednostima; efikasnošću zdravstvenog sistema.</p>
+<p><strong>Sadašnji izazovi u Srbiji (6):</strong> preventabilne bolesti; faktori rizika; socijalne i ekonomske determinante zdravlja; zdravlje na radnom mestu; starenje stanovništva; ranjive populacione grupe.</p>
+<h3 id="l2-3">Razvoj javnog zdravlja</h3>
+<p>Četiri etape razvoja: (1) poboljšanje higijenskih i sanitarnih uslova; (2) individualna zdravstvena zaštita (imunizacija); (3) terapijski postupci; (4) novo javno zdravlje.</p>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 4"><table>
+<thead>
+<tr>
+<th>Faza</th>
+<th>Vreme</th>
+<th>Obeležja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Individualistička</td>
+<td>početak XX veka</td>
+<td>razvoj mikrobiologije i imunologije, otkrivanje vakcina, asanacija okoline</td>
+</tr>
+<tr>
+<td>Terapijska</td>
+<td>četrdesete godine XX veka</td>
+<td>otkriće novih lekova (sulfonamidi, insulin); državna sredstva idu dominantno ka bolnicama i kurativnoj zaštiti</td>
+</tr>
+<tr>
+<td>Novo javno zdravlje</td>
+<td>od druge polovine XX veka do danas</td>
+<td>uslovljeno saznanjem o ograničenim efektima kurativne medicine i skupih tehnologija, porastom socio-ekonomskih nejednakosti i zdravstvenih rizika</td>
+</tr>
+</tbody>
+</table></div>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 5"><table>
+<thead>
+<tr>
+<th><span class="sr">Stavka</span></th>
+<th>Staro javno zdravlje</th>
+<th>Novo javno zdravlje</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Čime se bavi</td>
+<td>rizičnim faktorima za zdravlje, bezbednom hranom, vazduhom i vodom</td>
+<td>sintetiše tradicionalni pristup sa menadžmentom zdravstvenih i javnozdravstvenih službi i akcijama u zajednici (Tulchinsky i Varavikova, 2000)</td>
+</tr>
+<tr>
+<td>Šta rešava</td>
+<td>infektivne, toksične i traumatske uzroke smrti</td>
+<td>pored klasičnih oblasti: pravično korišćenje zdravstvenih usluga, ekologija, javnozdravstvena politika, povezanost zdravlja sa socijalnim i ekonomskim razvojem (Ncayiyana i saradnici, 1995)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Iz predavanja:</strong> terapijska faza započela je otkrićem novih lekova, <strong>pre svega antibiotika</strong>, ali i insulina i drugih.</p>
+</blockquote>
+<h3 id="l2-4">Sistem javnog zdravlja</h3>
+<ul>
+<li><strong>Mreža učesnika (IOM, 2003):</strong> policija, NVO, centri u zajednici, mesna zajednica, crkva, domovi za stare, domovi za hendikepirane, mediji, domovi zdravlja, bolnice, doktori, škole, filantropi, poslanici, sportski centri, javni saobraćaj, zavodi za zdravstvenu zaštitu, grupe za samopomoć, Crveni krst, ministarstvo zdravlja, vatrogasna služba, laboratorije, službe za zloupotrebu droga, službe za mentalno zdravlje, poslodavci, sektor za ekonomski razvoj.</li>
+<li><strong>Shema sistema:</strong> u središtu je <strong>obezbeđivanje uslova za zdravlje stanovništva</strong>, a oko njega šest učesnika: zajednica; sistem zdravstvene zaštite; državna javnozdravstvena infrastruktura; zaposleni i poslodavci; akademska javnost; mediji.</li>
+</ul>
+<p><strong>Dve osobine javnog zdravlja:</strong></p>
+<ol>
+<li>Bavi se <strong>preventivnim</strong>, a ne kurativnim aspektom zdravstvene zaštite.</li>
+<li>Bavi se zdravstvenim pitanjima na nivou <strong>zajednice</strong>, a ne pojedinca.</li>
+</ol>
+<ul>
+<li><strong>Žiža javnozdravstvene intervencije je prevencija, a ne lečenje.</strong> Ostvaruje se kroz nadzor nad obolelima i promociju zdravog ponašanja.</li>
+<li>Mnoge bolesti mogu se sprečiti <strong>jednostavnim, nemedicinskim merama</strong>: pranje ruku, podela sterilnih špriceva i igala, upotreba kondoma.</li>
+<li><strong>Specifična prevencija:</strong> npr. vakcinacija protiv zaraznih bolesti.</li>
+<li>Ovakav koncept bio je važan za razvoj socijalno-medicinske misli, prevenciju bolesti i odgovornost zajednice za zdravlje građana.</li>
+<li><strong>Definicija zdravlja (Ustav SZO, 1946):</strong> „Stanje potpunog fizičkog, psihičkog i socijalnog blagostanja, a ne samo odsutnost bolesti ili onesposobljenosti."</li>
+</ul>
+<div class="lesson-end" data-li="1"><button class="btn read" data-read="1" aria-pressed="false">Označi kao pročitano</button><a class="btn primary" href="index.html#lekcija=2">Testovi iz lekcije 2</a><a class="btn" href="index.html#kartice=2">Kartice</a></div></section>
+<section class="prose" data-li="2" aria-labelledby="l3"><h2 id="l3"><span class="ln">Lekcija 3</span>Funkcije, osnovne usluge i nivoi delovanja</h2>
+<p><em>Slajdovi 37–61.</em> Lekcija objašnjava čime se javno zdravlje konkretno bavi i na kojim nivoima deluje, uz probleme javnog zdravlja u Evropi.</p>
+<h3 id="l3-1">Razlike između razvijenih i nerazvijenih zemalja</h3>
+<ul>
+<li>Država osniva vladine agencije i institucije koje traže odgovore na domaće zdravstvene probleme. Zbog različitih problema postoji velika razlika u pristupu između razvijenih zemalja i zemalja u razvoju.</li>
+<li><strong>U zemljama u razvoju i nerazvijenim:</strong> javnozdravstvena infrastruktura nije razvijena; nedostaju obrazovani zdravstveni radnici ili novac čak i za osnovnu negu i prevenciju. Zato je najveći deo bolesti i smrtnosti povezan sa <strong>siromaštvom</strong>.</li>
+</ul>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 6"><table>
+<thead>
+<tr>
+<th>Izdvajanje za zdravstvo</th>
+<th>Iznos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Neke afričke zemlje</td>
+<td>jedva 100 dolara po stanovniku godišnje</td>
+</tr>
+<tr>
+<td>SAD</td>
+<td>približno 4.500 dolara po stanovniku</td>
+</tr>
+<tr>
+<td>Odnos</td>
+<td>1 : 45</td>
+</tr>
+<tr>
+<td>Srbija</td>
+<td>6,9 miliona zdravstveno osiguranih; prema planu RFZO oko 295 evra, odnosno nešto više od 166 evra po osiguraniku</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Zato su još važnije <strong>jednostavne i jeftine preventivne mere</strong>, koje smanjuju broj obolelih i umrlih i ukupnu potrošnju. Potrošnja je najveća u kurativnoj medicini, posebno u bolničkom lečenju.</li>
+</ul>
+<h3 id="l3-2">Javnozdravstvene funkcije</h3>
+<ul>
+<li><strong>Definicija:</strong> skup aktivnosti kojima se izvršava glavni zadatak javnog zdravlja, a to je <strong>unapređenje zdravlja populacije</strong>. Definišu glavne zadatke ili očekivane rezultate održivog razvoja zdravlja.</li>
+</ul>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 7"><table>
+<thead>
+<tr>
+<th>Glavna funkcija</th>
+<th>Sadržaj</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Procena</td>
+<td>procena i praćenje zdravlja zajednice i ugroženih grupa radi identifikacije zdravstvenih problema i prioriteta</td>
+</tr>
+<tr>
+<td>Razvoj politike</td>
+<td>formulisanje javne politike, u saradnji sa političkim i društvenim liderima, radi rešavanja lokalnih i nacionalnih problema i prioriteta</td>
+</tr>
+<tr>
+<td>Obezbeđivanje (osiguranje)</td>
+<td>osiguranje pristupa odgovarajućoj i ekonomski isplativoj zdravstvenoj zaštiti (uključujući unapređenje zdravlja i prevenciju) i evaluacija njenog kvaliteta i efikasnosti, uz pravičnost i solidarnost</td>
+</tr>
+<tr>
+<td>Učestvovanje</td>
+<td>ravnopravno učestvovanje svih članova zajednice i zaposlenih u odlučivanju i aktivnostima</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Ostale funkcije sa slajdova:</strong></p>
+<ul>
+<li>identifikacija prioritetnih zdravstvenih problema i opasnosti po zdravlje;</li>
+<li>planiranje i pripravnost za hitna stanja u javnom zdravstvu;</li>
+<li>intervencije zaštite zdravlja od štetnih faktora u okolini i na mestu rada;</li>
+<li>sprečavanje bolesti;</li>
+<li><strong>promocija zdravlja</strong>: jedna od ključnih intervencija za unapređenje i kontrolu nad sopstvenim zdravljem i njegovim odrednicama;</li>
+<li>upravljanje, finansiranje i osiguranje kvaliteta u javnom zdravstvu;</li>
+<li><strong>istraživanja</strong> stanja i opterećenja populacije bolešću. Procena potreba ranjivih i drugih specifičnih grupa je <strong>početni i ključni deo</strong> javnozdravstvenog delovanja.</li>
+</ul>
+<h3 id="l3-3">Deset osnovnih usluga javnog zdravlja (CDC)</h3>
+<ol>
+<li>Nadgledati zdravstveno stanje radi identifikovanja zdravstvenih problema zajednice.</li>
+<li>Dijagnostikovati i istražiti zdravstvene probleme i rizike u zajednici.</li>
+<li>Informisati, obrazovati i osposobiti ljude o zdravstvenim pitanjima.</li>
+<li>Pokrenuti partnerstva u zajednici za identifikaciju i rešavanje zdravstvenih problema.</li>
+<li>Osmisliti politiku i planove za podršku pojedinačnim i zajedničkim zdravstvenim naporima.</li>
+<li>Primeniti zakone i regulative za zaštitu zdravlja i garantovanje bezbednosti.</li>
+<li>Povezati ljude sa potrebnim zdravstvenim službama i obezbediti im zaštitu ako je nema.</li>
+<li>Obezbediti sposobne profesionalce za zdravstvenu zaštitu populacije i pojedinaca.</li>
+<li>Evaluirati efikasnost, pristupačnost i kvalitet zdravstvene zaštite.</li>
+<li>Istraživati radi novih uvida i inovativnih rešenja za zdravstvene probleme.</li>
+</ol>
+<h3 id="l3-4">Nivoi delovanja</h3>
+<p>Populacija obuhvaćena intervencijom može biti mala grupa (porodica, lokalna zajednica) ili celo stanovništvo.</p>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 8"><table>
+<thead>
+<tr>
+<th>Nivo</th>
+<th>Primeri i napomene</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lokalni</td>
+<td>porodica, lokalna zajednica</td>
+</tr>
+<tr>
+<td>Regionalni</td>
+<td>važni su kao „čuvari ulaza" za bolesti koje bi se mogle proširiti preko granica</td>
+</tr>
+<tr>
+<td>Nacionalni</td>
+<td>SAD: US Public Health Service, koji upravlja agencijama FDA (Food and Drug Administration), CDC (Centers for Disease Control) i NIH (National Institute of Health); finski National Public Health Institute, sa programom CINDI (Countrywide Integrated Non-communicable Diseases Intervention) za suzbijanje nezaraznih bolesti</td>
+</tr>
+<tr>
+<td>Internacionalni i globalni</td>
+<td>SZO (WHO), CDC, ECDC (European Center for Disease Prevention and Control)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Iz predavanja:</strong> regionalni nivo kao „čuvar ulaza" pokazao se tokom pandemije <strong>COVID-19</strong>. Ukupna zdravstvena potrošnja najveća je u kurativi, a <strong>bolničko lečenje je najskuplji vid lečenja</strong>; zato prevencija smanjuje troškove. SAD izdvajaju približno <strong>4.500–5.000 $</strong> po stanovniku (odnos sa Afrikom oko <strong>1:45–50</strong>).</p>
+</blockquote>
+<h3 id="l3-5">Javno zdravlje u Evropi danas</h3>
+<ul>
+<li><strong>Društvene promene:</strong> pad nataliteta, starenje stanovništva.</li>
+<li><strong>Promene u morbiditetu</strong> i potrebama za zaštitom; stalno preispitivanje ravnoteže između primarne i bolničke zaštite.</li>
+<li>Teško je uspostaviti ravnotežu između izbora prioriteta, delotvornosti sistema i jednakosti u ostvarivanju prava.</li>
+<li>Ozbiljni su problemi u mobilizaciji stručnjaka i primeni njihovih preporuka u zdravstvenoj politici.</li>
+<li>Uloga nekih vlada: kontrola troškova, jednakost i pravičnost u raspodeli resursa, razvoj lokalne zdravstvene zaštite.</li>
+<li>Malo je dokaza da se napori usmeravaju ka zdravstvenim ciljevima. <strong>Troškovi stalno rastu</strong> u većini zemalja EU, uz ograničene mogućnosti finansiranja.</li>
+</ul>
+<p><strong>Demografski trendovi kao odgovor na pritisak:</strong></p>
+<ul>
+<li>Natalitet u većini evropskih zemalja je približno <strong>13 na 1.000</strong> stanovnika, jednak ili niži od mortaliteta (relativno stabilna populacija).</li>
+<li>Stalno raste udeo starijih, a opada udeo mlađih (niska stopa fertiliteta, porodice sa malo dece).</li>
+<li><strong>Udeo mladih opada, a njihovi problemi rastu:</strong> nesreće, zloupotreba droga, neželjene trudnoće, posledice nezaposlenosti, samoće i migracija.</li>
+<li><strong>Problemi starijih stalno rastu:</strong> hronične bolesti, veća potreba za zaštitom, veća potrošnja lekova, veća potreba za kućnim lečenjem i negom.</li>
+<li>Ovo su važne odrednice za socijalnu i zdravstvenu politiku i traže promenu u raspodeli resursa.</li>
+</ul>
+<blockquote>
+<p><strong>Iz predavanja:</strong> kod starijih dominiraju hronične nezarazne bolesti, često udružene (<strong>multimorbidnost</strong>). U pandemiji <strong>COVID-19</strong> pokazalo se da <strong>dominantnu ulogu ima primarna zdravstvena zaštita</strong>. Nejednakost nije svuda bila ista: u nekim zemljama EU pacijenti su morali da plaćaju npr. korišćenje respiratora, dok u <strong>Srbiji te usluge nisu naplaćivane</strong>.</p>
+</blockquote>
+<div class="lesson-end" data-li="2"><button class="btn read" data-read="2" aria-pressed="false">Označi kao pročitano</button><a class="btn primary" href="index.html#lekcija=3">Testovi iz lekcije 3</a><a class="btn" href="index.html#kartice=3">Kartice</a></div></section>
+<section class="prose" data-li="3" aria-labelledby="l4"><h2 id="l4"><span class="ln">Lekcija 4</span>Determinante i pokazatelji zdravstvenog stanja</h2>
+<p><em>Slajdovi 62–82.</em> Ovo je lekcija sa najviše brojki: pokazatelji starosti stanovništva, natalitet, mortalitet, morbiditet i formule.</p>
+<h3 id="l4-1">Vodeći javnozdravstveni problemi</h3>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 9"><table>
+<thead>
+<tr>
+<th>Hronične bolesti</th>
+<th>Zarazne bolesti</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>nenamerne povrede, mentalni poremećaji i druge</td>
+<td>AIDS, SARS i druge</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="l4-2">Determinante zdravlja</h3>
+<ul>
+<li><strong>Determinante izvan zdravstvenog sistema:</strong> životno i radno okruženje, ishrana, stil života.</li>
+<li><strong>Društveni i ekonomski razvoj</strong> i <strong>razvoj zdravlja</strong> međusobno utiču jedan na drugi.</li>
+<li><strong>Odrednice zdravlja</strong> dele se na: genetske, društvene, ekonomske i ostale.</li>
+</ul>
+<p><strong>Dahlgren-Whitehead model (1991)</strong>, slojevi od centra ka spolja:</p>
+<ol>
+<li>starost, pol i konstitucionalni (nasledni) faktori;</li>
+<li>individualni stil života;</li>
+<li>socijalne mreže i mreže zajednice;</li>
+<li>uslovi života i rada: proizvodnja hrane i poljoprivreda, obrazovanje, radno okruženje, nezaposlenost, voda i sanitacija, zdravstvene službe, stanovanje;</li>
+<li>opšti socioekonomski, kulturni i uslovi životne sredine.</li>
+</ol>
+<h3 id="l4-3">Analiza situacije</h3>
+<ul>
+<li><strong>Analiza situacije</strong> obezbeđuje potrebne informacije i podatke i daje input za sledeće korake: izbor prioriteta, postavljanje ciljeva.</li>
+<li><strong>Utvrđivanje problema</strong> je najznačajniji podkorak analize situacije.</li>
+</ul>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 10"><table>
+<thead>
+<tr>
+<th>Šta se analizira (7)</th>
+<th>Sadržaj</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Geografsko područje</td>
+<td>ruralno ili urbano; razvijeno ili nerazvijeno</td>
+</tr>
+<tr>
+<td>2. Stanovništvo</td>
+<td>vitalno-demografski podaci</td>
+</tr>
+<tr>
+<td>3. Društveno-ekonomski faktori</td>
+<td>obrazovanje, zanimanje, dohodak, potrošnja, ishrana, uslovi stanovanja, infrastruktura</td>
+</tr>
+<tr>
+<td>4. Kulturalni faktori</td>
+<td></td>
+</tr>
+<tr>
+<td>5. Ljudski resursi</td>
+<td>davaoci i korisnici usluga; interesi, motivi, veštine, slabe tačke</td>
+</tr>
+<tr>
+<td>6. Zdravstveni status</td>
+<td>morbiditet, natalitet, mortalitet, onesposobljenost, rizični faktori, znanja, stavovi</td>
+</tr>
+<tr>
+<td>7. Zdravstvena služba</td>
+<td>infrastruktura, pristupačnost, kvantitet i kvalitet rada</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Ciljevi analize (9):</strong> sagledavanje zdravstvene problematike; opis zdravstvenog stanja i faktora koji utiču; poređenje sa prošlošću; definisanje problema; identifikacija i rangiranje prioriteta; osnova za planiranje; procena budućnosti; izbor strategija, mera i akcija; praćenje (monitoring) i evaluacija preduzetih mera.</p>
+<p><strong>Pokazatelji zdravstvenog stanja obezbeđuju:</strong> osnovne informacije za donosioce odluka; merenje napretka prema ciljevima zdravstvene politike; merenje vrednosti u zdravlju za uloženi novac (efikasnost, efektivnost, kvalitet).</p>
+<p><strong>Izvori podataka (6):</strong> matične knjige (vitalni događaji); rutinska zdravstvena statistika (korišćenje, efikasnost i kvalitet rada službe); istraživanje zdravlja populacije (zdravstvene potrebe); epidemiološki nadzor; registri bolesti; drugo.</p>
+<blockquote>
+<p><strong>Iz predavanja:</strong> stanje se poredi sa prethodnim periodom (npr. <strong>5–10 godina</strong>) i sa drugim zemljama/EU. <strong>Donosioci odluka</strong> u zdravstvu su pre svega <strong>Vlada i Ministarstvo zdravlja</strong>. Istraživanje zdravlja stanovništva Republike Srbije rađeno je do sada <strong>dva puta</strong> (npr. <strong>2010</strong>). Registri postoje samo za određene bolesti jer su <strong>skupi</strong>.</p>
+</blockquote>
+<h3 id="l4-4">Pokazatelji starosti stanovništva (5)</h3>
+<p><strong>1. Zrelost stanovništva:</strong> udeo starih 65 i više godina u ukupnom stanovništvu.</p>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 11"><table>
+<thead>
+<tr>
+<th>Tip stanovništva (eksperti UN)</th>
+<th>Udeo starih 65+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mlado</td>
+<td>do 4%</td>
+</tr>
+<tr>
+<td>Zrelo</td>
+<td>4–7%</td>
+</tr>
+<tr>
+<td>Staro</td>
+<td>7–10%</td>
+</tr>
+<tr>
+<td>Vrlo staro</td>
+<td>više od 10%</td>
+</tr>
+</tbody>
+</table></div>
+<p>Vojvodina ima 16,1%, a Centralna Srbija 17,6% starih 65+. <em>(Na predavanju: u Srbiji oko </em><em>18%</em><em>, tj. </em><em>vrlo staro</em><em> stanovništvo.)</em></p>
+<p><strong>2. Indeks starosti:</strong> broj osoba starih 60 i više godina podeljen brojem osoba starih 0–19 godina. <strong>Granica je 0,400.</strong></p>
+<p><strong>3. Prosečna starost:</strong> srednje godine u trenutku popisa, računa se kao ponderisana aritmetička sredina. Starenje počinje kada prosečna starost dostigne <strong>30 godina</strong>.</p>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 12"><table>
+<thead>
+<tr>
+<th>Prosečna starost</th>
+<th>Muškarci</th>
+<th>Žene</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vojvodina</td>
+<td>38,50</td>
+<td>41,54</td>
+</tr>
+<tr>
+<td>Srbija</td>
+<td>39,53</td>
+<td>41,92</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Iz predavanja:</strong> prosečna starost u Srbiji danas je oko <strong>42 godine</strong> (granica 30), pa je i po ovom pokazatelju stanovništvo staro/vrlo staro.</p>
+</blockquote>
+<p><strong>4. Koeficijent starosti:</strong> procenat osoba starih 60+ u ukupnom stanovništvu. Kada dostigne <strong>12%</strong>, stanovništvo je počelo da stari. Vojvodina ima preko 21%, Centralna Srbija preko 22%.</p>
+<p><strong>5. Biološki tip po Sundbergu:</strong></p>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 13"><table>
+<thead>
+<tr>
+<th>Tip</th>
+<th>0–14 godina</th>
+<th>15–49 godina</th>
+<th>50+ godina</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Progresivni</td>
+<td>40%</td>
+<td>50%</td>
+<td>10%</td>
+</tr>
+<tr>
+<td>Stacionarni</td>
+<td>33%</td>
+<td>50%</td>
+<td>17%</td>
+</tr>
+<tr>
+<td>Regresivni</td>
+<td>20%</td>
+<td>50%</td>
+<td>30%</td>
+</tr>
+</tbody>
+</table></div>
+<p>Uvek je 50% u grupi 15–49; razlikuju se mladi i stari.</p>
+<h3 id="l4-5">Natalitet, mortalitet, prirodni priraštaj</h3>
+<ul>
+<li><strong>Natalitet:</strong> broj živorođene dece na određenoj teritoriji u određenom periodu (na 1.000 stanovnika).</li>
+<li><em>Na predavanju:</em> natalitet u Srbiji je oko <strong>8–9‰</strong> (nepovoljan). Negativan prirodni priraštaj znači <strong>depopulaciju</strong>. <em>(Profesorka je usput pomenula i „oko 13‰", što je verovatno brojka za Evropu; za ispit drži se 8–9‰ za Srbiju i 13‰ za Evropu.)</em></li>
+<li><strong>Mortalitet:</strong> broj umrlih na 1.000 stanovnika. U Srbiji je visok, <strong>preko 14‰</strong>.</li>
+<li><strong>Prirodni priraštaj:</strong> razlika između broja rođenih i umrlih.</li>
+</ul>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 14"><table>
+<thead>
+<tr>
+<th>Natalitet (na 1.000)</th>
+<th>1953</th>
+<th>1961</th>
+<th>1971</th>
+<th>1981</th>
+<th>1991</th>
+<th>2002</th>
+<th>2007</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vojvodina</td>
+<td>22,4</td>
+<td>17,1</td>
+<td>13,4</td>
+<td>13,7</td>
+<td>11,4</td>
+<td>9,8</td>
+<td>9,2</td>
+</tr>
+<tr>
+<td>Srbija (uža)</td>
+<td>25,3</td>
+<td>17,2</td>
+<td>14,8</td>
+<td>16,2</td>
+<td>11,6</td>
+<td>10,6</td>
+<td>9,2</td>
+</tr>
+<tr>
+<td>Kosovo</td>
+<td>42,6</td>
+<td>41,8</td>
+<td>37,5</td>
+<td>30,2</td>
+<td>26,6</td>
+<td>–</td>
+<td>–</td>
+</tr>
+</tbody>
+</table></div>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 15"><table>
+<thead>
+<tr>
+<th>Natalitet</th>
+<th>Ocena</th>
+<th>Prirodni priraštaj</th>
+<th>Ocena</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>do 12‰</td>
+<td>nepovoljan</td>
+<td>više od 15‰</td>
+<td>retko visok</td>
+</tr>
+<tr>
+<td>12–20‰</td>
+<td>povoljan</td>
+<td>13–15‰</td>
+<td>vrlo visok</td>
+</tr>
+<tr>
+<td>20–25‰</td>
+<td>visok</td>
+<td>9–12‰</td>
+<td>visok</td>
+</tr>
+<tr>
+<td>25–30‰</td>
+<td>vrlo visok</td>
+<td>6–8‰</td>
+<td>povoljan</td>
+</tr>
+<tr>
+<td>više od 30‰</td>
+<td>vanredno visok</td>
+<td>manje od 5‰</td>
+<td>slab</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="l4-6">Morbiditet i formule</h3>
+<ul>
+<li><strong>Morbiditet</strong> se prati kao vanbolnički i bolnički.</li>
+<li><strong>Incidenca:</strong> broj <strong>novoobolelih</strong>.</li>
+<li><strong>Prevalenca:</strong> <strong>ukupan</strong> broj obolelih.</li>
+<li>Poznat je samo <strong>registrovani</strong> morbiditet, jer se neki ljudi sa problemom ne jave službi, pa <strong>stvarni morbiditet ne znamo</strong>.</li>
+<li><strong>Vanbolnički</strong> morbiditet registruje se u <strong>primarnoj</strong> zaštiti; <strong>bolnički</strong> u bolnicama bilo kog nivoa.</li>
+</ul>
+<div class="formula"><span class="lhs">Rizik oboljevanja =</span><span class="frac"><span>broj obolelih</span><span>broj stanovnika u riziku</span></span><span>× 100</span></div>
+<div class="formula"><span class="lhs">Letalitet =</span><span class="frac"><span>broj umrlih</span><span>broj obolelih</span></span><span>× 100</span></div>
+<p><strong>Razlika:</strong> letalitet = umrli na broj <strong>obolelih</strong>; mortalitet = umrli na broj <strong>stanovnika</strong>.</p>
+<h3 id="l4-7">Očekivano trajanje života</h3>
+<ul>
+<li><strong>Očekivano trajanje života na rođenju:</strong> broj godina koje pojedinac može očekivati u istim uslovima mortaliteta.</li>
+<li><em>Na predavanju:</em> jedan od <strong>najboljih pokazatelja</strong> zdravstvenog stanja; <strong>žene po pravilu žive duže</strong> od muškaraca. U srednjem veku oko <strong>40 godina</strong>, danas oko <strong>80</strong> u mnogim zemljama.</li>
+<li>Velike razlike, koje se povećavaju, postoje između zemalja i unutar jedne zemlje.</li>
+<li>U Evropi varira od <strong>65,8 godina (Rusija)</strong> do <strong>81,6 godina (Island)</strong>. Srbija: <strong>74,56</strong> godina (muškarci 72, žene 77). Izvor: Health for All Data-Base, SZO, 2005.</li>
+</ul>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 16"><table>
+<thead>
+<tr>
+<th>Zemlja</th>
+<th>Žene</th>
+<th>Muškarci</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Austrija</td>
+<td>82,37</td>
+<td>76,81</td>
+</tr>
+<tr>
+<td>EU</td>
+<td>81,56</td>
+<td>75,41</td>
+</tr>
+<tr>
+<td>Slovenija</td>
+<td>80,93</td>
+<td>74,04</td>
+</tr>
+<tr>
+<td>Češka</td>
+<td>79,32</td>
+<td>72,97</td>
+</tr>
+<tr>
+<td>Hrvatska</td>
+<td>78,92</td>
+<td>71,9</td>
+</tr>
+<tr>
+<td>Mađarska</td>
+<td>77,23</td>
+<td>68,75</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="l4-8">Stanje životne sredine</h3>
+<p>Prati se kroz četiri elementa: vazduh, voda, hrana, buka.</p>
+<div class="lesson-end" data-li="3"><button class="btn read" data-read="3" aria-pressed="false">Označi kao pročitano</button><a class="btn primary" href="index.html#lekcija=4">Testovi iz lekcije 4</a><a class="btn" href="index.html#kartice=4">Kartice</a></div></section>
+<section class="prose" data-li="4" aria-labelledby="l5"><h2 id="l5"><span class="ln">Lekcija 5</span>Javno zdravlje u Srbiji</h2>
+<p><em>Slajdovi 84–122.</em> Lekcija pokriva demografiju i kadrove, organizaciju i nosioce javnog zdravlja, zakonodavstvo, strategije i politiku SZO.</p>
+<h3 id="l5-1">Demografski trendovi</h3>
+<ul>
+<li><strong>15,7%</strong> stanovništva starije je od 65 godina, pa je stanovništvo <strong>vrlo staro</strong> (preko 10%).</li>
+<li>Srbija je na <strong>4. mestu</strong> liste najstarijih populacija u svetu.</li>
+<li>Svaka generacija je malobrojnija od prethodne. Samo zbog odlaganja rađanja do 40. godine u demografskom smislu gubi se cela jedna generacija.</li>
+<li>Situaciju komplikuju ekonomska kriza, socijalna nesigurnost, siromaštvo i migracije.</li>
+<li>Distribucija stanovništva je izrazito neravnomerna: depopulacija sela i koncentracija u gradovima. Nema uravnoteženog prostornog ni etničkog obnavljanja stanovništva.</li>
+<li>Srednje trajanje života je produženo u drugoj polovini XX veka, ali i dalje zaostaje <strong>3–4 godine</strong> za razvijenim zemljama.</li>
+<li>Urbanizacija je <strong>prešla 50%</strong> (prag srednje urbanizovanosti).</li>
+</ul>
+<p><strong>Vodeći uzroci smrti (oba pola):</strong></p>
+<ol>
+<li>bolesti kardiovaskularnog sistema;</li>
+<li>maligne neoplazme;</li>
+<li>zatim saobraćajni traumatizam, unipolarna depresija i dijabetes melitus.</li>
+</ol>
+<ul>
+<li><strong>Tradicionalno okrivljeni:</strong> pušenje, neadekvatna ishrana, alkoholizam, nedovoljna fizička aktivnost, odlaganje odlaska lekaru.</li>
+<li><strong>Poslednjih godina navode se i:</strong> prolongirani stres, socijalni maladaptacioni sindrom na izmenjene norme, ograničena samorealizacija i osećaj nesigurnosti.</li>
+</ul>
+<p><strong>Iseljavanje:</strong></p>
+<ul>
+<li>Migracije su od davnina važan element demografskog razvoja Srbije.</li>
+<li>Gubici su <strong>direktni i indirektni</strong> (sa mladima se gubi i njihovo potomstvo) i <strong>strukturni</strong> (odlaze visokoobrazovani kadrovi).</li>
+<li>Problem je izražen od 90-ih i danas, jer emigracija traje uz nedovoljno rađanje i otvorenu depopulaciju; prirodni priraštaj je postao negativan. Ublažavanje uzroka emigracije je imperativ.</li>
+</ul>
+<p><strong>Pokazatelji socijalne uključenosti u zdravlju (3):</strong> pristup zdravstvenoj zaštiti (dostupnost); kvalitet (delotvornost, bezbednost, usmerenost na pacijenta); dugoročna održivost sistema (potrošnja i efikasnost).</p>
+<h3 id="l5-2">Kadrovi u Srbiji</h3>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 17"><table>
+<thead>
+<tr>
+<th>Kadar</th>
+<th>Broj</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Licencirani lekari</td>
+<td>preko 30.000</td>
+</tr>
+<tr>
+<td>Izabrani lekari u PZZ (opšta medicina)</td>
+<td>oko 3.500</td>
+</tr>
+<tr>
+<td>Izabrani ginekolozi</td>
+<td>oko 500</td>
+</tr>
+<tr>
+<td>Izabrani pedijatri</td>
+<td>oko 1.200</td>
+</tr>
+<tr>
+<td>Lekari u privatnim domovima zdravlja</td>
+<td>manje od 200</td>
+</tr>
+<tr>
+<td>Farmaceuti u laboratorijskoj dijagnostici doma zdravlja</td>
+<td>1 na 40.000 stanovnika</td>
+</tr>
+<tr>
+<td>Farmaceuti u privatnoj / državnoj praksi</td>
+<td>oko 2.500 / manje od 2.000</td>
+</tr>
+<tr>
+<td>Licence medicinskih sestara i tehničara</td>
+<td>gotovo 84.000 (ocena: nedovoljno)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="l5-3">Zdravstveni sistem i demografski trendovi</h3>
+<ul>
+<li>Plan mreže ustanova u nekim delovima Srbije nije prilagođen demografskim promenama i praktično se ne menja; nepokrivena područja mogu se pokriti privatnom praksom.</li>
+<li><strong>Kapitacija</strong>, novi način plaćanja, slabo prepoznaje osobenosti sredina i populacija (stariji, hronični bolesnici).</li>
+<li>Hitna pomoć je nedostupna u pojedinim delovima Srbije.</li>
+<li>Pokušaji gašenja medicine rada i prevođenja specijalista medicine rada u izabrane lekare ukazuju na nedovoljnu brigu za radno aktivno stanovništvo.</li>
+<li>Ne može se govoriti o „višku" lekara, jer migracija zdravstvenih radnika počinje i u Srbiji. Nedostaju anesteziolozi, radiolozi, patolozi, kardiohirurzi; trend će se nastaviti.</li>
+</ul>
+<p><strong>Četiri ključne strategije za akciju:</strong> međuresorski pristup; odabir efikasnih programa; integrisana primarna zaštita i prilagodljiv sistem bolničke zaštite; uključivanje partnera relevantnih za zdravlje.</p>
+<h3 id="l5-4">Organizacija i nosioci javnog zdravlja</h3>
+<ul>
+<li><strong>Istorija:</strong> javnozdravstvene institucije osnivaju se <strong>1924–1930</strong>; međunarodni značaj ima <strong>dr Andrija Štampar</strong>. <em>Na predavanju:</em> Štampar je osnivao higijenske zavode i u zemlji i u inostranstvu i izabran je za <strong>prvog privremenog generalnog sekretara SZO</strong>, koja je osnovana <strong>1948.</strong> kao agencija <strong>Ujedinjenih nacija</strong>.</li>
+<li><strong>Organizaciona shema:</strong> Republički institut za javno zdravlje; Institut za javno zdravlje Vojvodine; okružni zavodi (instituti) za javno zdravlje.</li>
+</ul>
+<p><strong>Nosioci javnog zdravlja u Srbiji:</strong></p>
+<ul>
+<li>Ministarstvo zdravlja.</li>
+<li>Ostala ministarstva: prosvete i nauke, omladine i sporta, rada i socijalne politike, životne sredine, ljudskih i manjinskih prava, državne uprave i lokalne samouprave i druga.</li>
+<li><strong>Institut za javno zdravlje Srbije „Dr Milan Jovanović Batut"</strong>, sa mrežom od <strong>22 zavoda/instituta</strong>.</li>
+<li>Domovi zdravlja.</li>
+<li>Inspekcijske službe: zdravstvene, sanitarne, komunalne, tržišne i veterinarske, na republičkom i regionalnom nivou.</li>
+<li>Obrazovne institucije: fakulteti, visoke i srednje medicinske škole, osnovne škole, predškolske ustanove.</li>
+<li>Institucije za socijalnu zaštitu.</li>
+</ul>
+<h3 id="l5-5">Zakonodavstvo</h3>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 18"><table>
+<thead>
+<tr>
+<th><span class="sr">Stavka</span></th>
+<th>Javnozdravstveno zakonodavstvo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nekad</td>
+<td>kontrola zaraznih bolesti, zaštita spoljne sredine, higijena ishrane, regulisanje rada zdravstvenog osoblja</td>
+</tr>
+<tr>
+<td>Danas</td>
+<td>globalni pristup zdravlju sa organizacijom zdravstvenog sistema i sredine; osnov za formulisanje i sprovođenje zdravstvene politike</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Obuhvata zakone o promociji zdravlja, pravima pacijenata, zaštiti sredine, jednakosti u pristupu zaštiti i podržava primarnu zdravstvenu zaštitu.</li>
+<li><strong>Podrška javnom zdravlju:</strong> Strategija javnog zdravlja, Zakon o javnom zdravlju, Nacionalna strategija. Treba da bude nezavisna od dnevne politike, uređena jedinstvenim propisima, sa definisanim zadacima i nosiocima na svim nivoima.</li>
+<li>U Srbiji ima <strong>više od 170</strong> zakonodavnih akata u oblasti javnog zdravlja.</li>
+<li><strong>Usmerenja:</strong> dalji razvoj Škole javnog zdravlja (osnivač Medicinski fakultet u Beogradu); razvoj promocije zdravlja; razvoj informacionog sistema.</li>
+<li><strong>Šta je zakon javnog zdravlja:</strong> skup pravila ponašanja i akcija koje propisuje država. Primarno je sredstvo kojim Vlada stvara uslove da ljudi žive zdravije i sigurnije; utiče na norme zdravog ponašanja, identifikuje i odgovara na pretnje i nameće zdravstvene i bezbednosne standarde.</li>
+<li><strong>Oblasti propisa:</strong> javno zdravlje i zdravi stilovi života; zaštita od zaraznih bolesti; ekološko zakonodavstvo i zaštita životne sredine; republički organi za životnu sredinu; promet eksplozivnih materijala, zapaljivih tečnosti i gasova; zaštita vazduha i Fond za zaštitu životne sredine; upravljanje otpadom, medicinskim i farmaceutskim otpadom; inspekcijski nadzor.</li>
+</ul>
+<p><strong>Zakon o javnom zdravlju: 26 članova, 8 poglavlja:</strong></p>
+<ol>
+<li>Osnovne odredbe.</li>
+<li>Načela javnog zdravlja.</li>
+<li>Društvena briga za javno zdravlje (na nivou Republike; na nivou AP i lokalne samouprave).</li>
+<li>Način i postupak sprovođenja delatnosti (sedam oblasti, iste kao sedam načela iz lekcije 2).</li>
+<li>Uslovi za sprovođenje delatnosti: jačanje kapaciteta ustanova i učesnika; saradnja i koordinacija; kontinuirana edukacija i naučnoistraživačka delatnost; finansiranje; izveštavanje.</li>
+<li>Nadzor.</li>
+<li>Kaznene odredbe.</li>
+<li>Prelazne i završne odredbe.</li>
+</ol>
+<blockquote>
+<p><strong>Iz predavanja:</strong> zakon <strong>ne treba znati detaljno</strong>, samo glavna poglavlja. <strong>Prvo je doneta (Nacionalna) strategija javnog zdravlja</strong>, a na osnovu nje zakon.</p>
+</blockquote>
+<h3 id="l5-6">Strategije i nacionalni programi</h3>
+<p><strong>Usvojene strategije (8):</strong> Strategija javnog zdravlja RS; o HIV infekciji i AIDS-u; za borbu protiv droga 2009–2013; za palijativno zbrinjavanje; za stalno unapređenje kvaliteta zaštite i bezbednost pacijenata; razvoja zdravlja mladih; kontrole duvana; razvoja zaštite mentalnog zdravlja.</p>
+<p><strong>Usvojeni nacionalni programi (6):</strong> kardiološke zdravstvene zaštite; „Srbija protiv raka"; prevencija kolorektalnog karcinoma; prevencija raka dojke; prevencija i rana detekcija dijabetesa tipa 2; prevencija raka grlića materice.</p>
+<p><strong>Strategija javnog zdravlja kao proces (od problema do odgovora):</strong></p>
+<ol>
+<li><strong>Nadzor:</strong> šta je problem?</li>
+<li><strong>Identifikacija rizičnih faktora:</strong> koji je uzrok?</li>
+<li><strong>Intervencija i evaluacija:</strong> šta je efikasno?</li>
+<li><strong>Implementacija:</strong> kako primeniti?</li>
+</ol>
+<h3 id="l5-7">Politika SZO</h3>
+<ul>
+<li><strong>„Zdravlje za sve za 21. vek"</strong> i <strong>„Zdravlje 2020"</strong>: različite zemlje imaju različita polazišta i mogućnosti.</li>
+<li><strong>Ciljevi:</strong> snažna politička posvećenost zdravlju (zdravlje visoko na političkoj agendi); zdravlje u svim politikama; jačanje dijaloga o zdravlju i determinantama i odgovornosti pojedinca, stanovništva i društva.</li>
+</ul>
+<p><strong>„Zdravlje za sve, politika za XXI vek":</strong></p>
+<ul>
+<li><strong>Osnovni ciljevi (3):</strong> povećanje dužine zdravog života za sve; pristup svih adekvatnoj i kvalitetnoj zaštiti; jednakost u zdravlju između zemalja i unutar njih.</li>
+<li><strong>Osnovni pravci (3):</strong> univerzalni sistem vrednosti zdravlja za sve; zdravlje u centru razvoja; održivi zdravstveni sistemi.</li>
+</ul>
+<p><strong>Deset globalnih ciljeva SZO za XXI vek:</strong></p>
+<ol>
+<li>Povećati jednakost u zdravlju.</li>
+<li>Povećati preživljavanje i kvalitet života.</li>
+<li>Zaustaviti globalne trendove vodećih pandemija.</li>
+<li>Eradikacija i eliminacija određenih bolesti.</li>
+<li>Poboljšati pristupačnost vode, sanitacije, hrane i stanovanja.</li>
+<li>Unaprediti zdrave i smanjiti štetne stilove života.</li>
+<li>Razvoj, primena i praćenje nacionalnih politika „zdravlje za sve".</li>
+<li>Unaprediti pristupačnost esencijalne kvalitetne zdravstvene zaštite.</li>
+<li>Primena nacionalnih i globalnih zdravstvenih informacija.</li>
+<li>Podrška istraživanju za zdravlje.</li>
+</ol>
+<p><strong>Evropski region:</strong> politika <strong>„21 cilj za XXI vek"</strong>. <em>(Na predavanju: uz 10 globalnih ciljeva postoji i </em><em>21 specifični cilj</em><em>; ciljevi se razlikuju po zemljama jer su različite mogućnosti.)</em> Krajnji cilj: <strong>postići pun zdravstveni potencijal za sve</strong>. Dva pravca: promocija i zaštita zdravlja tokom celog života; redukcija vodećih bolesti i povreda.</p>
+<p><strong>Glavne strategije delovanja (4):</strong></p>
+<ol>
+<li>Multisektorska strategija prema determinantama zdravlja (fizički, ekonomski, društveni, kulturni aspekt, ravnopravnost polova).</li>
+<li>Programi i investicije vođeni postignutim rezultatima, a ne brojem intervencija.</li>
+<li>Integrisana primarna zaštita orijentisana ka porodici i zajednici, podržana fleksibilnim bolničkim sistemom.</li>
+<li>Razvojni program koji promoviše participaciju, zajedničko odlučivanje i odgovornost partnera na svim nivoima (kuća, škola, radno mesto, lokalna zajednica, država).</li>
+</ol>
+<p><strong>Okvir Strategije javnog zdravlja (međunarodni pristup):</strong></p>
+<ul>
+<li>„Zdravlje 2020", evropski okvir politike (SZO, 2012).</li>
+<li>Evropski akcioni plan za jačanje javnozdravstvenih kapaciteta i usluga (SZO, 2012).</li>
+<li>Novi program EU za akcije u oblasti zdravlja 2014–2020.</li>
+<li>Nacionalni plan za usvajanje pravnih tekovina EU (2013–2016).</li>
+<li>Nacionalne strategije drugih zemalja.</li>
+</ul>
+<div class="lesson-end" data-li="4"><button class="btn read" data-read="4" aria-pressed="false">Označi kao pročitano</button><a class="btn primary" href="index.html#lekcija=5">Testovi iz lekcije 5</a><a class="btn" href="index.html#kartice=5">Kartice</a></div></section>
+<section class="prose" data-li="5" aria-labelledby="l6"><h2 id="l6"><span class="ln">Lekcija 6</span>Javno zdravlje u Evropi, dostignuća i izazovi</h2>
+<p><em>Slajdovi 124–150.</em> Lekcija daje deset ključnih oblasti javnog zdravlja u Evropi, dostignuća, globalizaciju, nove pretnje i održivost.</p>
+<h3 id="l6-1">Deset ključnih oblasti delovanja u Evropi (EPHOs)</h3>
+<ol>
+<li>Nadzor nad zdravljem i blagostanjem populacije.</li>
+<li>Praćenje i odgovor na zdravstvene katastrofe i hitne situacije.</li>
+<li>Zaštita zdravlja: bezbednost okoline, radnog okruženja, hrane i drugo.</li>
+<li>Promocija zdravlja, uključujući determinante i jednakost u zdravlju.</li>
+<li>Prevencija bolesti, uključujući rano otkrivanje.</li>
+<li>Dobra uprava za zdravlje i blagostanje.</li>
+<li>Dovoljan broj kompetentnih javnozdravstvenih kadrova.</li>
+<li>Održiva organizaciona struktura i finansiranje.</li>
+<li>Zastupanje, komunikacije i društvena mobilizacija za zdravlje.</li>
+<li>Javnozdravstvena istraživanja za politiku i praksu zasnovanu na informacijama.</li>
+</ol>
+<p><strong>Zdravlje i prevencija ostvaruju se kroz:</strong> sprečavanje širenja bolesti i epidemija; zaštitu od štetnih faktora sredine; prevenciju nesreća; promociju zdravih stilova života; odgovor na prirodne i društvene nesreće; kvalitet i dostupnost zdravstvene zaštite.</p>
+<ul>
+<li><strong>Stanovništvo je najveće bogatstvo jedne zemlje.</strong> Vrednost tog bogatstva meri se zdravstvenim stanjem, koje zavisi od mnogo determinanti.</li>
+<li>Resursi su ograničeni, pa treba izabrati <strong>determinante sa najvećim uticajem</strong> na zdravlje.</li>
+</ul>
+<h3 id="l6-2">Dostignuća javnog zdravlja (CDC, 1999)</h3>
+<p>Deset dostignuća: vakcinacija; bezbednost u saobraćaju; sigurnija radna mesta; kontrola infektivnih bolesti; smanjenje smrtnosti od kardiovaskularnih bolesti; sigurnija i zdravija hrana; zdravije majke, bebe i deca; planiranje porodice; fluorizacija pijaće vode; prepoznavanje duvana kao opasnosti po zdravlje.</p>
+<blockquote>
+<p><strong>Iz predavanja:</strong> vakcinacijom su <strong>eradikovane</strong> neke bolesti; uz sigurnija radna mesta ide donošenje <strong>Zakona o zaštiti na radu</strong>; fluorizacija vode smanjila je <strong>karijes</strong>.</p>
+</blockquote>
+<h3 id="l6-3">Zdravlje, razvoj i globalizacija</h3>
+<ul>
+<li>Mora postojati spremnost države i društva da obezbede dobrobit za sve kroz unapređenje zdravlja i očuvanje zdrave sredine.</li>
+<li>Zdravlje stanovništva je jedan od najvažnijih društvenih resursa. Dobro zdravlje je od suštinskog značaja za ekonomski i društveni razvoj; loše zdravlje troši potencijal i crpi resurse iz svih sektora.</li>
+<li><strong>Globalna ekonomska kriza</strong> pogađa i razvijene zemlje i može ugroziti napredak u zdravlju postignut poslednjih decenija. Istovremeno je prilika da se preispitaju politike. <em>Na predavanju:</em> kriza <strong>2008.</strong>, a zatim nova ozbiljna kriza zbog pandemije <strong>COVID-19</strong>.</li>
+<li>Zdravlje je u središtu nacionalnih i međunarodnih politika razvoja.</li>
+<li>Globalizacija ekonomije dovela je do pojma <strong>„globalno zdravlje"</strong>. <strong>Globalizacija</strong> opisuje promene u društvima, kulturi i ekonomiji koje dovode do dramatičnog porasta međunarodne razmene.</li>
+<li><strong>Odrednice globalnog zdravlja:</strong> globalna tržišta, globalna komunikacija i razmena informacija, globalna mobilnost, globalne ekološke i klimatske promene.</li>
+<li>Ratovi, prirodne katastrofe, prisilne migracije i gubitak doma i osnovnih uslova za život su pretnje javnom zdravlju.</li>
+</ul>
+<h3 id="l6-4">Održivi razvoj</h3>
+<ul>
+<li><strong>Najveći izazov:</strong> „zdrava" stopa rasta bez pustošenja prirodnih resursa i zagađenja sredine, da se ne ugroze buduće generacije.</li>
+<li><strong>Održivi razvoj:</strong> optimalna ravnoteža između ekonomskog rasta, očuvanja prirodnih resursa i kvaliteta životne sredine.</li>
+<li>Determinante vezane za <strong>životnu sredinu</strong> odgovorne su za blizu <strong>30% opterećenja bolešću</strong>, pa treba jačati kapacitete za procenu rizika i zaštitu od štetnih faktora sredine.</li>
+<li><strong>Glavni izazovi:</strong> nove tehnologije, globalizacija, demografske promene, socioekonomske promene (ekonomska kriza), rastući problemi okoline. Zdravlje se poboljšava, ali nejednako i nezadovoljavajuće sporo.</li>
+<li><strong>Rio deklaracija (Rio de Žaneiro, 1992), prvi princip:</strong> „ljudska bića su u centru brige za održivi razvoj". Zdravlje je i <strong>resurs i rezultat</strong> održivog razvoja; „zdravlje je srce održivosti".</li>
+<li>Ciljevi održivog razvoja nisu ostvarivi ako je mnogo bolesnih i siromašnih i nema dobrog zdravstvenog sistema i zdravog okruženja.</li>
+</ul>
+<h3 id="l6-5">Nove pretnje javnom zdravlju</h3>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 19"><table>
+<thead>
+<tr>
+<th>Pretnja</th>
+<th>Primeri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Oružja masovne destrukcije</td>
+<td>katastrofični terorizam, posebno bioterorizam</td>
+</tr>
+<tr>
+<td>Infektivne bolesti</td>
+<td>novi uzročnici (SARS); stare bolesti (TBC); rezistencija na antibiotike</td>
+</tr>
+<tr>
+<td>Nezarazne bolesti</td>
+<td>globalna pandemija bolesti povezanih sa pušenjem; gojaznost; fizička neaktivnost</td>
+</tr>
+<tr>
+<td>Povoljni uslovi za nove pretnje</td>
+<td>globalizacija; raspad javnozdravstvene infrastrukture</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Iz predavanja:</strong> <strong>koronavirusi</strong> su izazvali <strong>SARS</strong> i <strong>COVID-19</strong>. Rezistencija na antibiotike nastaje zbog <strong>neracionalne primene antibiotika u medicini i u veterini</strong>. Zemlje sa <strong>slabom javnozdravstvenom infrastrukturom</strong> imale su mnogo lošije pokazatelje u pandemiji (novozaraženi, umrli). Investiranje u zdravlje znači „<strong>u zdravlje, a ne samo u bolesti</strong>".</p>
+</blockquote>
+<p><strong>Aktivnosti javnog zdravlja treba usmeriti na (5):</strong> promociju zdravlja pristupom investiranja u zdravlje; prevenciju nasilja i nenamernih povreda; zdravo okruženje; primenu novih tehnologija radi kvalitetnih informacija o zdravlju; zaštitu od novih zaraznih bolesti.</p>
+<ul>
+<li><strong>Novi tip upravljanja za zdravlje:</strong> usmeren na društvene determinante, jednakost i održivost, kroz nove povezane oblike formalnog i neformalnog upravljanja.</li>
+<li>Nijedna pojedinačna aktivnost ne može rešiti probleme. Uspešno i održivo javno zdravlje ne postiže se <strong>samo</strong> prevencijom, merenjem efektivnosti, promenom plaćanja ili promenom organizacije ustanova; potrebne su sve te strategije i nove, da bi se dostiglo <strong>uspešno i održivo javno zdravlje</strong>.</li>
+</ul>
+<div class="lesson-end" data-li="5"><button class="btn read" data-read="5" aria-pressed="false">Označi kao pročitano</button><a class="btn primary" href="index.html#lekcija=6">Testovi iz lekcije 6</a><a class="btn" href="index.html#kartice=6">Kartice</a></div></section>
+<section class="prose" aria-labelledby="brojke"><h2 id="brojke">Brojke, godine i autori</h2>
+<p>Sve brojke, godine i autori iz prezentacije na jednom mestu; ponovi ih dan pred ispit.</p>
+<h3 id="brojke-1">Godine i autori</h3>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 20"><table>
+<thead>
+<tr>
+<th>Šta</th>
+<th>Godina / autor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pojam „public health"</td>
+<td>sredina 19. veka, SAD</td>
+</tr>
+<tr>
+<td>Definicija javnog zdravlja</td>
+<td>Winslow, 1920</td>
+</tr>
+<tr>
+<td>Definicija (nauka i veština)</td>
+<td>Acheson 1988; SZO 1999</td>
+</tr>
+<tr>
+<td>Definicija (šta društvo zajedno čini)</td>
+<td>IOM, 1988</td>
+</tr>
+<tr>
+<td>Sistem javnog zdravlja (mreža učesnika)</td>
+<td>IOM, 2003</td>
+</tr>
+<tr>
+<td>Definicija zdravlja</td>
+<td>Ustav SZO, 1946</td>
+</tr>
+<tr>
+<td>Staro i novo javno zdravlje</td>
+<td>Tulchinsky i Varavikova, 2000; Ncayiyana i sar., 1995</td>
+</tr>
+<tr>
+<td>Černobilj / Fukušima</td>
+<td>1986 / 2011</td>
+</tr>
+<tr>
+<td>Individualistička / terapijska faza</td>
+<td>početak XX veka / 40-te godine XX veka</td>
+</tr>
+<tr>
+<td>Osnivanje javnozdravstvenih institucija u Srbiji</td>
+<td>1924–1930 (dr Andrija Štampar)</td>
+</tr>
+<tr>
+<td>Dahlgren-Whitehead model</td>
+<td>1991</td>
+</tr>
+<tr>
+<td>Dostignuća javnog zdravlja</td>
+<td>CDC, 1999</td>
+</tr>
+<tr>
+<td>Rio deklaracija</td>
+<td>1992</td>
+</tr>
+<tr>
+<td>„Zdravlje 2020" i Evropski akcioni plan</td>
+<td>SZO, 2012</td>
+</tr>
+<tr>
+<td>Program EU za zdravlje / plan za pravne tekovine EU</td>
+<td>2014–2020 / 2013–2016</td>
+</tr>
+<tr>
+<td>Strategija za borbu protiv droga</td>
+<td>2009–2013</td>
+</tr>
+<tr>
+<td>Osnivanje SZO (agencija UN); Štampar prvi privremeni generalni sekretar</td>
+<td>1948 (predavanje)</td>
+</tr>
+<tr>
+<td>Istraživanje zdravlja stanovništva RS (rađeno 2 puta)</td>
+<td>npr. 2010 (predavanje)</td>
+</tr>
+<tr>
+<td>Globalna ekonomska kriza</td>
+<td>2008 (predavanje)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="brojke-2">Brojevi</h3>
+<div class="tw" tabindex="0" role="region" aria-label="Tabela 21"><table>
+<thead>
+<tr>
+<th>Šta</th>
+<th>Brojka</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vodeći principi / načela / globalni izazovi / izazovi u Srbiji</td>
+<td>5 / 7 / 4 / 6</td>
+</tr>
+<tr>
+<td>Osnovne usluge (CDC) / EPHOs / globalni ciljevi SZO</td>
+<td>10 / 10 / 10</td>
+</tr>
+<tr>
+<td>Izdvajanje: Afrika / SAD / odnos</td>
+<td>100 $ / 4.500 $ (predavanje: 4.500–5.000 $) / 1:45 (predavanje: 1:45–50)</td>
+</tr>
+<tr>
+<td>Srbija: osigurani / po osiguraniku</td>
+<td>6,9 miliona / oko 295 €, odnosno nešto više od 166 €</td>
+</tr>
+<tr>
+<td>Natalitet u Evropi</td>
+<td>oko 13 na 1.000</td>
+</tr>
+<tr>
+<td>Zrelost: mlado / zrelo / staro / vrlo staro</td>
+<td>do 4% / 4–7% / 7–10% / preko 10%</td>
+</tr>
+<tr>
+<td>Udeo 65+</td>
+<td>Vojvodina 16,1%, Centralna Srbija 17,6%, Srbija 15,7% (predavanje: Srbija oko 18%)</td>
+</tr>
+<tr>
+<td>Indeks starosti (60+ / 0–19)</td>
+<td>granica 0,400</td>
+</tr>
+<tr>
+<td>Prosečna starost, početak starenja</td>
+<td>30 godina (predavanje: Srbija danas oko 42)</td>
+</tr>
+<tr>
+<td>Natalitet u Srbiji (predavanje)</td>
+<td>oko 8–9‰</td>
+</tr>
+<tr>
+<td>Očekivano trajanje života: srednji vek / danas (predavanje)</td>
+<td>oko 40 / oko 80 godina</td>
+</tr>
+<tr>
+<td>Ciljevi SZO: globalni / specifični (predavanje)</td>
+<td>10 / 21</td>
+</tr>
+<tr>
+<td>Koeficijent starosti (60+), početak starenja</td>
+<td>12% (Vojvodina preko 21%, Centralna Srbija preko 22%)</td>
+</tr>
+<tr>
+<td>Sundberg (0–14 / 15–49 / 50+)</td>
+<td>progresivni 40/50/10; stacionarni 33/50/17; regresivni 20/50/30</td>
+</tr>
+<tr>
+<td>Mortalitet u Srbiji</td>
+<td>preko 14‰</td>
+</tr>
+<tr>
+<td>Očekivano trajanje života</td>
+<td>Rusija 65,8; Island 81,6; Srbija 74,56 (M 72, Ž 77)</td>
+</tr>
+<tr>
+<td>Srbija na listi najstarijih populacija</td>
+<td>4. mesto</td>
+</tr>
+<tr>
+<td>Zaostatak u trajanju života</td>
+<td>3–4 godine</td>
+</tr>
+<tr>
+<td>Urbanizacija</td>
+<td>preko 50%</td>
+</tr>
+<tr>
+<td>Lekari / izabrani lekari / ginekolozi / pedijatri</td>
+<td>30.000+ / 3.500 / 500 / 1.200</td>
+</tr>
+<tr>
+<td>Licence sestara i tehničara</td>
+<td>gotovo 84.000</td>
+</tr>
+<tr>
+<td>Mreža Instituta „Batut"</td>
+<td>22 zavoda/instituta</td>
+</tr>
+<tr>
+<td>Zakonodavni akti u oblasti javnog zdravlja</td>
+<td>više od 170</td>
+</tr>
+<tr>
+<td>Zakon o javnom zdravlju</td>
+<td>26 članova, 8 poglavlja</td>
+</tr>
+<tr>
+<td>Strategije / nacionalni programi</td>
+<td>8 / 6</td>
+</tr>
+<tr>
+<td>Opterećenje bolešću zbog životne sredine</td>
+<td>blizu 30%</td>
+</tr>
+</tbody>
+</table></div></section>
+</div>
+<footer class="foot noprint"><span>Pročitane lekcije se pamte u ovom pregledaču.</span><span class="links"><a href="index.html">Testovi</a><a href="../">Moji ispiti</a></span></footer>
+</main>
+<script>window.SKRIPTA={slug:"javno-zdravlje",n:6};</script>
+<script src="../assets/skripta.js?v=aeb8326c9f"></script>
+<script>if('serviceWorker' in navigator&&window.isSecureContext&&!/[?&]nosw/.test(location.search))addEventListener('load',()=>navigator.serviceWorker.register('../sw.js').catch(()=>{}));</script>
+</body>
+</html>
