@@ -95,7 +95,6 @@ button{cursor:pointer}
 .btn svg{width:18px;height:18px;flex:none}
 svg:not([width]):not(.ring){max-width:24px;max-height:24px}
 .today .big,.kpi b,.bigscore,.indeks .grade,.due b,.h1,.h2,.tally b,.subject-head .due-pill{font-variant-numeric:proportional-nums}
-.today .big{margin-left:-.04em}
 .link{color:var(--primary);font-weight:600;text-decoration:none;background:none;border:0;padding:0;cursor:pointer}
 .link:hover{text-decoration:underline}
 

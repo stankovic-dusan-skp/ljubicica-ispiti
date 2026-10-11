@@ -142,11 +142,18 @@ function render(){
   ${indeks(P)}
   <footer class="foot"><span>${IS.storageOk?'Napredak se čuva trajno u ovom pregledaču.':'Pregledač ne dozvoljava čuvanje (privatni režim?), pa se napredak neće pamtiti.'}</span><span class="links"><button data-act="settings" id="open-sync">Prenesi na telefon</button><button data-act="settings" id="open-settings">Podešavanja</button></span></footer>
   ${modalHtml()}`;
+  alignBig();
   if(modal){const f=app.querySelector('.modal input:not([type=file]),.modal [aria-pressed=true],.modal .btn.primary,.modal .btn.ok,.modal .btn.danger');if(f)f.focus()}
   else if(menu){const m=app.querySelector('.menu');if(m){fitMenu(m);const f=m.querySelector('[role=menuitem]');if(f)f.focus({preventScroll:true})}}
   else if(opener){const e=document.getElementById(opener);if(e)e.focus({preventScroll:true});opener=null}
 }
 const close=()=>{modal=null;menu=null;render()};
+/* veliki broj dana: leva ivica cifre tačno ispod natpisa „Do sledećeg ispita” (optičko poravnanje po obliku cifre) */
+function alignBig(){const big=app.querySelector('.today .big:not(.word)');if(!big)return;big.style.marginLeft='0px';
+  try{const cs=getComputedStyle(big),x=document.createElement('canvas').getContext('2d'),t=big.firstChild.textContent;
+    x.font=`${cs.fontWeight} ${cs.fontSize} Onest`;let bear=x.measureText(t).actualBoundingBoxLeft;const lab=big.parentElement.querySelector('.label');if(lab){const cl=getComputedStyle(lab);x.font=`${cl.fontWeight} ${cl.fontSize} Onest`;bear-=x.measureText(lab.textContent.trim()[0]).actualBoundingBoxLeft}
+    if(Math.abs(bear)<parseFloat(cs.fontSize)*.15)big.style.marginLeft=bear+'px'}catch(e){}}
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(alignBig);addEventListener('resize',alignBig);
 /* meni uvek ceo na ekranu: poravnanje uz dugme, pa pomeranje ako bi izašao levo ili desno */
 function fitMenu(m){const W=document.documentElement.clientWidth,g=12;m.style.left='auto';m.style.right='0';m.style.transform='';
   let r=m.getBoundingClientRect();if(r.left<g){m.style.right='auto';m.style.left='0';r=m.getBoundingClientRect()}
