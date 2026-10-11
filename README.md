@@ -1,6 +1,6 @@
 # Moji ispiti
 
-Lična platforma za pripremu ispita (VŠJ Novi Sad): testovi, skripte za čitanje i PDF, kartice, ponavljanje grešaka i praćenje napretka.
+Priprema ispita · ICEPS, Zdravstvena nega: testovi, skripte za čitanje i PDF, kartice, ponavljanje grešaka i praćenje napretka.
 
 **Sajt:** https://stankovic-dusan-skp.github.io/ljubicica-ispiti/
 

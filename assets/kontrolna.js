@@ -24,12 +24,12 @@ function tally(P){const n=SUBJ.length,k=SUBJ.filter(s=>P[s.slug]).length;
   return`<div class="tally" role="img" aria-label="Položeno ${k} od ${n} predmeta"><span>Položeno <b>${k} od ${n}</b></span><div class="pips">${'<i class="pip on">✓</i>'.repeat(k)+'<i class="pip"></i>'.repeat(n-k)}</div></div>`}
 
 function hero(active,D){
-  if(!active.length)return`<section class="today" aria-label="Danas"><div class="count"><div><p class="label">Svi predmeti</p><p class="big word">Položeno</p></div><p class="when">Čestitam!<span>Svi ispiti su upisani u indeks.</span></p></div>
-    <div class="plan"><p class="label">Preporuka za danas</p><div class="step"><div><h2>Odmori se</h2><p>Kad dobiješ nove predmete, dodaju se ovde.</p></div></div></div></section>`;
+  if(!active.length)return`<section class="today" aria-label="Danas"><div class="count"><div><p class="label">Svi predmeti</p><p class="big word">Položeno</p></div><p class="when">Indeks je kompletan<span>Svi ispiti su upisani.</span></p></div>
+    <div class="plan"><p class="label">Preporuka za danas</p><div class="step"><div><h2>Svi ispiti su položeni</h2><p>Kad dobiješ nove predmete, dodaju se ovde.</p></div></div></div></section>`;
   const up=active.find(x=>x.n!==null&&x.n>=0)||active[0],s=up.s,I=up.I,st=I.st,n=up.n,d=D[s.slug],today=IS.activity()[IS.today()]||0;
   const rem=I.L.filter(x=>x.st!=='l3').length;
   const left=n!==null&&n>=0?`<div><p class="label">Do sledećeg ispita</p>${n===0?'<p class="big word">Danas</p>':`<p class="big">${n}<small>${IS.dani(n)}</small></p>`}</div><p class="when">${esc(s.title)}<span>${esc(IS.dateLong(d))}</span></p>`
-    :`<div><p class="label">Sledeći ispit</p><p class="big word">Bez datuma</p></div><button class="btn setd" data-act="date" data-slug="${s.slug}" id="hero-date">${ICON.cal}Dodaj datum ispita</button>`;
+    :`<div><p class="label">Sledeći ispit</p><p class="big word">Datum nije unet</p></div><button class="btn setd" data-act="date" data-slug="${s.slug}" id="hero-date">${ICON.cal}Dodaj datum ispita</button>`;
   const pace=n!==null&&n>0?(rem?`Ostalo <b>${rem} ${pl(rem,'lekcija','lekcije','lekcija')}</b> do savladavanja · oko <b>${Math.ceil(rem/n)} dnevno</b>`:'Sve lekcije su savladane. Ostaje ponavljanje grešaka i simulacija.'):'';
   return`<section class="today" data-s="${s.s}" aria-label="Danas">
     <div class="count">${left}</div>
@@ -45,7 +45,7 @@ function subjCard(x,D){
     :`<div class="due"><button class="setdate" data-act="date" data-slug="${s.slug}" id="sd-${s.slug}">Dodaj datum ispita</button></div>`;
   const segs=I.L.map(l=>`<i class="seg ${l.st==='none'?'':l.st}" title="Lekcija ${l.li+1}: ${esc(s.lessons[l.li])} · ${esc(IS.ST_LABEL[l.st])}${l.avg!==null?' ('+l.avg+'%)':''}"></i>`).join('');
   const sim=st.sim,ws=st.ws;
-  const right=!I.started?`Počni od lekcije 1: ${esc(s.lessons[0])}`:`Simulacija: <b>${sim===null?'–':sim+'%'}</b> · ${ws.due?`<b>${ws.due}</b> za ponavljanje`:`${ws.total} u greškama`}`;
+  const right=!I.started?`Počni od lekcije 1: ${esc(s.lessons[0])}`:`${sim===null?'Simulacija nije rađena':`Simulacija: <b>${sim}%</b>`} · ${ws.due?`<b>${ws.due}</b> za ponavljanje`:`${ws.total} u greškama`}`;
   const open=menu===s.slug;
   return`<article class="card subj striped" data-s="${s.s}" id="p-${s.slug}" aria-labelledby="t-${s.slug}">
     <div><h3 class="h3" id="t-${s.slug}"><a href="${s.slug}/">${esc(s.title)}</a></h3><p class="prof">${esc(s.authors)}</p></div>
@@ -116,7 +116,7 @@ function modalHtml(){
       <div class="row"><button class="btn primary" id="copy-sync" data-act="copyLink">Kopiraj link za prenos</button></div>
       <p class="muted small">Rezervna kopija u fajlu, za svaki slučaj:</p>
       <div class="row"><button class="btn sm" data-act="backup">Sačuvaj kopiju</button><label class="btn sm" for="restore-f">Učitaj iz fajla</label><input type="file" id="restore-f" accept="application/json,.json" class="sr"></div></div>
-    <div class="stack divider" style="gap:8px;padding-top:16px"><h3 class="h3">Izgled</h3><div class="seg-ctl" role="group" aria-label="Tema">
+    <div class="stack divider" style="gap:8px;padding-top:16px"><h3 class="h3">Izgled</h3><div class="seg-ctl full" role="group" aria-label="Tema">
       <button data-act="theme" data-v="auto" aria-pressed="${t==='auto'}">Automatski</button><button data-act="theme" data-v="light" aria-pressed="${t==='light'}">Svetla</button><button data-act="theme" data-v="dark" aria-pressed="${t==='dark'}">Tamna</button></div></div>
     <div class="stack divider" style="gap:8px;padding-top:16px"><h3 class="h3">Privatnost</h3><p class="muted small">Sve se čuva trajno, samo na ovom uređaju, dok ne obrišeš. Kad nekome pošalješ adresu sajta, on dobija prazan napredak i ne vidi tvoj.</p>
       <div class="row"><button class="btn sm danger-text" id="reset-all" data-act="resetAll">Obriši sav napredak</button></div></div>`)}
@@ -133,7 +133,7 @@ function render(){
   const rank=x=>x.n===null?1:x.n<0?2:0;
   active.sort((a,b)=>rank(a)-rank(b)||(rank(a)===0?a.n-b.n:a.i-b.i));
   const y=new Date().getFullYear(),m=new Date().getMonth(),sy=m>=8?y:y-1;
-  app.innerHTML=`<header class="top"><div><h1 class="h1">Moji ispiti</h1><p class="sub">VŠJ Novi Sad, školska ${sy}/${String(sy+1).slice(2)}</p></div>${tally(P)}</header>
+  app.innerHTML=`<header class="top"><div><h1 class="h1">Moji ispiti</h1><p class="sub">ICEPS · Zdravstvena nega · ${sy}/${String(sy+1).slice(2)}</p></div>${tally(P)}</header>
   ${hero(active,D)}
   ${active.length?`<section aria-labelledby="h-pred"><div class="sec-head"><h2 class="h2" id="h-pred">Predmeti</h2>
       <div class="legend" aria-hidden="true"><span><i style="background:var(--sunk);box-shadow:inset 0 0 0 1px var(--line)"></i>nije rađeno</span><span><i style="background:color-mix(in srgb,var(--ink) 35%,var(--sunk))"></i>u toku</span><span><i style="background:var(--ink)"></i>savladano</span><span><i style="background:var(--urgent-soft);box-shadow:inset 0 0 0 1.5px var(--urgent)"></i>za ponavljanje</span></div></div>
@@ -143,10 +143,16 @@ function render(){
   <footer class="foot"><span>${IS.storageOk?'Napredak se čuva trajno u ovom pregledaču.':'Pregledač ne dozvoljava čuvanje (privatni režim?), pa se napredak neće pamtiti.'}</span><span class="links"><button data-act="settings" id="open-sync">Prenesi na telefon</button><button data-act="settings" id="open-settings">Podešavanja</button></span></footer>
   ${modalHtml()}`;
   if(modal){const f=app.querySelector('.modal input:not([type=file]),.modal [aria-pressed=true],.modal .btn.primary,.modal .btn.ok,.modal .btn.danger');if(f)f.focus()}
-  else if(menu){const f=app.querySelector('.menu [role=menuitem]');if(f)f.focus()}
+  else if(menu){const m=app.querySelector('.menu');if(m){fitMenu(m);const f=m.querySelector('[role=menuitem]');if(f)f.focus({preventScroll:true})}}
   else if(opener){const e=document.getElementById(opener);if(e)e.focus({preventScroll:true});opener=null}
 }
 const close=()=>{modal=null;menu=null;render()};
+/* meni uvek ceo na ekranu: poravnanje uz dugme, pa pomeranje ako bi izašao levo ili desno */
+function fitMenu(m){const W=document.documentElement.clientWidth,g=12;m.style.left='auto';m.style.right='0';m.style.transform='';
+  let r=m.getBoundingClientRect();if(r.left<g){m.style.right='auto';m.style.left='0';r=m.getBoundingClientRect()}
+  if(r.right>W-g)m.style.transform=`translateX(${W-g-r.right}px)`;else if(r.left<g)m.style.transform=`translateX(${g-r.left}px)`;
+  r=m.getBoundingClientRect();if(r.bottom>innerHeight)scrollBy({top:r.bottom-innerHeight+g,behavior:'smooth'})}
+addEventListener('resize',()=>{const m=app.querySelector('.menu');if(m)fitMenu(m)});
 
 app.addEventListener('click',async e=>{
   const b=e.target.closest('[data-act]');
@@ -160,7 +166,7 @@ app.addEventListener('click',async e=>{
   if(act==='dateSave'){const v=document.getElementById('date-in').value;IS.setDate(modal.slug,v);close();return toast(v?'Datum ispita je sačuvan.':'Datum je uklonjen.')}
   if(act==='dateClear'){IS.setDate(modal.slug,'');close();return toast('Datum je uklonjen.')}
   if(act==='grade'){modal.g=modal.g===+b.dataset.g?null:+b.dataset.g;modal.d=document.getElementById('pass-d').value;return render()}
-  if(act==='passDo'){const d=document.getElementById('pass-d').value||IS.today();IS.setPassed(modal.slug,{d,o:modal.g});close();return toast('Čestitam! Predmet je upisan u indeks.')}
+  if(act==='passDo'){const d=document.getElementById('pass-d').value||IS.today();IS.setPassed(modal.slug,{d,o:modal.g});close();return toast('Predmet je upisan u indeks.')}
   if(act==='unpassDo'){IS.setPassed(modal.slug,null);close();return}
   if(act==='resetOneDo'){IS.resetProgress(modal.slug);close();return toast('Napredak iz predmeta je obrisan.')}
   if(act==='resetAll'){modal={type:'resetAll'};return render()}

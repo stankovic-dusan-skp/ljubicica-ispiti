@@ -93,6 +93,9 @@ button{cursor:pointer}
 .btn.on{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
 .btn:disabled{opacity:.45;cursor:default}
 .btn svg{width:18px;height:18px;flex:none}
+svg:not([width]):not(.ring){max-width:24px;max-height:24px}
+.today .big,.kpi b,.bigscore,.indeks .grade,.due b,.h1,.h2,.tally b,.subject-head .due-pill{font-variant-numeric:proportional-nums}
+.today .big{margin-left:-.04em}
 .link{color:var(--primary);font-weight:600;text-decoration:none;background:none;border:0;padding:0;cursor:pointer}
 .link:hover{text-decoration:underline}
 
@@ -124,8 +127,10 @@ button{cursor:pointer}
 .modal{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:var(--radius-l);padding:24px;max-width:440px;width:100%;max-height:calc(100vh - 32px);overflow:auto;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow-pop);animation:rise .18s ease-out}
 .modal .acts{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 .menu-wrap{position:relative}
-.menu{position:absolute;right:0;bottom:calc(100% + 6px);min-width:240px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-m);box-shadow:var(--shadow-pop);padding:6px;z-index:20;display:flex;flex-direction:column;animation:rise .12s ease-out}
-.menu button,.menu a{display:flex;align-items:center;gap:10px;text-align:left;background:none;border:0;border-radius:8px;padding:10px 12px;font-weight:500;text-decoration:none;color:var(--ink);min-height:44px}
+.menu{position:absolute;right:0;top:calc(100% + 6px);min-width:250px;max-width:calc(100vw - 32px);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-m);box-shadow:var(--shadow-pop);padding:6px;z-index:20;display:flex;flex-direction:column;animation:rise .12s ease-out}
+.menu svg{width:18px;height:18px;flex:none;color:var(--muted)}
+.menu .danger-text svg{color:var(--urgent)}
+.menu button,.menu a{white-space:nowrap;width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:none;border:0;border-radius:8px;padding:10px 12px;font-weight:500;text-decoration:none;color:var(--ink);min-height:44px}
 .menu button:hover,.menu a:hover{background:var(--sunk)}
 .menu .danger-text{color:var(--urgent)}
 .menu hr{border:0;border-top:1px solid var(--line);margin:4px 6px}
@@ -133,6 +138,8 @@ button{cursor:pointer}
 .input{font:inherit;color:var(--ink);background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;min-width:0;width:100%}
 .input:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px var(--primary-soft)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:12px;font-weight:600;box-shadow:var(--shadow-pop);z-index:60;max-width:calc(100vw - 32px);text-align:center;animation:rise .2s ease-out}
+.seg-ctl.full{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);width:100%}
+.seg-ctl.full button{padding-inline:4px;white-space:normal;line-height:1.2;font-size:.9rem;overflow-wrap:anywhere}
 .seg-ctl{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
 .seg-ctl button{border:0;background:transparent;padding:8px 14px;font-weight:600;color:var(--muted);min-height:40px}
 .seg-ctl button+button{border-left:1px solid var(--line)}
@@ -341,7 +348,7 @@ details.plain>.inner{padding:0 20px 18px}
 .todo a:hover{filter:brightness(.98)}
 .todo a b{font-weight:650}
 .todo a span{color:var(--muted);font-size:.86rem}
-.todo a .arr{margin-left:auto;color:var(--urgent);font-weight:700}
+.todo a .arr{margin-left:auto;white-space:nowrap;flex:none;color:var(--urgent);font-weight:700}
 .rev{border-top:1px solid var(--line);padding:16px 0;display:flex;flex-direction:column;gap:8px}
 .rev:first-child{border-top:0}
 .rev .ans{font-size:.94rem;color:var(--muted)}
@@ -427,7 +434,6 @@ details.plain>.inner{padding:0 20px 18px}
   .row-actions .spacer{display:none}
   .row-actions .menu-wrap{flex:1 1 auto;display:flex}
   .row-actions .menu-wrap .btn{flex:1}
-  .menu{left:0;right:auto}
   .indeks th,.indeks td{padding:12px 16px}
   .indeks .dt{display:none}
   .activity{grid-template-columns:1fr}
@@ -451,6 +457,10 @@ details.plain>.inner{padding:0 20px 18px}
   .qnav .spacer{display:none}
 }
 @media (max-width:420px){
+  .modal{padding:20px}
+  .modal .acts{flex-direction:column-reverse;align-items:stretch}
+  .modal .acts .btn{width:100%;margin:0!important}
+  .modal .acts .btn.ghost{order:-1}
   .tally{padding-left:12px}
   .pip{width:18px;height:18px}
   .tf .opt{min-height:56px}

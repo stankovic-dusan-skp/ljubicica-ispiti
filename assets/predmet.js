@@ -135,7 +135,7 @@ function home(){
   <header class="subject-head" id="main" tabindex="-1"><h1 class="h1">${esc(P.title)}</h1><p class="who">${esc(P.authors)}</p>${pill}</header>
   <section class="card striped overview" aria-label="Napredak">
     <div class="segs" role="img" aria-label="Lekcije: ${mastered} savladano od ${L.length}">${segs}</div>
-    <div class="meta"><span><b>${mastered} od ${L.length}</b> ${pl(L.length,'lekcije','lekcije','lekcija')} savladano</span><span>Simulacija: <b>${sim===null?'–':sim+'%'}</b> · ${ws.total} u greškama</span></div>
+    <div class="meta"><span><b>${mastered} od ${L.length}</b> ${pl(L.length,'lekcije','lekcije','lekcija')} savladano</span><span>${sim===null?'Simulacija nije rađena':`Simulacija: <b>${sim}%</b>`} · ${ws.total} u greškama</span></div>
   </section>
   <section class="next-card" aria-labelledby="nx-h"><div><p class="label">Preporuka za danas</p><h2 id="nx-h">${esc(st.title)}</h2><p>${esc(st.why)}</p></div>
     <div class="actions">${actBtn(st.primary,'btn primary','go-next')}${actBtn(st.secondary,'btn','')}</div></section>
@@ -143,7 +143,7 @@ function home(){
     <div class="tiles">
       <div class="tile"><h3>Simulacija ispita</h3><p>30 pitanja ravnomerno iz svih lekcija, 30 minuta. Predaje se sam kad vreme istekne.</p>
         <p class="score">${sim===null?'Još nije rađena':`<b>${sim}%</b>najbolje · ocena ${mark(sim)}`}</p><button class="btn primary" id="go-ispit" data-act="start" data-id="ispit">Počni simulaciju</button></div>
-      <div class="tile"><h3>Brzi miks</h3><p>15 pitanja iz svih lekcija, bez ograničenja vremena. Dobar za zagrevanje.</p>
+      <div class="tile"><h3>Brzi miks</h3><p>15 pitanja iz svih lekcija, bez ograničenja vremena.</p>
         <p class="score">${mix===null?'Još nije rađen':`<b>${mix}%</b>najbolje`}</p><button class="btn" data-act="start" data-id="mix">Počni miks</button></div>
       <div class="tile"><h3>Moje greške</h3><p>${ws.total?'Pitanje se vraća odmah, pa sutra, pa za 3 dana; posle tri tačna odgovora nestaje.':'Ovde se skupljaju pitanja na kojima pogrešiš, da ih ponoviš u pravo vreme.'}</p>
         <p class="score"><b>${ws.due}</b>za danas · ${ws.total} ukupno${!ws.due&&ws.next?' · sledeće '+(IS.daysTo(IS.iso(ws.next))<=1?'sutra':IS.dateShort(IS.iso(ws.next))):''}</p>
@@ -207,7 +207,7 @@ function result(){
       ${q.e&&g.pts<1?`<p class="exp">${esc(q.e)}</p>`:''}
       ${g.pts<1&&q.src?`<a class="link small" href="skripta.html#l${LIX(q.src)+1}">Pročitaj u skripti: Lekcija ${LIX(q.src)+1}</a>`:''}</div>`}).join('');
   return`<nav class="crumbs" aria-label="Navigacija"><button class="back" style="background:none;border:0;cursor:pointer" data-act="home">${I.back}${esc(P.title)}</button></nav>
-  <header class="stack" style="gap:6px"><p class="muted">Rezultat · ${esc(R.title)}</p><h1 class="h1" id="res-h" tabindex="-1">${pass?(m>=9?'Odlično urađeno':'Položeno'):'Još jedan krug ponavljanja'}</h1></header>
+  <header class="stack" style="gap:6px"><p class="muted">Rezultat · ${esc(R.title)}</p><h1 class="h1" id="res-h" tabindex="-1">${pass?(m>=9?'Odlično · ocena '+m:'Položeno · ocena '+m):'Nije položeno'}</h1></header>
   ${R.timeout?'<div class="fb bad" role="alert"><strong>Vreme je isteklo.</strong> <span>Test je predat sa odgovorima koje si do tada uneo.</span></div>':''}
   <section class="card stack" style="gap:22px">
     <div class="verdict"><svg class="ring" viewBox="0 0 132 132" role="img" aria-label="${p}% tačno"><circle cx="66" cy="66" r="54" fill="none" stroke="var(--sunk)" stroke-width="12"/>
@@ -232,7 +232,7 @@ function result(){
 function cardFront(q){
   if(q.t==='fill')return`<p class="q">${esc(q.q).replace(/___/g,'<span class="gap">&nbsp;?&nbsp;</span>')}</p><p class="muted small">Šta ide na mesto praznine?</p>`;
   if(q.t==='tf')return`<p class="q">${esc(q.q)}</p><p class="muted small">Tačno ili netačno?</p>`;
-  return`<p class="q">${esc(q.q)}</p><p class="muted small">Seti se odgovora, pa okreni karticu.</p>`;
+  return`<p class="q">${esc(q.q)}</p><p class="muted small">Odgovori u sebi, pa okreni karticu.</p>`;
 }
 function cardBack(q){
   let s=0;const full=q.t==='fill'?esc(q.q).replace(/___/g,()=>`<span class="gap">${esc(q.a[s++][0])}</span>`):'';
@@ -242,7 +242,7 @@ function cards(){
   const n=C.deck.length;
   const top=`<div class="qbar"><div class="row"><button class="btn sm ghost" data-act="home" aria-label="Zatvori kartice">${I.x}<span>Zatvori</span></button><h1 class="ttl grow">${esc(C.title)}</h1><span class="clock">${Math.min(C.i+1,n)} / ${n}</span></div>
     <div class="bar"><i style="width:${C.i/n*100}%"></i></div></div>`;
-  if(C.i>=n)return top+`<section class="card stack" style="gap:16px;text-align:left"><h2 class="h2" id="cards-done" tabindex="-1">Kraj špila</h2>
+  if(C.i>=n)return top+`<section class="card stack" style="gap:16px;text-align:left"><h2 class="h2" id="cards-done" tabindex="-1">Kartice su završene</h2>
     <p>Znao si <b>${C.known}</b> od ${n}. ${C.unknown.length?`${C.unknown.length} ${pl(C.unknown.length,'kartica je otišla','kartice su otišle','kartica je otišlo')} u „Moje greške”.`:'Sve si znao.'}</p>
     <div class="row">${C.unknown.length?`<button class="btn primary" data-act="cardsAgain">Ponovi nepoznate (${C.unknown.length})</button>`:''}<button class="btn" data-act="cardsRestart">Ceo špil ponovo</button><button class="btn ghost" data-act="home">Nazad na predmet</button></div></section>`;
   const q=C.deck[C.i];
