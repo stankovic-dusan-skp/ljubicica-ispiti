@@ -15,6 +15,7 @@ const REG=[
   {slug:'javno-zdravlje',s:'jz',key:'testovi-javno-zdravlje-v1',wkey:'testovi-javno-zdravlje-greske-v1'},
   {slug:'poslovna-komunikacija',s:'vpk',key:'testovi-poslovna-komunikacija-v1',wkey:'testovi-poslovna-komunikacija-greske-v1'},
   {slug:'metodologija-zo',s:'mzo',key:'testovi-metodologija-zo-v1',wkey:'testovi-metodologija-zo-greske-v1'},
+  {slug:'medicinski-otpad',s:'mfo',key:'testovi-medicinski-otpad-v1',wkey:'testovi-medicinski-otpad-greske-v1'},
   {slug:'organizacija-zdravstva',s:'oz',key:'testovi-zdravstvo-v1',wkey:'testovi-zdravstvo-greske-v1'}
 ];
 /* Unapred upisani položeni predmeti (važe na svakom uređaju) */
