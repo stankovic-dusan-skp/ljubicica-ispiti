@@ -118,6 +118,7 @@ function home(){
   const segs=L.map(x=>`<i class="seg ${x.st==='none'?'':x.st}" title="Lekcija ${x.li+1}: ${esc(IS.ST_LABEL[x.st])}"></i>`).join('');
   const pill=passed?`<span class="due-pill" style="color:var(--ok)"><i style="background:var(--ok)"></i>Položeno${passed.o?' · ocena '+passed.o:''}</span>`
     :D&&n>=0?`<span class="due-pill ${n<=7?'urgent':''}"><i></i>Ispit ${n===0?'je danas':n===1?'je sutra':'za '+n+' '+IS.dani(n)} · ${esc(IS.dateLong(D))}</span>`
+    :D&&n<0?`<a class="due-pill" href="../" style="text-decoration:none;color:var(--warn)"><i style="background:var(--warn)"></i>Ispit održan ${esc(IS.dateNum(D))} · čeka rezultat</a>`
     :`<a class="due-pill" href="../#datum=${P.slug}" style="text-decoration:none;color:var(--muted)"><i></i>Dodaj datum ispita</a>`;
   const best=p=>p===null?'<span class="best">nije rađen</span>':`<span class="best ${tone(p)}">najbolje ${p}%</span>`;
   const lessons=L.map(x=>{const l=LESSONS[x.li],ts=TESTS.filter(t=>t.lesson===l),nq=ts.reduce((s,t)=>s+t.qs.length,0),rd=IS.isRead(P.slug,x.li),ln=lessonExamN(l),lb=IS.bestPct(h,'lekcija-'+x.li);

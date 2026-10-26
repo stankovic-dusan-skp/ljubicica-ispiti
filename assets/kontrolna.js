@@ -6,6 +6,7 @@
 'use strict';
 const SUBJ=window.PREDMETI,{esc,pl}=IS,app=document.getElementById('app');
 let modal=null,menu=null,toastT=null,opener=null,pendingImport=null;
+IS.del('ispiti-tab');
 
 const ICON={
   more:'<svg class="chev" viewBox="4.9 7.9 14.2 8.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
@@ -23,7 +24,10 @@ function info(s){const h=IS.results(s.key),w=IS.wrong(s.wkey),st=IS.nextStep(s,h
 function tally(P){const n=SUBJ.length,k=SUBJ.filter(s=>P[s.slug]).length;
   return`<div class="tally" role="img" aria-label="Položeno ${k} od ${n} predmeta"><span>Položeno <b>${k} od ${n}</b></span><div class="pips">${'<i class="pip on">✓</i>'.repeat(k)+'<i class="pip"></i>'.repeat(n-k)}</div></div>`}
 
-function hero(active,D){
+function hero(active,D,wait){
+  if(!active.length&&wait&&wait.length)return`<section class="today" aria-label="Danas"><div class="count"><div><p class="label">Sledeći ispit</p><p class="big word">Nije zakazan</p></div><p class="when">Čeka se rezultat<span>${esc(wait.map(x=>x.s.title).join(', '))}</span></p></div>
+    <div class="plan"><p class="label">Preporuka za danas</p><div class="step"><div><h2>Sačekaj rezultat</h2><p>Kad stigne rezultat, upiši ga u delu „Čeka rezultat”: ocenu ako si položio, ili novi datum ako nisi.</p></div></div>
+      <div class="actions"><a class="btn primary" href="#h-ceka">Upiši rezultat</a></div></div></section>`;
   if(!active.length)return`<section class="today" aria-label="Danas"><div class="count"><div><p class="label">Svi predmeti</p><p class="big word">Položeno</p></div><p class="when">Indeks je kompletan<span>Svi ispiti su upisani.</span></p></div>
     <div class="plan"><p class="label">Preporuka za danas</p><div class="step"><div><h2>Svi ispiti su položeni</h2><p>Kad dobiješ nove predmete, dodaju se ovde.</p></div></div></div></section>`;
   const up=active.find(x=>x.n!==null&&x.n>=0)||active[0],s=up.s,I=up.I,st=I.st,n=up.n,d=D[s.slug],today=IS.activity()[IS.today()]||0;
@@ -80,14 +84,27 @@ function activitySec(){
       <div class="heat" role="img" aria-label="Aktivnost po danima: ${sk} ${pl(sk,'dan','dana','dana')} zaredom, ukupno ${total} odgovora">${cells.join('')}</div></div></section>`;
 }
 
-function indeks(P){
-  const done=SUBJ.filter(s=>P[s.slug]),gr=done.map(s=>P[s.slug].o).filter(Boolean);
-  const avg=gr.length?(gr.reduce((a,b)=>a+b,0)/gr.length).toFixed(2).replace('.',','):null;
+function rowLinks(s){return`<a class="btn sm" href="${s.slug}/">Testovi</a><a class="btn sm" href="${s.slug}/skripta.html">Skripta</a>`}
+function waitRow(x,D){const s=x.s,d=D[s.slug];
+  return`<div class="mini-row" data-s="${s.s}" id="p-${s.slug}"><i class="dotc" aria-hidden="true"></i>
+    <div class="nm"><a href="${s.slug}/">${esc(s.title)}</a><small>ispit ${esc(IS.dateNum(d))} · <span class="pend-t">čeka rezultat</span></small></div>
+    <div class="acts"><button class="btn sm ok" data-act="pass" data-slug="${s.slug}" id="ok-${s.slug}">Položio sam</button><button class="btn sm" data-act="date" data-slug="${s.slug}" id="nd-${s.slug}">Nisam, novi datum</button>${rowLinks(s)}</div></div>`}
+function indeksSec(done,P){
+  const gr=done.map(s=>P[s.slug].o).filter(Boolean),avg=gr.length?(gr.reduce((a,b)=>a+b,0)/gr.length).toFixed(2).replace('.',','):null;
   return`<section aria-labelledby="h-ind"><div class="sec-head"><h2 class="h2" id="h-ind">Indeks</h2><p>${avg?'prosek '+avg:done.length?'':'još nema položenih'}</p></div>
     <div class="indeks" style="margin-top:14px">${done.length?`<table><thead><tr><th scope="col">Predmet</th><th scope="col" class="dt">Datum</th><th scope="col" style="text-align:right">Ocena</th></tr></thead><tbody>
-      ${done.map(s=>{const v=P[s.slug];return`<tr id="p-${s.slug}"><td class="nm">${esc(s.title)}<small>${esc(s.authors)}${s.slug in IS.PRESET?'':` · <button class="undo" data-act="unpass" data-slug="${s.slug}" id="un-${s.slug}">Poništi</button>`}</small></td>
-        <td class="dt">${v.d?esc(IS.dateNum(v.d)):'–'}</td><td class="grade ${v.o?'':'none'}">${v.o||'bez ocene'}</td></tr>`}).join('')}</tbody></table>`
-      :'<p class="empty">Kad položiš predmet, izaberi „Još” → „Označi kao položeno” i upisaće se ovde sa ocenom.</p>'}</div></section>`;
+      ${done.map(s=>{const v=P[s.slug],pre=s.slug in IS.PRESET;return`<tr id="p-${s.slug}" data-s="${s.s}"><td class="nm"><a class="nl" href="${s.slug}/">${esc(s.title)}</a><small>${esc(s.authors)}</small>
+        <div class="links"><a href="${s.slug}/">Testovi</a><a href="${s.slug}/skripta.html">Skripta</a>${pre?'':`<button class="undo" data-act="unpass" data-slug="${s.slug}" id="un-${s.slug}">Poništi</button>`}</div></td>
+        <td class="dt">${v.d?esc(IS.dateNum(v.d)):'–'}</td><td class="grade ${v.o?'':'none'}">${v.o?v.o:`<button class="btn sm" data-act="pass" data-slug="${s.slug}" id="gr-${s.slug}">Upiši ocenu</button>`}</td></tr>`}).join('')}</tbody></table>`
+      :'<p class="empty">Kad položiš predmet, upisaće se ovde sa ocenom.</p>'}</div></section>`;
+}
+function predmeti(active,wait,done,D,P){
+  return`${active.length?`<section aria-labelledby="h-pred"><div class="sec-head"><h2 class="h2" id="h-pred">Predmeti</h2>
+      <div class="legend" aria-hidden="true"><span><i style="background:var(--sunk);box-shadow:inset 0 0 0 1px var(--line)"></i>nije rađeno</span><span><i style="background:color-mix(in srgb,var(--ink) 35%,var(--sunk))"></i>u toku</span><span><i style="background:var(--ink)"></i>savladano</span><span><i style="background:var(--urgent-soft);box-shadow:inset 0 0 0 1.5px var(--urgent)"></i>za ponavljanje</span></div></div>
+    <div class="list" style="margin-top:14px">${active.map(x=>subjCard(x,D)).join('')}</div></section>`:''}
+  ${wait.length?`<section aria-labelledby="h-ceka"><div class="sec-head"><h2 class="h2" id="h-ceka" tabindex="-1">Čeka rezultat</h2><p>ispit je održan</p></div>
+    <div class="box" style="margin-top:14px">${wait.map(x=>waitRow(x,D)).join('')}</div></section>`:''}
+  ${indeksSec(done,P)}`;
 }
 
 /* ---------- modali ---------- */
@@ -97,7 +114,7 @@ function modalHtml(){
   if(modal.type==='date')return wrap(`<div class="stack" style="gap:4px"><h2 class="h2" id="mt">Datum ispita</h2><p class="muted small">${esc(s.title)}</p></div>
     <label class="field">Datum<input class="input" type="date" id="date-in" value="${esc(D[s.slug]||'')}" min="2026-01-01" max="2030-12-31"></label>
     <div class="acts">${D[s.slug]?'<button class="btn ghost danger-text" data-act="dateClear" style="margin-right:auto">Ukloni datum</button>':''}<button class="btn" data-act="close">Otkaži</button><button class="btn primary" id="date-save" data-act="dateSave">Sačuvaj</button></div>`);
-  if(modal.type==='pass')return wrap(`<div class="stack" style="gap:4px"><h2 class="h2" id="mt">Označi kao položeno</h2><p class="muted small">${esc(s.title)} se seli u indeks i sklanja iz aktivnih predmeta. Ocenu možeš i da preskočiš.</p></div>
+  if(modal.type==='pass')return wrap(`<div class="stack" style="gap:4px"><h2 class="h2" id="mt">${modal.edit?'Upiši ocenu':'Označi kao položeno'}</h2><p class="muted small">${modal.edit?esc(s.title):esc(s.title)+' se upisuje u indeks. Ocenu možeš i da preskočiš i upišeš kasnije.'}</p></div>
     <div class="stack" style="gap:8px"><span style="font-weight:600;font-size:.92rem">Ocena</span><div class="seg-ctl" role="group" aria-label="Ocena" style="display:grid;grid-template-columns:repeat(5,1fr)">${[6,7,8,9,10].map(g=>`<button data-act="grade" data-g="${g}" aria-pressed="${modal.g===g}">${g}</button>`).join('')}</div></div>
     <label class="field">Datum polaganja<input class="input" type="date" id="pass-d" value="${esc(modal.d||IS.today())}"></label>
     <div class="acts"><button class="btn" data-act="close">Otkaži</button><button class="btn ok" id="pass-ok" data-act="passDo">${modal.g?'Položeno · ocena '+modal.g:'Položeno bez ocene'}</button></div>`);
@@ -129,17 +146,16 @@ function toast(m){clearTimeout(toastT);let t=document.getElementById('toast');if
 /* ---------- prikaz ---------- */
 function render(){
   const D=IS.dates(),P=IS.passedMap();
-  const all=SUBJ.map((s,i)=>({s,i,n:IS.daysTo(D[s.slug]),I:info(s)})),active=all.filter(x=>!P[x.s.slug]);
-  const rank=x=>x.n===null?1:x.n<0?2:0;
-  active.sort((a,b)=>rank(a)-rank(b)||(rank(a)===0?a.n-b.n:a.i-b.i));
+  const all=SUBJ.map((s,i)=>({s,i,n:IS.daysTo(D[s.slug]),I:info(s)}));
+  const active=all.filter(x=>!P[x.s.slug]&&!(x.n!==null&&x.n<0)),wait=all.filter(x=>!P[x.s.slug]&&x.n!==null&&x.n<0);
+  const done=SUBJ.filter(s=>P[s.slug]).sort((a,b)=>String(P[b.slug].d||'').localeCompare(String(P[a.slug].d||'')));
+  active.sort((a,b)=>(a.n===null)-(b.n===null)||(a.n!==null?a.n-b.n:a.i-b.i));
+  wait.sort((a,b)=>b.n-a.n);
   const y=new Date().getFullYear(),m=new Date().getMonth(),sy=m>=8?y:y-1;
   app.innerHTML=`<header class="top"><div><h1 class="h1">Moji ispiti</h1><p class="sub">ICEPS · Zdravstvena nega · ${sy}/${String(sy+1).slice(2)}</p></div>${tally(P)}</header>
-  ${hero(active,D)}
-  ${active.length?`<section aria-labelledby="h-pred"><div class="sec-head"><h2 class="h2" id="h-pred">Predmeti</h2>
-      <div class="legend" aria-hidden="true"><span><i style="background:var(--sunk);box-shadow:inset 0 0 0 1px var(--line)"></i>nije rađeno</span><span><i style="background:color-mix(in srgb,var(--ink) 35%,var(--sunk))"></i>u toku</span><span><i style="background:var(--ink)"></i>savladano</span><span><i style="background:var(--urgent-soft);box-shadow:inset 0 0 0 1.5px var(--urgent)"></i>za ponavljanje</span></div></div>
-    <div class="list" style="margin-top:14px">${active.map(x=>subjCard(x,D)).join('')}</div></section>`:''}
+  ${hero(active,D,wait)}
+  ${predmeti(active,wait,done,D,P)}
   ${activitySec()}
-  ${indeks(P)}
   <footer class="foot"><span>${IS.storageOk?'Napredak se čuva trajno u ovom pregledaču.':'Pregledač ne dozvoljava čuvanje (privatni režim?), pa se napredak neće pamtiti.'}</span><span class="links"><button data-act="settings" id="open-sync">Prenesi na telefon</button><button data-act="settings" id="open-settings">Podešavanja</button></span></footer>
   ${modalHtml()}`;
   alignBig();
@@ -168,12 +184,14 @@ app.addEventListener('click',async e=>{
   if(act==='noop')return;
   if(act==='close'){if(b.classList.contains('veil')&&e.target!==b)return;return close()}
   if(act==='menu'){menu=menu===slug?null:slug;opener='more-'+slug;return render()}
-  if(['date','pass','unpass','resetOne'].includes(act)){opener=menu?'more-'+slug:b.id||null;menu=null;modal={type:act,slug,g:null};return render()}
+  if(['date','pass','unpass','resetOne'].includes(act)){opener=menu?'more-'+slug:b.id||null;menu=null;modal={type:act,slug,g:null};
+    if(act==='pass'){const pv=IS.passedMap()[slug],dd=IS.dates()[slug];if(pv){modal.edit=true;modal.g=pv.o||null;modal.d=pv.d}else if(dd&&IS.daysTo(dd)<0)modal.d=dd}
+    return render()}
   if(act==='settings'){opener=b.id||opener;menu=null;modal={type:'settings'};return render()}
   if(act==='dateSave'){const v=document.getElementById('date-in').value;IS.setDate(modal.slug,v);close();return toast(v?'Datum ispita je sačuvan.':'Datum je uklonjen.')}
   if(act==='dateClear'){IS.setDate(modal.slug,'');close();return toast('Datum je uklonjen.')}
   if(act==='grade'){modal.g=modal.g===+b.dataset.g?null:+b.dataset.g;modal.d=document.getElementById('pass-d').value;return render()}
-  if(act==='passDo'){const d=document.getElementById('pass-d').value||IS.today();IS.setPassed(modal.slug,{d,o:modal.g});close();return toast('Predmet je upisan u indeks.')}
+  if(act==='passDo'){const d=document.getElementById('pass-d').value||IS.today(),ed=modal.edit;IS.setPassed(modal.slug,{d,o:modal.g});close();return toast(ed?'Ocena je sačuvana.':'Predmet je upisan u indeks.')}
   if(act==='unpassDo'){IS.setPassed(modal.slug,null);close();return}
   if(act==='resetOneDo'){IS.resetProgress(modal.slug);close();return toast('Napredak iz predmeta je obrisan.')}
   if(act==='resetAll'){modal={type:'resetAll'};return render()}
